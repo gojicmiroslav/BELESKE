@@ -1,0 +1,17 @@
+Ruby Best Practices
+	Resource:
+		https://github.com/bbatsov/ruby-style-guide
+	
+	
+1) Use two spaces per indentation level (aka soft tabs). No hard tabs. 
+2) Prefer a single-line format for class definitions with no body.
+		# bad
+		class FooError < StandardError
+		end
+
+		# okish
+		class FooError < StandardError; end
+
+		# good
+		FooError = Class.new(StandardError)
+	

@@ -1,0 +1,6 @@
+PostgreSQL
+	resource:
+		- http://stackoverflow.com/questions/14588212/resetting-password-of-postgresql-on-ubuntu
+
+- Exit console
+		type "\q" and then ENTER

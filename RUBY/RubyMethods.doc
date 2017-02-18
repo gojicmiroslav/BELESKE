@@ -1,0 +1,79 @@
+Ruby Methods
+
+Array:
+	* compact, compact! - removes "nil" element
+	* each, each_index - Calls the given block once for each element in self, passing that element as a parameter.
+	* include? - Returns true if the given object is present in self (that is, if any element == object), otherwise returns false.
+	* map, map! - Invokes the given block once for each element of self. 
+	* pop - Removes the last element from self and returns it, or nil if the array is empty.
+	* push - Pushes the given object(s) on to the end of this array. 
+	* select, select! - Returns a new array containing all elements of ary for which the given block returns a true value.
+	* slice, slice! - Returns the element at index, or returns a subarray starting at the start index and continuing for length elements, 
+										or returns a subarray specified by range of indices.
+	* sort, sort! - Returns a new array created by sorting self.
+	* take(n) - returns first elements form the array
+	* count - returns a number of elements or if a block is given counts the number of elements for which the block retruns a true value
+			Example:
+				arr = [1,2,4,2]
+				arr.count {|x| x%2 == 0} #=> 3
+				
+				
+Integer
+	* times - iterates the given block int times, passing in values from zero to int-1
+		Example:
+			5.times do |i|
+				print i, " "
+			end
+			
+			#=> 0 1 2 3 4
+			
+Hash
+	* fetch - returns a value from the hash for the given key. 
+						If the ket can't be found, there are several options:
+							- with no other arguments, it will raise an KeyError exception
+							- if default is given, then that will be returned
+							- if the optional block is specified, then that will be run and its result returned
+							
+						Example:
+							h = { "a" => 100, "b" => 200 }
+							h1 = { :first => "First element", second: "Second element" }
+							
+							h.fetch("a") #=> 100
+							h.fetch("z", "go fish") #=> "go fish"
+							h.fetch("z"){ |el| "go fish #{el}" } #=> "go fish z"
+							h.fetch("z") #=> ket not found: KeyError
+							h1.fetch(:first) #=> "First element"
+							
+Object
+	* freeze - prevents modification of object. There is no way to unfreeze a frozen object.
+		Example:
+			a = ["a", "b", "c"]
+			a.freeze
+			a << "z" #=> can't modify frozen object (RuntimeError)
+	* frozen? - return the freeze status of object
+	* send - invokes the method identified by symbol
+		Example:
+			class Person
+				def greet
+					puts "Hello"
+				end
+			end
+
+			p = Person.new
+			p.send(:greet) #=> "Hello"
+			
+Proc
+
+Splat Operator
+	URL:
+		- http://jacopretorius.net/2012/01/splat-operator-in-ruby.html
+		- https://endofline.wordpress.com/2011/01/21/the-strange-ruby-splat/
+		- https://theplana.wordpress.com/2007/03/03/ruby-idioms-the-splat-operator/	
+	- it "creates" array of given parameters
+	- it allows us to pass in additional parameters without having to put those parameters into an array
+		examples:
+			def greet(message, *friends)
+				friends.each { |f| puts "#{f}: #{message}" }
+			end
+			
+			greet("Hello", "Misa", "Pera", "Maja")

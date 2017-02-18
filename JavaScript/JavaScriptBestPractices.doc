@@ -1,0 +1,23 @@
+JavaScript Best Practices
+	- send argument to the function as object(aka hashes) instead of multiple native types
+		Examples:
+			function draw(options){
+				// any parameter that is passed to this function that is not an object will be lost and 
+				// replaced with empty object
+				if(options !== 'object'){
+					options = {};
+				}
+				
+				if(typeof options.one === 'undefined'){
+					options.one = 'default-left';
+				}
+				
+				if(typeof options.two === 'undefined'){
+					options.two = 'default-two';
+				}
+				
+				console.log('One: ', one);
+				console.log('Two: ', two);
+			}
+
+			draw({ one: 'one', two: 'two' });

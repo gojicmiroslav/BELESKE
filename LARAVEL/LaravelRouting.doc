@@ -1,0 +1,112 @@
+Console command:
+	php artisan route:list
+
+Routing examples:
+	Route::get('about/test', function () {
+			return view('test/test');
+	});
+
+	// or...
+	Route::get('about/test', function () {
+			return view('test.test');
+	});
+
+	// url: /about, view: /pages/about.blade.php
+	Route::get('/about', function () {
+			return view('pages.about');
+	});
+
+	Route::get('test/{parameter}', function ($parameter) {
+			return "<h2>Test parameter: $parameter </h2>";
+	});
+
+	Route::get('about/directions', array('as' => 'directions', function(){
+		$theUrl = URL::route('directions');
+		$urlName = Route::currentRouteName();
+		return "This URL is <b>$theUrl</b> and name is <b>$urlName</b>";
+	}));
+
+	Route::get('about/named', function(){
+		$theUrl = URL::route('directions');
+		$urlName = Route::currentRouteName();
+		return "This URL is <b>$theUrl</b> and name is <b>$urlName</b>";
+	})->name('named');
+
+	Route::get('post/{postId}/comment/{commentId}', function ($postId, $commentId) {
+			return "<h2>Post ID: $postId </h2> and comment ID: $commentId";
+	});
+
+	// route ton controller action
+	Route::get('/post', 'PostsController@index);
+
+	// controller route with parameters
+	Route::get('show/{id}', 'PostsController@show');
+
+	//Route for resource controller
+	Route::resource('posts', 'PostsController');
+
+	//Named Route
+	//home.blade.php
+	<a href="{{ route('greet') }}" class="btn btn-primary">Greet</a><br /><br />
+
+	//in routes.php
+	Route::get('/greet', function(){
+		...
+	})->name('greet');
+
+Passing data to the views:
+	1) way
+			Route::get('/', function () {
+				$people = ['Misa', 'Pera', 'Miki'];
+				return view('welcome', ['people' => $people]);
+			});
+	2) way
+			Route::get('/', function () {
+				$people = ['Misa', 'Pera', 'Miki'];
+				return view('welcome', compact('people')); //same result
+			});
+
+	3) way
+			Route::get('/', function () {
+				$people = ['Misa', 'Pera', 'Miki'];
+				return view('welcome')->with('people', $people);
+			});
+
+	4) way - using dynamic methods
+			Route::get('/', function () {
+				$people = ['Misa', 'Pera', 'Miki'];
+				return view('welcome')->withPeople($people);
+			});
+
+	// print in view - pure PHP approach
+		<?php foreach($people as $person) : ?>
+    	<li><?= $person; ?></li>
+    <?php endforeach; ?>
+
+	// print in view - blade approach
+		@foreach ($people as $person)
+			<li>{{ $person }}</li>
+		@endforeach
+
+Redirect:
+	Route::get('where', function(){
+		return redirect()->route('named');
+	});
+
+- return view('...') and return View::make('...') are equivalent. They trigger the same code.
+	View is facade, and view() is global function accessible in routes.
+	
+- redirect back to previous page
+		return back();
+	
+Route Model Binding
+	//web.php
+	Route::get('cards/{card}', 'CardsController@show');
+	
+	//controller
+	public function show(Card $card)
+	{
+		return $card;
+	}
+	
+	IMPORTANT: name in Route(card) and name in function show(card) must be EQUAL

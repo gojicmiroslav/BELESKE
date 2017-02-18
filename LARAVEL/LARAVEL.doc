@@ -1,0 +1,37 @@
+Creating new project:
+	composer create-project --prefer-dist laravel/laravel cms
+	
+Creating new project with Laravel installer:
+	laravel new blog
+
+Runing server(localhost:8000):
+	php artisan serve
+
+Resource:
+	- https://laravel.com/api/5.4/index.html
+
+Console command:
+	php artisan help
+	php artisan help <command>
+		Example:
+			php artisan help make:controller
+	php artisan list //list all commands
+	php artisan help make:controller // help for generate controller
+	php artisan route:list
+
+Model
+	- php artisan make:model <name> - creates a new Eloquent model class
+	- php artisan make:model -m <name> - creates a model and migration
+	
+	Example:
+		php artisan make:model Card
+
+TEST-DRIVEN
+		- debug function dd($arg);
+		
+DEBUG
+	- dd function dumps the given variables and ends execution of the script:
+			dd($value);
+			dd($value1, $value2, $value3, ...);
+	- If you do not want to halt the execution of your script, use the dump function instead:
+			dump($value);

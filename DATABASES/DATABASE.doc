@@ -1,0 +1,6 @@
+DATABASE
+	Transactions
+		A - atomic
+		C - consistent
+		I - isolated
+		D - durable

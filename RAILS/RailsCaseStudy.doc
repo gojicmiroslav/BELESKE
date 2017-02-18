@@ -1,0 +1,186 @@
+Case Study
+	
+Resource URL:
+	- http://api.rubyonrails.org/
+	
+Gems:
+	* gem 'paranoia' (https://github.com/rubysherpas/paranoia)
+			- calling destroy on an ActiveRecord object doesn't actually destroy the database record, but just hides it. 
+				Paranoia does this by setting a deleted_at field to the current time when you destroy a record, and hides it by scoping all 
+				queries on your model to only include records which do not have a deleted_at field.
+				Example:
+					class Task < ActiveRecord::Base
+						acts_as_paranoid
+						...
+					end
+	* gem 'devise' - authentication
+	* gem 'draper' - adds an object-oriented layer of presentation logic to your Rails application.
+	* gem 'rubocop' - analyzing code
+	* gem 'open_uri_redirections' - OpenURI patch to allow redirections between HTTP and HTTPS
+	* gem 'whenever' - for creating Cron jobs
+	* gem 'nokogiri' - for searching web pages
+	* gem 'sidekiq' - background processing for Ruby. Sidekiq uses threads to handle many jobs at the same time in the same process. 
+										It does not require Rails but will integrate tightly with Rails to make background processing dead simple.
+	* gem 'launchy' - A helper for launching cross-platform applications
+	* gem 'letter_opener' - Preview email in the default browser instead of sending it. This means you do not need to set up email delivery in 
+													your development environment, and you no longer need to worry about accidentally sending a test email to someone 
+													else's address.
+	* gem bullet
+	
+Routing
+	- adding member routes
+		resources :tasks do
+			member do
+				put 'active'
+				put 'inactive'
+			end
+		end
+		
+		- resource(task) id is: params[:id]
+		
+		Examples:
+			/tasks/1/active	
+		
+		Controller action: tasks#active, tasks#inactive
+		Helper methods: active_task_path(url), inactive_task_path(url)
+		
+		This can be done without member block:
+			resources :tasks do
+				put 'active', on: :member
+			end
+			
+		If we leave out ":on" option, this will create the same member route except that the resource id value will be
+		available in params[:task_id] instead of params[:id]
+		
+Models
+	- email_changed? - Devise helper method
+	- for admin role create a separate Devise model:
+			rails g devise AdminUser
+	
+- for single line metohds use syntax: &:method_name
+	Example:
+		words.each(&:strip!)
+		
+Controllers
+	- protect_from_forgery(options = {}) - Turn on request forgery protection. Bear in mind that GET and HEAD requests are not checked.
+		(http://api.rubyonrails.org/classes/ActionController/RequestForgeryProtection/ClassMethods.html)
+		
+	- layout - https://github.com/plataformatec/devise/wiki/How-To:-Create-custom-layouts
+		- devise_controller? helper you can determine when a Devise controller is active 
+		
+	- custom redirect for unauthenticated users:
+		# app/controllers/application_controller.rb
+		class ApplicationController < ActionController::Base
+			protected
+			
+			def authenticate_user!(options = {})
+				if user_signed_in?
+					super(options)
+				else
+					redirect_to new_user_session_path
+				end
+			end
+		end
+		
+	- custom redirect after sign in for different users(e.g. user, admin user,...)
+		# app/controllers/application_controller.rb
+		class ApplicationController < ActionController::Base
+			def after_sign_in_path_for(resource)
+				case resource
+					when AdminUser then admin_dashboard_path
+					when User then tasks_path
+					else super
+				end
+			end
+		end
+		
+		resource - User model or AdminUser model or some else Devise model
+		super - path "/"
+		
+	- yield and content_for - The main body of the view will always render into the unnamed yield. 
+														To render content into a named yield, you use the content_for method.s
+		Example:
+			# app/views/layouts/application.html.erb
+			<html>
+				<head>
+					<%= yield :head %>
+				</head>
+				
+				<body>
+					<%= yield %>
+				</body>
+			</html>
+
+			# in view
+			<% content_for :head do %>
+				<title>A simple page</title>
+			<% end %>	
+			
+- different layouts for controller actions(methods):
+	Example:
+		class UsersController < ApplicationController
+			def show
+				render(layout: 'layouts/user')
+			end
+		end
+		
+- save vs save!
+		save - saves the model. If the model is new a record gets created in the database, otherwise the existing record gets updated.
+						By default, save always run validations. If any of them fail the action is cancelled and save returns false. 
+						However, if you supply validate: false, validations are bypassed altogether.
+						There’s a series of callbacks associated with save. If any of the before_* callbacks return false the action is cancelled 
+						and save returns false. 
+						
+		save! - saves the model.f the model is new a record gets created in the database, otherwise the existing record gets updated.
+						With save! validations always run. If any of them fail ActiveRecord::RecordInvalid gets raised.
+						There’s a series of callbacks associated with save!. If any of the before_* callbacks return false the action is cancelled 
+						and save! raises ActiveRecord::RecordNotSaved.
+						
+* rescue_from(*klasses, with: nil, &block)
+		- rescue exceptions raised in controller actions
+		- in other words: specified exception handle with given code
+		Example:
+			class UsersController < ApplicationController
+				rescue_from ActiveRecord::RecordNotFound, with: :record_not_found
+				...
+				
+				private
+				
+				  def record_not_found
+						flash[:error] = 'No user found!'
+						redirect_to root_path
+					end
+			end
+			
+		Example:
+			class ApplicationController < ActionController::Base
+				rescue_from User::NotAuthorized, with: :deny_access # self defined exception
+				rescue_from ActiveRecord::RecordInvalid, with: :show_errors
+
+				rescue_from 'MyAppError::Base' do |exception|
+					render xml: exception, status: 500
+				end
+
+				protected
+					def deny_access
+						...
+					end
+
+					def show_errors(exception)
+						exception.record.new_record? ? ...
+					end
+			end
+	
+Services:
+
+	UrlChecker
+		- UrlChecker.html_parser(url) - parse the given url and returns a string representation. Raise error if invalid url 
+		- UrlChecker.find_words_in_text(words, text)
+		- UrlChecker.url_checker(words, url) - returns TRUE if given words exists for url, returns FALSE otherwise
+		
+- scheduler.rake -> VisitorMailer -> view/visitor_mailer
+		
+TODO:
+	- testovi za TaskFeature:
+			- shows only 50 tasks
+	- pogledati Decorator tutorial 

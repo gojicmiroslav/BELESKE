@@ -1,0 +1,30 @@
+REDIS
+	Resources:
+		- https://redis.io/topics/quickstart
+		
+Start server
+	- redis-server
+
+Start client
+	- redis-cli
+	
+* Rails Jobs
+	- when using calling perform_async for job, it is better to send id of resource, and find it in perform method,
+	  then sending an resource object
+		Example:
+			//controller
+			def create
+				@snippet = Snippet.new(snippet_params)
+				if @snippet.save
+					DpasteWorker.perform_async(@snippet.id)
+					redirect_to @snippet
+				else
+					render :new
+				end
+			end
+			
+			//worker
+			def perform(snippet_id)
+				snippet = Snippet.find(snippet_id)
+				...
+			end

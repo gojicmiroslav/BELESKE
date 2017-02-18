@@ -1,0 +1,678 @@
+Connect to MySQL using console - MySQL client:
+	- mysql -u root -p
+	- mysql -h localhost -u root -p
+	- mysql -h localhost -u --no-beep root -p
+	- mysql -u root laravel_cms -p  // connect and select given database
+
+Commands:
+	- show databases;
+	- use <database_name>;
+	- show tables;
+	- describe users; //show table structure
+	- describe users\G; // different format
+	- quit;
+	- CTRL+L - clear screen
+	- source ~/Desktop/mysqlsampledatabase.sql; // execute sql file
+
+Changing the Root User Password:
+	1) login in to mysql
+		mysql -u root -p
+	2) change password
+		set password for 'root'@'localhost' = password('deronje777');
+
+Creating Database
+	- create database <name>;		
+
+Creating User Account
+	- login as root user
+	- create user 'test-user'@'localhost' identified by 'deronje';
+	- grant all privileges on laravel_cms.* to 'test-user'@'localhost';
+
+CHANGING GLOBAL PASSWORD SETTINGS
+	- SHOW VARIABLES LIKE 'validate_password%';
+	- SET GLOBAL validate_password_mixed_case_count=0;
+	- SET GLOBAL validate_password_policy=LOW;
+	- ...
+
+Creating a Table
+	- CREATE TABLE customers (
+			name varchar(255),
+			email varchar(255),
+			employees integer,
+			state char(2),
+			customer_since date
+	  );
+
+Drop Table
+	- drop table customers;
+
+View Table Structure
+	- describe <table_name>
+
+Data Types
+	1) String-based data types
+		- 8 different string-based data types
+			- CHARD - fixed length strings up to 255 characters
+			- VARCHAR - variable length strings of up to 65,535
+			- BINARY/VARBINARY - like CHAR/VARCHAR, but used for storing binary data
+			- BLOB - store large amount of binary string data such as image or zip file
+			- TEXT - store large amount of non-binary string data such as books
+			- ENUM - defines a list of permitted string values. Up to 65,535 values allowed.
+			- SET - similar as ENUM, in that that we can store a list of acceptible string values, with the difference
+							its possible to store multiple values rather then just one.For instance: different types of 
+							comunication - email, phone, and text message. Customer can preffer multiple types of comunication,
+							for example email and phone.	  
+		Example:
+			create table contacts (
+				 	name varchar(255),
+				 	phone varchar(50),
+				 	email varchar(255),
+				 	salutation enum('Mr.', 'Mrs.', 'Ms.', 'Dr.', 'Prof.' ),
+				 	contact_method set('email', 'phone', 'text message')
+			);
+
+			insert into contacts values(null, 'John Smith', 'john@gmail.com', 'Mr', ('email,phone'), 23);
+
+	2) Numerical data types
+			- INTEGER - -2,147,483,648 <-> 2,147,483,647
+			- BIGINT - 
+			- MEDIUMINT - -8,388,608 <-> 8,388,607
+			- SMALLINT - -32,768 <-> 32,767
+			- TINYINT - -128 <-> 127
+			- FLOAT - for decimal numbers.Float values are approximated. If application requires apsolute precision we should
+ 								use decimal type.Accurate to approximately seven decimal places. Suitable for storing geographical
+						 		coordinates. 
+								Example: latitude FLOAT(10, 6) 
+			- DOUBLE - double-precision floating-point number. Accurate to approximately 15 decimal places.
+			- DECIMAL - useful for storing EXACT numbers. Unlike FLOAT, no rounding will ever occur.
+									Example: price DECIMAL(5,2)
+			- BOOLEAN - TINYINT alias, for storing true(1) and false(0)
+	
+	3) Date and Time Data Types
+			- YEAR - four digit format(2011) supports rangs of: 1901 - 2155. Two digit format(11) supports range 
+								2000-2069(00-69) and 1979-1999(70-99) - not recomended.
+								Example: birth_year YEAR NOT NULL	
+			- DATE - stores a complete date(year, month and day). Range is 1000-01-01 to 9999-12-31
+							Example: birthdate DATE NOT NULL
+			- DATETIME - stores both the date and the time, supporting range 1000-01-01 00:00:00 to 9999-12-31 23:59:59
+							Example: expiration DATETIME NOT NULL
+			- TIMESTAMP - MySQL will automatically record the current date and time for us, such as when a new record was 
+										created. Example: created_on TIMESTAMP NOT NULL.
+
+			- DATE, DATETIME and TIMESTAMP columns are all pretty forgiving in terms of how values are passed: 2011-10-06,
+				2011/10/06 and 20111006 are all VALID values.
+			- the TIMESTAMP data type can be configured in a variety of ways:
+					- insert current timestamp when row is created and update to current timestamp when row is updated
+							created_on TIMESTAMP NOT NULl //problem, it will update this column when any columns is updated
+
+					- insert current timestamp when row is created, but never update:
+							created_on TIMESTAMP NOT NULL DEFAULT current_timestamp
+
+					- default value of 0 and set to current timestamp when updated:
+							updated_on TIMESTAMP DEFAULT 0 ON UPDATE current_timestamp
+
+		Example:
+				create table employees( 
+					name varchar(255) not null, 
+					created_on timestamp not null default current_timestamp, 
+					updated_on timestamp not null default current_timestamp on update current_timestamp 
+				);
+
+Data Attributes
+		- NULL -doesn't mean empty, it means unknown
+			Example:
+				CREATE TABLE customers (
+					name varchar(255) not null,
+					email varchar(255) not null,
+					employees integer,
+					state char(2) not null,
+					customer_since date not null
+				);
+Numberical Tpes Data Attributes:
+		- UNSIGNED - prevents the negative part of a range from being used. Additionaly, for integers the positive side
+								of the range is effectively doubled.					
+								Example:
+										price DECIMAL(5,2) NOT NULL UNSIGNED
+										age TINYINT NOT NULL UNSIGNED
+		- ZEROFILL - pads the displayed value with zeros up to the display width.
+								Example: invoice INTEGER(6) ZEROFILL
+											// 1 becomes 000001, 44566 becomes 044566, 123456 remains 123456	
+
+PRIMARY AND FOREIGN KEYS
+	Primary key:
+		- two ways:
+				1)
+						create table customers(
+				    	id integer unsigned not null auto_increment primary key,
+					    name varchar(255) not null,
+    					email varchar(255) not null
+				    );
+				
+				2)
+						create table customers(
+				    	id integer unsigned not null auto_increment,
+					    name varchar(255) not null,
+    					email varchar(255) not null,
+							primary key (id)
+				    );
+
+		- primary key in join table - multiple attributes
+				CREATE TABLE film_actor (
+					actor_id SMALLINT UNSIGNED NOT NULL,
+					film_id SMALLINT UNSIGNED NOT NULL,
+					last_update TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+					PRIMARY KEY  (actor_id,film_id),
+					CONSTRAINT fk_film_actor_actor FOREIGN KEY (actor_id) REFERENCES actor (actor_id) 
+										ON DELETE RESTRICT ON UPDATE CASCADE,
+					CONSTRAINT fk_film_actor_film FOREIGN KEY (film_id) REFERENCES film (film_id) 
+										ON DELETE RESTRICT ON UPDATE CASCADE
+				)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+	Foreign Keys
+		Syntax:
+				[CONSTRAINT [symbol]] FOREIGN KEY
+    		[index_name] (index_col_name, ...)
+		    REFERENCES tbl_name (index_col_name,...)
+		    [ON DELETE reference_option]
+		    [ON UPDATE reference_option]
+
+				//reference_option: RESTRICT | CASCADE | SET NULL | NO ACTION
+
+		-	Referential Actions:
+			When an UPDATE or DELETE operation affects a key value in the parent table that has matching rows in the child
+ 			table, the result depends on the referential action specified using ON UPDATE and ON DELETE subclauses of the
+	 		FOREIGN KEY clause. 
+				CASCADE: Delete or update the row from the parent table, and automatically delete or update the matching rows
+								 in the child table. Both ON DELETE CASCADE and ON UPDATE CASCADE are supported. Between two tables,
+								 do not define several ON UPDATE CASCADE clauses that act on the same column in the parent table or in
+								 the child table.
+				SET NULL: Delete or update the row from the parent table, and set the foreign key column or columns in the
+ 									child table to NULL. Both ON DELETE SET NULL and ON UPDATE SET NULL clauses are supported.
+									If you specify a SET NULL action, make sure that you have not declared the columns in the child table
+									as NOT NULL.
+				RESTRICT: Rejects the delete or update operation for the parent table. Specifying RESTRICT (or NO ACTION) is
+ 									the same as omitting the ON DELETE or ON UPDATE clause.
+				NO ACTION: A keyword from standard SQL. In MySQL, equivalent to RESTRICT. The MySQL Server rejects the delete
+ 									 or update operation for the parent table if there is a related foreign key value in the referenced
+ 									 table. Some database systems have deferred checks, and NO ACTION is a deferred check. In MySQL,
+									 foreign key constraints are checked immediately, so NO ACTION is the same as RESTRICT.
+				SET DEFAULT: This action is recognized by the MySQL parser, but both InnoDB and NDB reject table definitions
+ 										 containing ON DELETE SET DEFAULT or ON UPDATE SET DEFAULT clauses.
+
+		Example: film_actor -> actor
+				CONSTRAINT fk_film_actor_actor FOREIGN KEY (actor_id) REFERENCES actor (actor_id) 
+										ON DELETE RESTRICT ON UPDATE CASCADE
+
+		Example:	
+				create table customers(
+					 id integer unsigned not null auto_increment primary key,
+					 name varchar(255) not null,
+					 email varchar(255) not null,
+					 state_id tinyint unsigned not null,
+					 constraint fk_customer_state foreign key (state_id) references states (id) on update cascade
+	      );
+
+	- adding foreign key
+			ALTER TABLE tbl_name
+	    ADD [CONSTRAINT [symbol]] FOREIGN KEY
+  	  [index_name] (index_col_name, ...)
+  	  REFERENCES tbl_name (index_col_name,...)
+  	  [ON DELETE reference_option]
+  	  [ON UPDATE reference_option]
+
+	- dropping foreign key
+			ALTER TABLE tbl_name DROP FOREIGN KEY fk_symbol;
+			
+
+Alter Table
+		- ALTER TABLE customers
+			CHANGE COLUMN name
+			name VARCHAR(255) NOT NULL DEFAULT '';
+
+INSERT DATA
+	Three ways:
+		1) insert into contacts values(null, 'John Smith', 'john@gmail.com', 'Mr', ('email,phone'), 23);
+		2) insert into contacts set name="Sally", email="sally@example.com", salutation="Mrs", 
+			 contact_method=('email,text message'),age=33;
+		3) insert into contacts(name, email, salutation, contact_method, age) 
+				values("Pera", "pera@pera.com", "Dr","email", 24);
+
+SELECT DATA
+	Count
+		- select count(id) from contacts;
+		- select count(*) from contacts;
+
+	Aliases
+		- select name as `Employee name` from contacts;
+
+	Order By
+		- select * from contacts order by name desc;
+		- select * from contacts order by name, age;
+		- select * from contacts order by name, age desc;
+
+	Where
+		- select * from customer where active=1;
+		- select count(*) from customer where active=1;	
+		- select count(*) from customer where active=1 and store_id=1;
+		- select * from payment where amount > 6.0;
+
+	Group By
+		- The GROUP BY statement is used in conjunction with the aggregate functions(min,max,avg,count,first,last,sum) to group the result-set by one or
+ 			more columns.
+
+		Examples:
+		- select store_id, count(customer_id) as `customers` from customer group by store_id;
+		- select count(payment_id), amount from payment group by amount;
+		
+		- WHERE clause is execute before COLUMNS are selected, GROUP BY is after COLUMNS are selected, so they can;t be used together.
+			Instead we use HAVING for calculations and counting the results(instead of WHERE).
+			Example:
+				- select count(payment_id), amount from payment group by amount having count(payment_id) > 500;
+	IN and NOT IN clause
+		Example:
+			- select distinct district from address where city_id in (select city_id from city where city like "A%");				
+			- select distinct district from address where city_id not in (select city_id from city where city like "A%");				
+
+	Distinct			
+		- select distinct(customer_id) from rental;
+		
+	Like
+		- select * from film where title like 'AIRPLANE%';
+		- select * from film where title like '%PLANE%';
+		
+	LIMIT
+		- select * from customer limit 10;
+		- select * from customer limit 10,11; //LIMIT start,count (start column = start+1)
+		- select * from customer limit 10 offset 11; //LIMIT count offset start
+
+DELETE DATA
+	- in conjuction with WHERE statement
+	Examples
+		- delete from film where title='something';
+		- delete from film where title='something' and year='2011';
+				
+BACKUP
+	Backup with mysqldump
+		- mysqldump is a client utility that performs a logical backup(CREATE and INSERTS statements)
+		- mysqldump command generates a SQL statements that can be run to reproduce original schema objects and data
+
+	Backup Single Database
+		Example:		
+				cd ~/Desktop
+				mysqldump -h 127.0.0.1 -u root -p laravel_cms > mysql_backup/laravel_cms.sql
+
+MySQL FUNCTIONS
+	String functions: 
+		- length,concat, lower, upper,substring
+			Example:
+				- select length(title), title from film
+				- select concat(first_name, last_name) from actor;
+				- select concat(first_name, " ", last_name) from actor;
+				- select lower(title) from film;
+				- select concat(first_name, ", ", last_name) from actor;
+				- select substring(first_name, 2) from actor;
+				- select substring(first_name, -10, 2) from actor;
+
+	Aggregate(GROUP BY) functions
+		- avg
+		Example:
+			- select avg(length) from film;
+
+SUBQUERIES
+	- a subquery is a nested query. Outcome of second query determines a result of the first query. Syntax:
+			select * from table1 where id=(select id from table2 order_by created_on limit 1)
+		Example:
+			# get all films film length greather than average
+				select title,length from film where length > (select avg(length) from film) limit 10;
+			- select first_name, last_name, (select sum(amount) from payment where customer_id=1) as amount from customer where customer_id=1;
+			- select distinct district from address where city_id in (select city_id from city where city like "A%");
+			# join
+					select distinct name from category
+		      where (not) exists
+    			select category_id from film_category
+		    	where category.category_id = film_category.category_id);
+
+TABLE JOINS
+	Inner Joins
+		- seeks a intersection of two tables, returns rows which are common to the both tables
+		- only returns that are found in both tables
+		Example:
+				#customer n-->1 address
+					select customer.first_name, customer.last_name, address.address
+    			from customer inner join address
+    			on customer.address_id = address.address_id;
+
+					//using aliases - following tables name
+					select cu.first_name, cu.last_name, a.address
+    			from customer cu inner join address a
+    			on cu.address_id = a.address_id;
+
+					// with clause using - only when tables have same foreign key name
+					select cu.first_name, cu.last_name, a.address
+    			from customer cu inner join address a
+    			using (address_id);
+
+				#customer n-->1 address n-->1 city
+					select customer.first_name, customer.last_name, address.address, city.city
+    			from customer inner join address inner join city
+    			on customer.address_id = address.address_id and address.city_id = city.city_id;
+
+					select customer.first_name, customer.last_name, address.address, city.city
+    			from customer inner join address inner join city
+    			on customer.address_id = address.address_id
+					inner join city
+					on address.city_id = city.city_id;
+
+					// with aliases and using clause
+					select cu.first_name, cu.last_name, a.address, c.city
+    			from customer cu inner join address a
+    			using (address_id)
+					inner join city c
+					using(city_id);
+
+			Example lookup for all customers who are made a payment on a specific date:
+				# customer 1-->n payment
+				select distinct c.email
+    		from customer c
+				inner join payment p
+    		using (customer_id)
+    		where date(p.payment_date) = '2005-07-31';
+
+				select distinct cu.email, sum(p.amount) 
+				from customer cu inner join payment p 
+				using (customer_id) 
+				where date(p.payment_date) = '2005-07-31' 
+				group by cu.email;
+
+	Left Join
+		- all rows in first(left) table are returned regardless of matches is find on the second table
+
+		Examples:
+			select actor.first_name, actor.last_name, film_actor.film_id   
+			from actor left join film_actor 
+			using (actor_id) 
+			order by actor.last_name;
+
+			select actor.first_name, actor.last_name, film.title
+			from actor left join film_actor
+			using (actor_id)
+			left join film
+			using (film_id)
+			where film_id is null
+			order by actor.last_name;
+
+OPTIMIZING MySQL
+	Column Indexes
+		- performance improved when using WHERE clause, table joins, sorting and grouping, and the MIN() and MAX() functions
+		- Showing index:
+			show index from customer;
+		Showing command used to create table:
+			show create table customer;
+		- syntax:
+				{INDEX|KEY} [index_name] [index_type] (index_col_name,...) [index_option] ...
+
+				index_col_name:
+					  col_name [(length)] [ASC | DESC]
+				index_type:
+					  USING {BTREE | HASH}
+
+				index_option:
+							KEY_BLOCK_SIZE [=] value
+						| index_type
+						| WITH PARSER parser_name
+						| COMMENT 'string'	
+
+				Example:
+					KEY `idx_actor_last_name` (`last_name`) // improves statement: ... WHERE last_name = <something>
+					KEY `idx_actor_name` (`last_name`, `first_name`) // improves statements: 
+																															- ... WHERE last_name = <something> and first_name = <something>
+		 																													- ... WHERE last_name = <something>
+
+			- EXPLAIN(DESCIBE | DESC) clause - use for knowing how MySQL executes certain SELECT statement.
+				Syntax:
+					explain <table_name>;
+					explain <table_name> <col_name>;
+						
+					explain [explain_type] {explainable_stmt | FOR CONNECTION conection_id}
+
+					explain_type: {
+							EXTENDED
+						| PARTITIONS
+						| FORMAT=format_name					
+					}
+
+					format_name: {
+							TRADITIONAL
+						| JSON					
+					}
+
+					explainable_stmt: {
+							SELECT statement
+						| DELETE statement
+						| INSERT statement
+						| REPLACE statement
+						| UPDATE statement
+					}
+						
+
+				Example:
+					explain actor;
+					explain actor first_name;
+
+					explaine select * from customers where first_name="...";
+					describe select * from customers where first_name="..."; //same
+					explain format=json select * from actor where first_name="John" and last_name="Wayne";
+
+	Optimizing MySQL Configuration - caching, resource management, buffer size, maximum numbers of simultaneous connections
+		- show MySQL configuration varibles:
+				show variables;
+				show variables like 'key%'; //show variables that starts with keyword 'key'
+
+		- we can change any variable using SET clause. Values will be reset to default when server is restarted. 
+			For permanent store use config file - /etc/mysq/my.cnf
+				Example:
+					set global key_buffer_size = 16777216; //16MB
+		- variable: key_buffer_size
+				- for storing how much RAM is available for storing column indexes			
+		- Config files(http://dev.mysql.com/doc/refman/5.7/en/option-files.html):
+				/etc/my.cnf	        - Global options
+				/etc/mysql/my.cnf	  - Global options
+				SYSCONFDIR/my.cnf	  - Global options
+				$MYSQL_HOME/my.cnf  - Server-specific options (server only)
+				defaults-extra-file -	The file specified with --defaults-extra-file, if any
+				~/.my.cnf	          - User-specific options
+				~/.mylogin.cnf	    - User-specific login path options (clients only)
+
+	Query Caching
+		- many queries executes repeatedly
+		- to cache queries and results, if data no changes on the regular bases
+		- enable caching within MySQL server. MySQL server will flash the cache automatically should the cache table contents change in any way
+			(update, insert, ...). This cache is NOT enabled by default.
+		- To check if cache is enabled:
+				show variables like 'query_cache_size';
+				// if query_cache_size == 0 caching is disabled
+		- to enable caching we allocate memory
+				set global query_cache_size = 16777216;
+		- to make this these changes permanent set in my.conf
+		- to see how many queries have been executed since server started
+				show status like 'Q%';
+				// Queries
+				// Qcache_hits - how many queries have been retrieved from the cache
+
+Server System Variables
+	- to see the values that a server will use based on its compiled-in defaults and any option files that it reads, use this command:
+			mysqld --verbose --help
+	- to see the values that a server will use based on its compiled-in defaults, ignoring the settings in any option files, use this command:
+			mysqld --no-defaults --verbose --help
+	- To see what values a running MySQL server is using, type
+			mysqladmin variables --verbose --help
+
+MYSQLDUMP utility
+	- help:
+			mysqldump --help	
+	- backup DB with mysqldump console utility:
+			mysqldump -u root -p sakila > sakila.sql
+	- mysqldump by default doesn't add this line:
+			CREATE DATABASE IF NOT EXISTS `sakila`
+	- load dump swl file in different schema:
+			mysql-u root -p sakila2 < sakila.sql
+	
+MYSQLADMIN utility
+	- Create database:
+			mysqladmin -u root -p create sakila2
+
+Automatically Backing MySQL Database
+	- using cron for creating task
+		Example:
+			30 22 * * * /usr/bin/mysqldump -u backup -p'123456' prod_example_com | gzip -9 > /home/backup/backups/DB_`date '+\%m\%d\%Y-\%H\%M\%S'`.sql.gz
+
+MySQL User Privileges
+	- user account and privileges are managed within several tablesfound in mysql database
+		 	use mysql
+			show tables
+
+	- create a new use with only connection privileges
+			grant usage on *.* to 'jerry'@'localhost' identified by 'secret';
+
+			// 'jerry'@'localhost' - it means that jerry can access only from this local machine
+			// 'jerry'@'192.168.1.23' - access from specific IP address
+			// 'jerry'@'%' - can access from anywhere
+
+	- grant select on jerry account for every database
+			grant select on *.* to 'jerry'@'localhost'
+
+	- revoke(opozvati) privileges from account
+			revoke select on *.* from 'jerry'@'localhost'
+
+	- grant select for specific database
+			grant select on sakila.* to 'jerry'@'localhost'
+
+			// sakila.* - all tables in database
+
+	- grant select access on column level for specific table
+			grant select(first_name, last_name) on sakila.actor to 'jerry'@'localhost'
+
+HOW TO CHECK STORAGE ENGINE
+	- in DB: information_schema
+	- SELECT ENGINE FROM information_schema.TABLES WHERE TABLE_SCHEMA = 'my_database' AND TABLE_NAME = 'my_table';
+
+////////////////////////// mysqltutorial.org /////////////////////////////////////////////////////////
+Group By
+	- ova klauzula, koja opciona za SELECT iskaz, grupise skup torki u skup torki ze rezime(summary rows) na osnovu vrednost kolona ili izraza. GROUP BY
+		klauzula vraca jednu torku za svaku grupu. Drugim recima ona smanjuje broj torki u skupu rezultata(result set).
+	
+	
+
+
+============== MySQL Full-Text Search =============================================================================================
+
+	- MySQL full-text search provides a simple way to implement various advanced search techniques such as natural language search, Boolean text search 
+		and	query expansion.
+	- MySQL creates an index from the words of the enabled full-text search column and performs searches on this index. MySQL uses a sophisticated
+ 		algorithm to determine the rows matched against the search query.
+	- Not all storage engines support the full-text search feature. In MySQL version 5.6 or later, only MyISAM and InnoDB storage engines
+		support full-text search.
+
+		Defining FULLTEXT indexes
+
+		- Before performing a full-text search in a column of a table, you must index its data. MySQL will re-index again whenever the data of the column
+ 			changes. In MySQL, the full-text index is a kind of index that has a name FULLTEXT.
+		- MySQL version 5.6 or later allows you to define a full-text index for a column whose data type is CHAR, VARCHAR or TEXT in MyISAM or 
+			InnoDB table type.
+		- MySQL allows you to define the FULLTEXT index by using the CREATE TABLE statement when you create the table or ALTER TABLE or CREATE INDEX
+ 			statement for the existing tables.
+
+			1) Defining FULLTEXT index using CREATE TABLE statement
+					CREATE TABLE table_name(
+					 	column1 data_type, 
+        		column2 data_type,
+        		column3 data_type,
+					 	…
+						PRIMARY_KEY(key_column),
+						FULLTEXT (column1,column2,..)
+					);
+
+					// You put the a list of comma-separated columns that you want to create the full-text index in parentheses after the FULLTEXT statement.
+					Example:
+						CREATE TABLE posts (
+							id int(4) NOT NULL AUTO_INCREMENT,
+							title varchar(255) NOT NULL,
+							post_content text,
+							PRIMARY KEY (id),
+							FULLTEXT KEY post_content (post_content)
+						);
+
+			2) Defining FULLTEXT index for existing tables
+					- We can use the ALTER TABLE statement or CREATE INDEX statement.
+					- using ALTER TABLE statement
+							ALTER TABLE  table_name  
+							ADD FULLTEXT(column_name1, column_name2,…)
+
+							Example:
+								ALTER TABLE products  
+								ADD FULLTEXT(productDescription,productLine)
+
+					- using CREATE INDEX statement
+								CREATE FULLTEXT INDEX index_name
+								ON table_name(idx_column_name,...)
+
+							Example:
+								CREATE FULLTEXT INDEX address
+								ON offices(addressLine1,addressLine2)
+
+		Removing full-text search columns
+			Example:
+				ALTER TABLE offices
+				DROP INDEX address
+
+		MySQL Natural Language Search
+			- MySQL looks for rows or documents that are relevant to the free-text natural human language query, for example, 
+				“How to use MySQL full-text search”.
+			- Relevance is a positive floating-point number. When the relevance is zero, it means that there is no similarity. MySQL computes the relevance
+			 	based on various factors including the number of words in the record, the number of unique words in the record, the total number of words in
+	 			the collection, and the number of documents (rows) that contain a particular word.
+			- To perform natural language searches, you use MATCH() and  AGAINST() functions. 
+			- The MATCH() function specifies the column where you want to search and the AGAINST() function determines the search expression to be used.
+
+				Example:
+					ALTER TABLE products 
+					ADD FULLTEXT(productline)
+
+					//search for products whose product lines have a word Classic
+					SELECT productName, productline
+					FROM products
+					WHERE MATCH(productline) AGAINST('Classic')
+
+					//search for product whose product line contains Classic or Vintage  keyword
+					SELECT productName, productline
+					FROM products
+					WHERE MATCH(productline) AGAINST('Classic,Vintage')
+
+			- The AGAINST()  function uses IN NATURAL LANGUAGE MODE  search modifier by default therefore you can omit it in the query. There are other
+ 				search modifiers e.g.,  IN BOOLEAN MODE   for Boolean text searches.
+
+					SELECT productName, productline
+					FROM products
+					WHERE MATCH(productline) 
+					AGAINST('Classic,Vintage' IN NATURAL LANGUAGE MODE)
+
+			- By default, MySQL performs searches in the case-insensitive fashion. However, you can instruct MySQL to perform case-sensitive searches 
+				using binary collation for indexed columns.
+
+			Sort the result set by relevance
+			//nastaviti - http://www.mysqltutorial.org/mysql-natural-language-search.aspx
+
+
+
+
+
+
+
+
+
+	
+
+			
+
+
+

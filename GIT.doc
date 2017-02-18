@@ -1,0 +1,528 @@
+GIT
+
+ - VCS - version control system
+ 		Example:
+ 			logo_v1.gif, logo_v2.gif
+
+ - SCM - source code management
+ - Git - Distributed Version Control
+ - git help
+ - git help <command>
+
+ - .git - GIT's workspace, we don't want to come in here and start messing arround and changing things, let GIT managethese files. The only exception to that would be the CONFIG file, that we would either take a look at ar even possibly edit. This is for project level configuration.
+
+ - Commit message best practice:
+ 		- short single-line summary (less than 50 characters)
+ 		- optionally followed by a blank line and a more complete description
+ 		- keep each line to less than 72 characters
+ 		- write commit messages in present tense, not past tense(what this commit does, not what are we as creator doing).
+ 			Example:
+ 				"fix bug" or "fixes bug", not "fixed bug"
+
+ 		Example of good commit message - the longest line in this commit is about 60 characters wide:
+ 			t23086 - Fixes bug in admin logout
+
+ 			When an admin logged out of the admin area, they
+ 			could not log in to the members area because their
+ 			session[:user_id] was still set to the admin ID. This patch
+ 			fixes this bug by setting session[:user_id] to nil when
+ 			any user logs out of any area.
+
+ - GIT LOG
+ 		- git log --since=2016-03-23
+ 		- git log --after=2016-03-23
+ 		- git log --before=2016-03-23
+ 		- git log --until=2016-03-23
+ 		- git log --since=2016-03-23 --until=2016-03-24
+ 		- git log --author=gojicmiroslav
+
+ 	- git log --grep=<pattern>
+ 		 - grep = global regular expression search.
+ 		 --grep=<pattern> - Limit the commits output to ones with log message that matches the specified pattern (regular expression).With more than one --grep=<pattern>, commits whose message matches any of the given patterns are chosen.
+ 		 all-match - Limit the commits output to ones that match all given --grep, instead of ones that match at least one.
+ 		 - case sensitive
+
+ 	Example:
+ 		git log --grep="Init" //all commit messages that have Init
+
+- THREE-TREE ARCHITECTURE
+
+			REPOSITORY - STAGING INDEX - WORKING
+
+	- git add .  // WORKING -> STAGING INDEX
+	- git commit // STAGING INDEX -> REPOSITORY
+
+- HEAD
+ 	- pointer to specific commit in the repository
+ 	- always point to "tip" of CURRENT branch(not master branch) in REPOSITORY
+ 	- last state of repository, what was last checked out
+ 	- points to parent of next commit, where writing commits take place
+ 	- it is place where will Git start "recording" next, it can be moved arround
+ 	- just about repository, not staging index or working directory
+ 	- git log == git log HEAD // logging from HEAD going backwards
+
+ - GIT STATUS
+ 		- difference between working directory, staging index and repository
+
+- GIT DIFF
+	- shows difference between commits(repository), commit and working directory(staging index is not included)
+	- + new version, - old version
+
+- GIT DIFF --STAGED
+	- comparing commits(repository) and staged index
+	- --cached <=> --staged (sinonimi)
+
+- DELETING FILES FROM REPO
+	1) way
+			- manually delete file
+			- git rm file_name
+			- git commit -m "..."
+
+	2) way
+			- git rm file_name // completelly removes file from file system
+
+- RENAME FILES IN REPO
+	1) way
+			- manually
+			- git sees as deleted and added new file
+			- git rm filename
+			- git add new_filename
+
+	2) way
+			- git mv filename new_filename
+
+- git commit -am "message"
+		- am - it doesn't include deleted or aded files, just modified.Also it takes everything from working
+						directory, so if there is something that we don't want to add, it will add all.
+
+- GIT CHECKOUT - has many purposes - branches, undoing changes,...
+	- git checkout - got to repository, get my named thing and make my working directory look like that.
+									 If that named thing is branch, bring the branch, down, if it is file, bring the file down. If branch and file or folder have a same name, Git brings branch.
+
+	Good practice, when we not trying to checkout branch, to use
+		git checkout -- file_name
+
+		-- means stay on the current branch
+
+	From manual:
+		git checkout -- <file> - discard(odbaciti) changes in working directory
+
+- UNDOING CHANGES IN STAGING INDEX
+	- git reset HEAD file_name - go look at last commit(where HEAD points to) and reset file to be the same as in last commit
+
+- UNDOING COMMITS
+	- it's possible to change just the last commit, because nothing depends on him in the chain, yet
+	- we can edit the last commit, the commit that HEAD points to
+	- using AMEND option
+	- git commit --amend
+	- Combine the staged changes with the previous commit and replace the previous commit with the resulting snapshot. Running this when there is nothing staged lets you edit the previous commit’s message without altering its snapshot.
+	- never amend commits that have been pushed to a public repository.
+	- Amended commits are actually entirely new commits, and the previous commit is removed from the project history. This has the same consequences as resetting a public snapshot. If you amend a commit that other developers have based their work on, it will look like the basis of their work vanished from the project history. This is a confusing situation for developers to be in and it’s complicated to recover from.
+
+UNDOING CHANGES
+	- in order to make new commits that undo changes, there's a number of different that we could wo it
+	- one would be we could simply manually make those changes and then commit the result
+	- another way - we want to retrieve file from some commit in the past
+			git checkout 23ds3w423 -- file_name // uzimamo dati fajl iz zadatog commita iz proslosti
+
+GIT REVERT
+	- The git revert command undoes a committed snapshot. But, instead of removing the commit from the project history, it figures out how to undo the changes introduced by the commit and appends a new commit with the resulting content. This prevents Git from losing history, which is important for the integrity of your revision history and for reliable collaboration.
+	Usage:
+		git revert <commit>
+	- generate a new commit that undoes all of the changes introduced in <commit>, then apply it to the current branch.
+	- Reverting should be used when you want to remove an entire commit from your project history. This can be useful, for example, if you’re tracking down a bug and find that it was introduced by a single commit. Instead of manually going in, fixing it, and committing a new snapshot, you can use git revert to automatically do all of this for you.
+
+	- Option: -n --no-commit
+		Usually the command automatically creates some commits with commit log messages stating which commits were reverted. This flag applies the changes necessary to revert the named commits to your working tree and the index, but does not make the commits. In addition, when this option is used, your index does not have to match the HEAD commit. The revert is done against the beginning state of your index.
+
+    This is useful when reverting more than one commits' effect to your index in a row.
+
+    Git wont actually do the commit, it will just stage it and wait for us to do commit ourself. We can make another modification if we need.
+
+GIT RESET
+	- undo many commits
+	- specify where HEAD pointer should point to. Normally we just let GIT to manage HEAD for us.
+	- Options:
+			-- soft
+			-- mixed
+			-- hard
+	- Soft - moves HEAD pointer to the specified commit, does not change staging index or working directory
+	- Mixed(default) - moves HEAD pointer to the specified commit, changes staging index to match repository,
+										does not change working directory
+	- Hard - moves HEAD pointer to the specified commit, changes staging index and working directory to match repository
+
+	Soft reset example:
+		- git log
+				dd54545dsd32323  // HEAD
+				3sdsd32323dsds
+				da3769f934
+				...
+
+		- Now we do soft reset:
+				git reset --soft da3769f934 // HEAD now points to da3769f934
+
+		- We can change HEAD back to original commit:
+				git reset --soft dd54545dsd32323 // HEAD
+
+	Mixed reset example:
+		- git reset --mixed da3769f934
+		- git reset HEAD <file> - to unstage file, we are using HEAD instead of using the SHA, and then tell it
+															which file, we're not telling it to move the pointer and then make staging index look the same, we're telling it just to go get the file that is where the HEAD is at.So, HEAD doesn't move, it stays in exactly the same place that it's in now.
+
+		- git reset <=> git reset --mixed
+
+GIT CLEAN - permanently deletes untracked files
+ - git clean -n - tells what would be deleted(from hard disk) from working directory
+ - git clean -f - deletes	files from working directory, but not from staging index
+
+GIT IGNORE
+	- .gitignore file provide set of rules which files to use for commits and which one should be ignored
+	- we could use basic regular expressions
+			* ? [aeiou] [0-9]
+	- we can also negate expression by putting exclamation point in them !
+	- Example:
+			*.php - ignore all files that ends with php, don't get tracked
+			!index.php - don't ignore index.php, means it would be tracked
+
+	- ignore all files in a directory with trailing slash at the end
+			assets/videos/
+
+	- comments: #
+	- never ignore .gitignore file, we want to include that file in project commit
+	- what to ignore:
+			- compiled source code
+			- packages and compressed files(gz, rar, iso, ...)
+			- logs and databases
+			- OS generated files
+			- user uploaded assets(images, PDFs, videos,..)
+
+	- https://github.com/github/gitignore
+	- globally ignoring files
+			- ignore files in all repositories
+			- settings not tracked in repository
+			- user-specific instead of repository-specific
+			- git config --global core.excludesfile  ~/.gitignore_global
+					- ~/gitignore_global - we tell GIT where the file is. File can be named anything we want, we
+																 can locate it wherever we want, we just have to tell GIT in its config file, this is file you should use for globally ignoring things.
+
+	- ignoring tracked files
+		- GIT will not ignore file that was already tracked before a rule was added to the .gitignore file
+		- we have to tell Git to stop tracking this file
+		- one way is just to remove it
+				git rm file.txt
+		- other way is to remove it with cached option. That's going to tell Git to remove this file from the
+			staging index, not from the repository.That will cause the file to stop being tracked. It will still
+			leave copy in the repository, it will still leave copy in the working directory. It.s just going to take it out of the index.
+				git rm --cached file.txt
+
+	- Git doesn't track empty directories. We put file, by convention, file .gitkeep in directory, so that
+	  Git track this directory
+
+- Tree-ish - points to commit:
+		- full SHA-1
+	  - short SHA-1
+	  - HEAD reference
+	  - branch reference(tip of the branch)
+	  - tag reference
+	  - ancestry
+
+- Ancestry
+	- we can use anyone of these methods and then referring to that object's ancestry.
+	- Examples:
+		 	- parent commit:
+				- using ^, we moving up to the parent
+						HEAD^, acf342233^, master^
+
+				- using ~, then number of generations we want to go up
+						HEAD~1, HEAD~
+
+			- grandparent commit:
+					HEAD^^, asdwe32323^^, master^^
+					HEAD~2
+
+			- great-grandparent commit
+					HEAD^^^, master^^^
+					HEAD~3
+
+- git ls-tree [options] <tree-ish>
+		Options:
+			- '-d' - only shows tree
+			- '-r' - recurse into subtrees
+			- '--name-only' - list only filenames
+			- '--full-tree'
+			- '--full-name'
+
+		Example:
+				git ls-tree HEAD
+				git ls-tree HEAD^
+				git ls-tree -d HEAD^
+				git ls-tree master assets/
+
+GIT LOG ADVANCED
+	- git log --oneline
+	- git log --oneline -3
+	- git log as345ds..3245dfds33
+	- git log 23sdssd32.. index.html //prikazi sta se desilo sa zadatim fajlom od datog commita pa do kraja
+	- git log -p 23sdssd32.. index.html	// prikazuje i promene
+	- git log --all --decorate --graph --oneline
+
+GIT SHOW <commit>
+	- show details about commit
+	- Example:
+			git show dfs342a44
+
+COMPARE COMMITS - diff
+	- if we pass in a SHA that references a commit, it will show us the difference between wprking directory
+		and the directory at the point in time that that commit was made.
+			git diff sd233421
+	- we can pass in a file
+			git diff sd233421 index.html
+
+	- we can compare two differenct commits
+			git diff asd345..HEAD
+			git diff asd345..HEAD^
+	- options:
+			- '--summary --stats' - shows summary of changes
+			- '-b' - same as '--ignore-space-change'
+			- '-w' - same as '--ignore-all-change'
+
+BRANCH
+	- git branch
+			*master
+			new_branch
+	- cat .git/HEAD
+			// ref: refs/heads/master
+	- git checkout new_branch
+	- cat .git/HEAD
+			// ref: refs/heads/new_branch
+
+	Switching branches with uncommitted changes
+		- working directory must be "mostly clean" to do switch between branches(almost clean). If Git allows us to 	switch to another branch, we would lose chnges in working directory.
+		- "mostly clean" - this means that we can loose data if make a switch
+		- we have three options at this point:
+			1) we can discard the changes in working directory by checking out the file again
+					git checkout -- <filename>
+			2) we can commit the changes to the current branch
+			3) we can stash the changes
+
+	Comparing branches
+		- git diff master..new_branch // comparing HEAD of two branchs
+		- git diff master..new_branch^ // comparing HEAD of master and previous commit of HEAD of new_branch
+		- git diff --color-words as23212..dfe4533
+				"--color-words" - all changes in one line
+
+		- we can find out whether one branch completely contains another branch or not, that is whether or not everything in it has been merged into current branch
+			git branch --merged //shows all branches that are completely included in this branch(all commits)
+
+	Renaming branch
+		git branch -m old_name new_name
+
+	Delete branch
+		git branch -d <branch>
+
+	- if branch that we want to delete is not fully merged with current branch(has some new commits), Git will not allows deleting this branch. If we want to force deleting to this branch we use -D option
+		git branch -D <branch>
+
+MERGING BRANCHES
+	- TIP: always do merging branches with CLEAN WORKING DIRECTORY
+
+	Fast-forward merges vs Real merges
+		- ff - doesn't make new commit
+
+	- "--no-ff" option
+			git merge --no-ff <branch>
+		- forces Git to create new commit anyway, with commit message. We do this if we want some kind of documentation that we did merge
+
+	- "--ff-only" option
+			git merge --ff-only <branch>
+		- do a merge only if you can do fast-forward, if you can do fast-forward, just abort
+
+RESOLVING MERGE CONFLICTS
+	- three choices:
+	  	1) abort merge
+	  			git merge --abort
+
+	  			// after this we are not longer in merging state
+
+	  	2) resolve the conflicts manually
+	  			- resolve conflicts in the file(s)
+	  			- git add <file(s)>
+	  			- git commit  // message will added by default, or if we want we can add a message
+
+	  	3) use a merge tool
+	  			git mergetool --tool=<tool>
+
+	  			//list all merge tools
+	  			git mergetool
+
+STASHING CHANGES
+	- the stash(skladiste) is a place where we can store changes temporarily without having to commit them.
+	- the stash is NOT part of repository, staging index or working directory, it's a special forth area in GIT
+	- they look a lot like commit, but they don't have SHA associated with them
+	- command:
+			git stash save "message"
+	- after this, GIT was ran: git reset --hard HEAD
+
+	VIEW STASHED CHANGES:
+		- command:
+				git stash list
+				// stash@{0}: "message"
+		- stash@{0} - this is the way to reffer the things in the stash
+		- view details about stash:
+				git stash show stash@{n} // n=0,1,2,3...
+				git stash show -p stash@{n} // p - patch, for more details
+
+	RETRIEVING STASHED CHANGES
+		- there can be conflicts
+		- there are two commands to pull out items from stash
+				1) git stash pop stash@{n} - pull out whats in the stash and put it in the working directory.
+																		 Removes it from the stash as well. Most of the time this is what we going to use.
+				2) git stash apply stash@{n} - pull out whats in the stash and put it in the working directory.
+																			 Leaves a copy in the stash.
+			- n - by default is 0, if not specified stash@{n}
+						git stash pop <=> git stash pop stash@{0}
+
+	DELETING STASHED CHANGES
+		- deleting one stash
+				git stash drop stash@{n}
+		- deleting everything in stash area:
+				git stash clear
+
+REMOTES
+	- origin/master - branch on our local machine that references the remote server branch.
+	- fetch - commit changes from remotes to the origin/master. Fetch is essentially sync remote branch with origin/master.
+    It doesn't bring it out to master branch. We have to do a merge.
+
+	- generally speaking, the process we go through when we're working with a remote:
+				- do commits locally
+				- fetch the latest from the remote server, get the origin/master branch in sync
+				- merge any of the latest work we did into what just came down from remote server and then push
+					the result back up to the remote server
+
+	- list of all remotes
+			git remote
+			git remote -v //more informations
+
+	- list remote branches
+			git branch -r // only remote branches
+			git branch -a	// both
+
+	- git stores remote in ".git/config" file
+
+	- dodavanje remote repository
+			git remote add <alias> <url>
+
+			// this will create a new remote called origin(can be anything) that points to that remote server at that URL
+
+			Example:
+				git remote add origin https://github.com/gojicmiroslav/first-repo.git
+
+	- remove remote:
+			git remote rm <alias>
+
+			Example:
+				git remote rm origin
+
+	GIT PUSH
+		- git push -u <remote> <branch>
+
+		"-u" - creates tracking branch. If we don't do git push with "-u" option, it doesn't track any remote
+					 branch. All it does is push our code up there, and that's it. It doesn't keep any kind of reference that this is
+           the branch there we're goning to working in the future. The "-u" options says push it up there, and also make note of
+           the fact because we're going to be coming back and working with this
+branch frequently.
+					 We can see tracking in:
+					 	cat .git/config - branch "master" option
+
+		Example:
+			git push -u origin master
+
+	GIT CLONE
+		git clone <url> [<directory_name>]
+
+		- it will push down master branch by default
+		- of the directory name is not given, directory will be named by project name on github. Project name
+		 	 on github has nothing to do with directory name.
+		- git clone does track remote branch. We can
+
+		Options:
+		"-b" - what branch to push down
+
+	- tracking branch - remote branch in what we do push or fetch
+
+	If we want to make non-tracking branch to be tracking, we have three option:
+		1) manually add in .git/config
+				[branch "non_tracking"]
+					remote = origin
+					merge = refs/heads/master
+		2) git config branch.branch_name.remote origin
+			 git config branch.branch_name.merge refs/heads/master
+		3) git branch --set-upstream <branch_name> origin/<branch_name>
+				Example:
+					 git branch --set-upstream non_tracking origin/non_tracking
+
+	Fetch changes from a remote repository
+		- fetch - synchronizes origin/master with whatever is on the remote repository. Origin/master doesn't
+							automatically reflect what's on remote repository, we have to tell Git that we want it to do a sync between the two.
+
+		- git log --oneline origin/master - it doesn't go out to Github to see what the log file is there. It's 				looking at the local copy that Lynda has in a repositoryfrom the last time that she synced up, the 				last time that she did a fetch.
+		- syntax:
+				git fetch <branch>
+				git fetch origin
+				// if we have only one remote branch - origin/master we can type
+				git fetch
+		- Tips:
+				- fetch before work
+				- fetch before push
+
+	Merging in fetched changes
+		- git fetch sync up origin/master with the master branch on the remote repository. While it brought those commits down
+      into origin/master, it didn't bring them into master on our local repository. All it did was get origin/master in sync.
+      We need to do merge with master branch.
+		- origin/master is just a regular branch.
+		- it's possible to have conflicts we have to resolve
+		- command:
+				git merge origin/master
+		- when we do a merge, we are merging with origin/master, our local version. We are not going back to GitHub to see what's there.
+      So when we do a merge, we always do fetch first.
+		- fetch, then merge
+
+	GIT PULL
+		- git pull = git fetch + git merge // all in one step
+		- goes to GitHub, finds the latest, brings it down and merges into current branch
+
+
+CREATE BRANCH FROM NON-CURRENT BRANCH
+ - branch where HEAD is not the tip
+ - Command:
+ 			git branch <branch_name> <starting_point_branch>
+
+ 		Example:
+ 			git branch example_branch non_tracking_branch
+ 			git branch remote_branch origin/non_tracking_branch
+ 		Note: remote_branch will now track origin/non_tracking_branch, if remote_branch previously
+ 					was non tracking branch.
+
+ 		We can do also:
+ 			git checkout -b example_branch non_tracking_branch
+			git checkout -b remote_branch origin/non_tracking_branch
+
+		- changes in remote_branch will be push into origin/non_tracking_branch
+
+	Pushing to an updated remote branch
+		- if we can push to the remote server, because some new commits and apper in remote branch, we need to:
+				- fetch changes
+				- merge our branch(usually master) with origin/master
+				- resolve confilcts if any
+				- push changes
+
+DELETING A REMOTE BRANCH
+	- Two ways:
+			1)  git push origin :branch_name
+				  Example:
+				 		git push origin :non_tracking
+			2)  git push origin --delete <branch_name>
+				  Example:
+						git push origin --delete non_tracking
+
+ENABLING COLLABORATION

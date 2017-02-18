@@ -1,0 +1,670 @@
+  - Isomorphic friendly - can be run both on the server side and the client side
+
+Stateless Components
+	- since React .14
+	- use plain JS functions
+
+React Context
+	- if we want an entire subtree to have access to some piece of information (a color). Using context, we can pass this through the tree automatically
+	- it forces a "contract" between child and parent component. 
+		In parent component:	
+				static get childContextTypes(){
+					return {
+						store: React.PropTypes.object.isRequired
+					}
+				}
+
+		In child component:
+				static get contextTypes(){
+		      return {
+		          store: React.PropTypes.object.isRequired
+		      }
+		  	}
+
+		Example: CommentSection -> CommentList
+			//Parent
+			class CommentSection extends React.Component {
+				constructor(){
+					super();
+					this.store = new CommentStore();
+				}
+
+				static get childContextTypes(){
+					return {
+						store: React.PropTypes.object.isRequired
+					}
+				}
+
+				getChildContext(){
+					// store can be access in cild via this.context.store
+					return {
+						store: this.store
+					}
+				}
+
+				render(){
+					return(
+						<CommentList />
+					);
+				}
+			}
+
+			// Child
+			class CommentList extends React.Component {
+					static get contextTypes(){
+						  return {
+						      store: React.PropTypes.object.isRequired
+						  }
+					}
+
+					constructor(props, context) {
+						  super(props, context);
+						  this.state = { comments: this.props.comments };
+					}
+
+					componentDidMount(){
+						 this.context.store.addChangeListener(this._onChange.bind(this));
+					}
+			 
+					componentWillUnmount(){
+						 this.context.store.removeChangeListener(this._onChange.bind(this));
+					}
+			 
+					_onChange(){
+						 this.forceUpdate();
+					}
+
+					render() {
+						  return (
+						      <div>
+						          {this.context.store.comments().map((comment,i) => {
+						              return  <Comment 
+						                          key={i}
+						                          author={comment.author} 
+						                          body={comment.body} 
+						                          created_at={comment.created_at} />
+						          })}
+						      </div>
+						  );
+					}
+			}
+
+
+Using forceUpdate() in ReactJS ES6
+	Two ways:
+	1) add bind(this) to methods that calls method that calls forceUpdate()
+		 Example:
+			export default class CommentList extends React.Component {
+					static get propTypes(){
+						  return {
+						      comments: PropTypes.array, 
+						  }
+					}
+
+					constructor(props, context) {
+						  super(props, context);
+						  this.state = { comments: this.props.comments };
+					}
+
+					componentDidMount(){
+						 this.props.store.addChangeListener(this._onChange.bind(this));
+					}
+			 
+					componentWillUnmount(){
+						 this.props.store.removeChangeListener(this._onChange.bind(this));
+					}
+			 
+					_onChange(){
+						 this.forceUpdate();
+					}
+
+					render() {
+						  return (...);
+					}
+			}
+
+	2) add bind(this) to method that calls forceUpdate() directly
+		Example:
+		export default class CommentList extends React.Component {
+				static get propTypes(){
+				    return {
+				        comments: PropTypes.array, 
+				    }
+				}
+
+				constructor(props, context) {
+				    super(props, context);
+				    this.state = { comments: this.props.comments };
+				    this._onChange = this._onChange.bind(this);
+				}
+
+				componentDidMount(){
+				   this.props.store.addChangeListener(this._onChange);
+				}
+		 
+				componentWillUnmount(){
+				   this.props.store.removeChangeListener(this._onChange);
+				}
+		 
+				_onChange(){
+				   this.forceUpdate();
+				}
+
+				render() {
+				    return (...);
+				}
+		}
+
+
+REACT INPUT
+	- we must add onChange={this.something} to the input
+		Example:
+			onInputChange(event){
+				console.log(event);
+			}
+
+			render(){
+				return (
+					<div>
+						<form>
+							<div className="form-group">
+								<label>Author:</label>
+								<input  type="text" 
+										name="author" 
+										className="form-control" 
+										value={this.state.author} 
+										onChange={this.onInputChange}/>
+							</div>
+							<div className="form-group">
+								<label>Comment:</label>
+								<textarea name="body" 
+											className="form-control" 
+											value={this.state.body}/>
+							</div>
+
+							<button type="submit" className="btn btn-primary">Submit</button>
+						</form>
+					</div>
+				);
+			}
+
+	Attributes
+		- When you want to add custom attribute, you need to use data- prefix. In example below we added data-myattribute:
+				<p data-myattribute = "somevalue">This is the content!!!</p>
+
+	JavaScript Expressions
+		- JavaScript expressions can be used inside of JSX. You just need to wrap it with curly brackets {}. 
+			Example:
+				<p>1 + 2 = {1+3}</p>
+		- We can not use if else statements inside JSX but you can use conditional (ternary) expressions instead. 
+			Example:
+					class App extends React.Component {
+						render(){
+							var i = 1;
+							return (
+								<h2>{ i == 1 ? 'One' : 'Zero' }</h2>
+							);
+						}
+					}
+
+	Styling
+		Two ways:
+			1. way
+					var myStyle = {
+				     fontSize: 100,
+				     color: '#FF0000'
+				  }
+
+				  return (
+				     <div>
+				        <h1 style = {myStyle}>Header</h1>
+				     </div>
+				  );
+
+			2. way
+					return (
+				     <div>
+								<p style = {{ color: '#FF0000', fontSize: 30 }}>1 + 2 = {1+3}</p>
+							</div>
+					);
+
+	Default Props
+		Two ways:
+			1) way
+						class Header extends React.Component {
+								...
+								static get defaultProps() {
+									return {
+										header: "Default Props Header"
+									}
+								}
+								...
+						}
+
+			2) way
+						class Header extends React.Component {
+							render(){
+								return(){
+									...
+								}
+							}		
+						}
+					
+
+						Header.defaultProps = {
+							header: "Default Props Header"
+						}
+
+
+Props - properties, like HTML attributes. Used to pass data to child components. They are immutable, they are own by the parent.
+ 	this.props.username
+
+State - holds mutable state. Use state only on top-level component. Pass data down to child compkents via props.
+ 	this.state.username
+
+getInitialState - set initial state of the component. Tipicaly done on top-level component, also known as controller view.
+
+getDefaultProps - set default values for props. Child component should use values declared in this function if 
+									parent component doesn't declare the value.
+
+
+The Component Lifecycle methods:
+	- https://facebook.github.io/react/docs/react-component.html
+	
+	Mounting
+		constructor()
+		componentWillMount()
+		render()
+		componentDidMount()
+		
+	Updating		
+		componentWillReceiveProps()
+		shouldComponentUpdate()
+		componentWillUpdate()
+		render()
+		componentDidUpdate()
+		
+	Unmounting
+		componentWillUnmount()
+
+	componentWillMount
+		WHEN - before initial render, both client and server
+		WHY - good spot to set components initial state
+
+	componentDidMount
+		WHEN - after render. By the time this function is called, components DOM exist.
+		WHY - access DOM, integrate with frameworks, set timers, AJAX requests
+
+	componentWillReceiveProps - invoked before a mounted component receives new props
+		WHEN - when receiving new props, or in other words when properties are changed. Not called on initial render.
+		WHY - set state before a render.
+
+	shouldComponentUpdate
+		WHEN - runs before render when new props or state are being reveived by component. Not called on initial render.
+		WHY - for performance. Return false to void unnecessary re-renders. Component doesn't need to re-render because data change doesn't effect the DOM. When this is case, we return FLASe to avoid unnecessary re-render call.
+
+	componentWillUpdate
+		WHEN - runs immediately before rendering when new props or state are being received. Not called on initial render.
+		WHY - prepare for an update. We can't call setState in this function.
+
+	componentDidUpdate
+		WHEN - runs after compoenent's updates are flushed to the DOM. Not called for the initial render. 
+		WHY - work with the DOM after component is being updated and re-rendered in DOM
+
+	componentWillUnmount
+		WHEN - runs immediately before component is removed from the DOM
+		WHY - cleanup
+
+Keys For Dynamic Children
+	When we creating multiple childs dynamically, we need to provide a key for each child component
+	Example:
+		<tr key={author.id} >
+
+
+Controller Views
+	- top level component on page
+	- controls data flows for all its child components, by setting props on child components
+	- interacts with stores
+
+	Example:
+		var Avatar = React.createClass({
+			render: function(){
+				return (
+					<div>
+						<ProfilePic username={this.props.username} />
+						<ProfileLink username={this.props.username} />
+					</div>
+				);
+			}
+		});
+
+		var ProfilePic = React.createClass({
+			render: function(){
+				return (
+					<img src={'https://graph.facebook.com/' + this.props.username + '/picture'}
+				);
+			}
+		});
+
+		var ProfileLink = React.createClass({
+			render: function(){
+				return (
+					<a href={'https://www.facebook.com/' + this.props.username}>
+						{this.props.username}
+					</a>
+				);
+			}
+		});
+
+		React.render(
+			<Avatar username="pwh" />, document.getElementById('example')
+		);
+
+Prop Validation
+	propTypes: {
+		authors: React.PropTypes.object.isRequired,
+		onSave: React.PropTypes.func.isRequired,
+		errors: React.PropTypes.object,
+		...
+	}
+
+	- every prop typethat isn't required should have a corresponding field in getDefaultProps
+
+Mixins
+	- for sharing code between multiple components
+	- declaring them by setting the mixins property in React component and populating that property with the array of mixins
+	Example:
+		var ManageAuthorPage = React.createClass({
+			mixins:[
+				Router.Navigation,
+				Router.State,
+			],
+
+			...
+		});
+
+REACT FORMS
+	- Handle changes in form elements:
+		- add function for handle changes in top level component(setAuthorState)
+		- add onChange:
+			<AuthorForm author={this.state.author} onChange={this.setAuthorState} />
+		- add onChange in child component:
+			<div className="form-group">
+				<label htmlFor="firstName">First Name</label>
+				<input type="text"
+					name="firstName"
+					className="form-control"
+					placeholder="First Name"
+					ref="firstName"
+					onChange={this.props.onChange}
+					value={this.props.author.firstName}/>
+				<br />
+			</div>
+
+Input Element
+	- event.target.value
+
+SyntheticEvent
+	- https://facebook.github.io/react/docs/events.html
+	- As of v0.14, returning false from an event handler will no longer stop event propagation. Instead, e.stopPropagation() or e.preventDefault() 
+		should be triggered manually, as appropriate.
+
+React State
+	- state is plain JS object that is used to record in React to use in events.Each class-based React component has his one state object.
+		Whenever a compo nent state is changed the component immediately re-renders(function render() is re-run) and also forces his children to 
+		re-renders as well.
+	- before we use a state inside of a component we need to initiliaze a state object. To initialize a state we set a property state to a plain JS object
+		inside of a classes constructor method.
+		Example:
+			constructor(props){
+				super(props);
+				this.state = { term: '' };
+			}
+	- each instance of classed based component has his own copy of the state
+	- functional(stateless) components doesn't have a state, only a class component
+	- only inside of constructor we can change a state like this:
+			this.state = { term: '' };
+		Everywhere else, instead of using "this.state", we use method this.setState()
+	- we can use "this.state" to reference state
+		Example:
+			return (
+				<div>	
+					<input onChange={event => this.setState({ term: event.target.value }) } />
+					Value of the input: {this.state.term}
+				</div>
+			);
+
+React Forms
+	- https://facebook.github.io/react/docs/forms.html
+
+Controlled Component
+		- controlled component has its value set by state. So its value is changes whenever the state changes
+		- when we tell <input /> that its value is provided  by "this.state.something", we turned it to controlled component
+			Example:
+					<input
+						value={this.state.term}
+						onChange={ event => this.setState(event.target.value) }
+					/>
+
+					// this.setState() - causes component to re-render and when the component is re-rendered the value of input is set to new state value
+					// real logic behind this is - when user type in something, he didn't actually change input value, they only triggered the event. Because
+																				 we updated an state with that event, that causes the value of input to change.
+
+Binding "this" context to onChange method	
+	- two ways:
+			1) 
+					<input
+						value={this.state.username}
+						onChange={this.onChange.bind(this)}
+						type="text"
+						name="username"
+						className="form-control"
+					/>
+					
+			2)	constructor(){
+						...
+						this.onChange = this.onChange.bind(this);
+					}
+
+Updating state in onChange method:
+	- two ways:
+			1) not flexible, because for each form element we have to create a separate method
+					onChange(event){
+						this.setState({ username: event.target.value });
+					}
+					
+			2) flexible way, we force every form element to have "name" property
+					onChange(event){
+						this.setState({ [event.target.name]: event.target.value });
+					}
+
+					<input
+						value={this.state.username}
+						onChange={this.onChange.bind(this)}
+						type="text"
+						name="username" // we force every form element to have this property
+						className="form-control"
+					/>
+
+Sending props	
+	- when sending props from a parent component to a child component it will appear as a props in constructor of a child compoenent
+		Example:
+			//parent compoenent
+			<VideoList videos={this.state.videos} />
+
+			//child component
+			const VideoList = (props) => {
+				const videos = props.videos;
+				return (
+					...
+				);
+			};
+
+	Functional Component props vs Class Component props
+		- in functional component we used props with just: "props"; in class component we use "this.props"
+	
+
+Two types of components:
+	- presentational compoenents - "dummy" components, they don't have state
+	- containers component - they have state
+
+
+ReactDOM
+	- findDOMNode - If this component has been mounted into the DOM, this returns the corresponding native browser DOM element
+
+REACT methods in ES6:
+	Resources:
+		- http://cheng.logdown.com/posts/2015/09/29/converting-es5-react-to-es6	
+		- http://www.tamas.io/react-with-es6/
+	*Default Props - 2 ways
+		1) way
+			class Greeter extends React.Component {
+				constructor(props){
+					super(props);
+				}
+
+				render(){
+					return(
+						<div>
+							<h1>Hello {this.props.name}</h1>
+							<p>This is a Form</p>
+						</div>
+					);
+				}
+			};
+
+			Greeter.defaultProps = {
+				name: "Default name"
+			};
+		2) way
+			class Video extends React.Component {
+			  static defaultProps = {
+				autoPlay: false,
+				maxLoops: 10,
+			  }
+			  static propTypes = {
+				autoPlay: React.PropTypes.bool.isRequired,
+				maxLoops: React.PropTypes.number.isRequired,
+				posterFrameSrc: React.PropTypes.string.isRequired,
+				videoSrc: React.PropTypes.string.isRequired,
+			  }
+			  state = {
+				loopsRemaining: this.props.maxLoops,
+			  }
+			}
+		
+	*propTypes - 2 ways
+		1) way
+			export default class Header extends Component {
+				render() {
+					return (
+						<header>
+							<h1>This is the header section</h1>
+						</header>
+					);
+				}
+			}
+
+			//Note that the propTypes has to be defined outside of the class definition
+
+			Header.propTypes = {
+				title: PropTypes.string.isRequired
+			}
+
+		2) way
+			export default class Header extends Component {
+				static propTypes = {
+					title: PropTypes.string.isRequired
+				}
+			
+				render() {
+					return (
+						<header>
+							<h1>This is the header section</h1>
+						</header>
+					);
+				}
+			}
+			
+	*getInitialState
+		- ES5
+			var Header = React.createClass({
+				getInitialState: function() {
+					return {
+						title: this.props.title
+					};
+				},
+			});
+		- ES6
+			export default class Header extends Component {
+				constructor(props) {
+					super(props);
+					this.state = {
+						title: props.title
+					};
+				}
+			}
+	* componentDidMount - same
+		componentDidMount(){
+			...
+		}
+	* componentWillMount - same 	
+		componentWillMount(){
+	
+		}
+			
+Dynamic Rendering in JSX
+	- pattern
+			render(){
+				let renderSomething = () => {
+					if(something...){
+						return <FirstRender />
+					} else {
+						return <SecondRender />
+					}
+				};
+
+				return (
+						<div>
+							{renderSomething()}
+						</div>
+				);
+			}
+	
+	
+Event Handlers	
+	- accepts event
+	- if we immediatelly execute function on onClick handler, that function must return a function that will handle a click event
+		(currying pattern)
+		Example:
+			handleClick(par){
+					console.log(apr)
+					return (event) => {
+						console.log(e.target);
+					}
+			}
+			
+			render(){
+				return(
+					<button onClick={this.handleClick("Hello")}>Click me</button>
+				);
+			}
+	
+Higher Order Component
+	- component that adds some additional functionality or data
+	- Component + Higher Order Component = Enhanced or Composed Component 
+	
+- when building app with data, start with some static data. Example:
+		class Todo extends React.Component {
+			constructor(props) {
+				super(props);
+				this.state = {
+					todos: [
+						{ id: 1, text: "Go to store"},
+						{ id: 2, text: "Go to sleep"}
+						{ id: 3, text: "Drink a coofee"},
+					]
+				};
+			}
+			...
+		}

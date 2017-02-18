@@ -1,0 +1,713 @@
+Resources:
+	- https://www.youtube.com/playlist?list=PL0eyrZgxdwhwBToawjm9faF1ixePexft-
+	- https://www.youtube.com/playlist?list=PL442FA2C127377F07
+	- https://github.com/domnikl/DesignPatternsPHP
+
+- Static PHP analyzer: https://github.com/etsy/phan
+- php -l <file.php> - syntax check
+
+Server:
+	php -S localhost:8000 -t .
+
+	URL: localhost:8000/test.php
+
+Composer:
+	Composer (version 1.3.0) successfully installed to: /usr/local/bin/composer
+	Use it: php /usr/local/bin/composer
+
+	- fix issue with "cannot create ...":
+			sudo chown -R $USER $HOME/.composer
+
+Variables:
+	- variables are "loosely-typed". We are not required to tell PHP tyhe type of the data to be stored.
+	- all variables begins with $, the variable name after tha $ must begin with a letter or '_'
+	- there are three variable scopes: local, global and static
+	- variables with local scope can only be accessed within the function in which the variable was created
+	- variables with global scope are created outside of a function making them accessible by any function
+
+Type Declarations
+ - in PHP7 added declarations support for: int, float, bool, string
+		Example:
+			function calcTotal(float $price, float $shipping): float{
+				return $price + $shipping;
+			}
+
+			$calcTotal = calcTotal('1.23', 4.56);
+
+Looping in PHP
+	- three looping constructs:
+			while(<some conditions is TRUE>)
+			for(<starting value>, <ending value>, <increment>)
+			foreach() - foreach element in collection
+
+
+ARRAYS
+	- three types of arrays:
+				1.indexed arrays(numerically indexed)
+						$arr = array('one', 'two',  'three')
+						echo $arr[2] //=> 'three'
+						// numder of elements
+						count($arr) //3
+						// content of array - print_r
+						print_r($arr)
+				2.associative arrays - use keys to store values
+						$arr = array('one' => 'First', 'two' => 'Second', 'three' => 'Third')
+						$arr['two'] // 'Second'
+						//list all elements in array
+						foreach($arr as $el)
+						{
+							echo $el;
+						}
+				3.multidimensional arrays(array of arrays)
+
+EXTERNAL:
+	- include "<filename>" - an automatic copy-paste command that makes the contents of any file available in the
+													including file at runtime
+	- include_once "<filename>" - same as include except that it checks to ensure that the file has not already
+															been included
+	- require "<filename>" - same as include except that if the file canot be included a fatal error is generated
+	- require_once "<filename>" - same as include_once except that if the file cannot be included a fatal error is
+																generated
+
+RUNTIME ERROR HANDLING
+	- referred as exceptions
+	- try/catch mechanism
+	- try - encapsulates a code block protecting its execution. If a runtime error occur eithin try block then PHP
+					saves the current state of the program and transfers execution to a nadler for a error.
+	- uncaught runtime error will result in a fatal error terminating the execution of the application.
+
+FILE RESOURCES
+	- fopen(<filename>, <mode>)
+			- mode:
+					"r"- reading(from begining of the file),
+					"r+" - reading(from begining of the file) and writing
+					"w" - writing only, over-write file content, if the file doesn't exists, it is created
+					"w+" - reading and writing(from begining of the file),over-write file content, if the file doesn't exists, it 								 is created
+					"a" - reading only, write(append) from the end of the file, if the file doesn't exists, it is created
+					"a+" - reading and writing
+	- filesize(<file path>) - returns file size in bytes
+	- fread(<file handle>, <bytes to read>) - read the file's content
+	- fgetcsv(<file handler>) - read a comma separated file into an array
+	- fclose(<file handle>)it is not required to programmatically close and open file, however, it is best practice
+	- fgets(<file handle>, length) - reads a single line from the file. length - optional limit in bytes
+	- fgetss(<file handle>) - reads a single line from the file and strips HTML and PHP tags from the data
+	- feof(<file handle>) - detect the end of file
+			while(!foef($file))
+			{
+				//
+			}
+	- fseek(<file handle>, <bytes>) - change position in the file
+			fseek($file, 0) - moves back to the begining of the file
+
+Writing to a file:
+	- before writing to a file it must be opened
+	- fopen(<filename>, <mode>)
+	- fwrite(<file handle>, <data>)
+	- fclose(<file handle>) - not required, best practice
+
+Reading a Configuration File
+	- two generally used formats for configuration:
+			1. configuration values are listed within a text file as key-value pairs
+				PHP function for reading key-value pairs is: parse_ini_file(<filename>)
+				parse_ini_file() - returns an associative array of key-value pairs.
+				Expected format of the file:
+					[debug]
+					debug_on=1
+					[directory]
+					root=c:\my_app
+
+			2. XML files
+					simplexml_load_file(<filename>) - returns a collection of objects containing XML data
+
+Form Processing
+	- $_GET
+	- $_POST
+			<input type='text' name='username' id='username' maxlength="50" />
+			$username = $_POST['username']
+
+Superglobals
+	$_SERVER - information about the web server and HTTP connection
+	$_COOKIE - information about cokkie data sent to the server
+	$_REQUEST - combination of information fomr $_COOKIE, $_POST and $_GET
+	$_SESSION - information we stored about user
+	$_ENV - information about server environment
+
+Cookies
+	- cookies allow the application to store small amounts of information on the user's computer
+	- writing cookies: setcookie(<value name>, <value>, <expiration>)
+	- retrieve data: $_COOKIE['<value name>']
+
+Session
+	- session data is not stored on the serve or user computer, temporary data will dew deleted when the user leaves website
+	- begin a session: start_session()
+	- store session data: $_SESSION[<value name>] = <value>
+	- terminate session: session_destroy()
+
+MySQL
+	- $DB = mysql_connect(<server>, <username>, <password>)
+	- mysql_query(<query>, <database connection>)
+
+Object-Oriented Development
+	- Instantiate an object
+			$user = new User(<constructor arguments>);
+	- Overriding methods of the parent class allows the child to modify the inherited behaviour
+	- To access the parent version of the method in the child class use the '::' operator with the parent class name
+		or the keyword 'parent'. Example:
+				MyBaseClass::method()
+				parent::method()
+
+Static variables;
+	- lives through out all calls of this function
+	  Example:
+			function getNextUserID()
+			{
+				static userId = 1;
+				return userId++;
+			}
+
+Security
+	- always sanitize user input
+	- PHP functions to sanitize:
+			- htmlspecialchars(<string>)
+			- filter_var(<input_value>, <Sanitize directive>)
+				Syntax:
+					mixed filter_var ( mixed $variable [, int $filter = FILTER_DEFAULT [, mixed $options ]] )
+			- filter_input(<input source>, <variable>, <Sanitize Directive>)
+	- PHP sanitize directives:
+			- FILTER_SANITIZE_STRING
+			- FILTER_SANITIZE_NUMBER_INT
+			- FILTER_SANITIZE_EMAIL
+			- FILTER_SANITIZE_URL
+			- FILTER_VALIDATE_EMAIL
+			- ...
+
+	- Types of filters(http://php.net/manual/en/filter.filters.php):
+			- validate filters
+			- sanitize filters
+			- other filters
+			- filter flags
+
+	- Example:
+			filter_var('some@gmail.com', FILTER_SANITIZE_EMAIL);
+			filter_var('some@gmail.com', FILTER_VALIDATE_EMAIL);
+
+Define Named Constant
+	- bool define(string $name, mixed $value [, $case_insensitive=false])
+	- Examples:
+			define('alpha', 1);
+
+PHP Built-in Constants
+	- Magic constants:
+			__LINE__ - contains current line number
+			__FILE__ - contains path and filename
+			__FUNCTION__ - contains the function name currently executing
+			__CLASS___ - contains the class name
+			__METHOD__ - contains the name of the class function currently executing
+			...
+
+Interface
+	- interface defines a contract for implementation.
+	- has no functionality, defines a standard API
+	- class implements interface
+	Example:
+		interface Printable
+		{
+			public function print();
+			public function preview();
+		}
+
+		class Movie implements Printable
+		{
+			public function print()
+			{
+				//code...
+			}
+
+			public function preview()
+			{
+				//code...
+			}
+		}
+
+SPL(standard PHP library) interfaces:
+		- Countable - allows the implementer to define functionality when calling count($object)
+			Example:
+				class MovieCatalog implements Countable
+				{
+					private $movies = [];
+					public function count(){ return count($this->movies); }
+					...
+				}
+		- ArrayAccess - allows object to behave as an array, defines the interface for array behavior
+			Example:
+				class MovieCatalogue implements Countable, ArrayAccess
+				{
+					private $movies = [];
+					//Countable interface implementation
+					public function count(){ //... }
+
+					//ArrayAccess interface implementation
+					public function offsetExists($index){ return($this->movies[$index]); }
+					public function offsetGet($index){ //... }
+					public function offsetSet($index, $value){ //... }
+					public function offsetUnset($index){ //... }
+					...
+				}
+
+		- Iterator - defines how to traverse an object when looping, an object that contains a collection of data
+								 can define how the data is accessed. Use the Iterator interface to create our own iterator type,
+								 defines how objects behave within a foreach loop.
+								interace Iterator
+								{
+									public function key();
+									public function current();
+									public function next();
+									public function valid();
+									public function rewind();
+								}
+
+		 - IteratorAggregate - creates an external iterator for the class
+			 Example:
+					class moviCatalogue implements IteratorCatalogue
+					{
+						private $movies = [];
+						public function getIterator(){ return new ArrayIterator($this->movies); }
+						...
+					}
+		- Data Structures
+				- Dictionary: Fixed Arrays
+						PHP native array is not fixed size which may impact performance.
+						SPL fixed array data structure is an object:
+							- predefined size
+							- size can be adjusted at runtime: setSize()
+							- indexed, not associative
+							- random access
+							- implements following interfaces: Iterator, ArrayAccess, Countable
+				- Linear: Double-linked lists, Stacks, Queues
+				- Trees: Heaps
+
+Scopes
+	- local, global, static
+	- a variable declared outside a function has a GLOBAL scope and can only be
+		accessed outside a function
+	- A variable declared within a function has a LOCAL SCOPE and can only be accessed within that function
+	- global keyword
+			- used to access a global variable from within a function
+			Example:
+			<?php
+				$x = 5;
+				$y = 10;
+
+				function myTest() {
+					global $x, $y;
+					$y = $x + $y;
+				}
+	- PHP also stores all global variables in an array called $GLOBALS[index]. The
+		index holds variable name.
+		Example:
+			$x = 5;
+			$y = 10;
+
+			function myTest() {
+				$GLOBALS['y'] = $GLOBALS['x'] + $GLOBALS['y'];
+			}
+	- static keyword
+			- when a function is completed/executed, all of its variables are deleted.
+				However, sometimes we want a local variable NOT to be deleted. We need it for a further job.
+				To do this, use the static keyword when you first declare the variable.
+				Example:
+				function myTest() {
+					static $x = 0;
+					echo $x;
+					$x++;
+				}
+
+				myTest(); // 0
+				myTest(); // 1
+
+PHP Data types:
+	String
+	Integer
+	Float (floating point numbers - also called double) // Ex: $x = 10.365;
+	Boolean // Ex: $x = true; $y = false;
+	Array
+	Object
+	NULL // Ex: $x = null;
+	Resource
+
+PHP Strings
+	- length of the string - strlen()
+		 Ex: echo strlen("Hello world!"); // outputs 12
+	- ounts the number of words in a string
+		 Ex: echo str_word_count("Hello world!"); // outputs 2
+	- strpos() function searches for a specific text within a string.
+		 Ex: echo strpos("Hello world!", "world"); // outputs 6
+	- str_replace() function replaces some characters with some other characters in a string
+		Ex: echo str_replace("world", "Dolly", "Hello world!"); // outputs Hello Dolly!
+
+PHP Constants
+	- The value cannot be changed during the script.
+	- A valid constant name starts with a letter or underscore (no $ sign before the constant name).
+	- Unlike variables, constants are automatically global across the entire script.
+	- create constants:
+			define(name, value, case-insensitive)
+
+			//case-insensitive: Specifies whether the constant name should be case-insensitive. Default is false
+		Example:
+			define("GREETING", "Welcome to W3Schools.com!");
+			echo GREETING;
+
+		Example:
+			define("GREETING", "Welcome to W3Schools.com!", true); //case-insensitive
+			echo greeting;
+
+IF-ELSE
+	- if statement
+	- if..else statement
+	- if..elsif..else statement
+
+Switch
+	- Example:
+		$favcolor = "red";
+
+		switch ($favcolor) {
+			case "red":
+					echo "Your favorite color is red!";
+					break;
+			case "blue":
+					echo "Your favorite color is blue!";
+					break;
+			case "green":
+					echo "Your favorite color is green!";
+					break;
+			default:
+					echo "Your favorite color is neither red, blue, nor green!";
+		}
+
+PHP Loops
+	- while - loops through a block of code as long as the specified condition is true
+	- do...while - loops through a block of code once, and then repeats the loop as long as the specified condition is true
+	- for - loops through a block of code a specified number of times
+	- foreach - loops through a block of code for each element in an array
+
+		Example - while:
+			$x = 1;
+
+			while($x <= 5) {
+				echo "The number is: $x <br>";
+				$x++;
+			}
+
+		Example - do..while
+			$x = 1;
+
+			do {
+				echo "The number is: $x <br>";
+				$x++;
+			} while ($x <= 5);
+
+		Example - for:
+			for ($x = 0; $x <= 10; $x++) {
+				echo "The number is: $x <br>";
+			}
+
+		Example - foreach
+			$colors = array("red", "green", "blue", "yellow");
+
+			foreach ($colors as $value) {
+				echo "$value <br>";
+			}
+
+PHP argument default value
+	Example:
+		function setHeight($minheight = 50) {
+			echo "The height is : $minheight <br>";
+		}
+
+		setHeight(350);
+		setHeight(); // will use the default value of 50
+
+Array
+	- In PHP, there are three types of arrays:
+			Indexed arrays - Arrays with a numeric index
+			Associative arrays - Arrays with named keys
+			Multidimensional arrays - Arrays containing one or more arrays
+	- Indexed arrays
+	 		$cars = array("Volvo", "BMW", "Toyota");
+			echo "I like " . $cars[0] . ", " . $cars[1] . " and " . $cars[2] . ".";
+			$cars[0] = "Volvo"; // assign value mannually
+	- Associative arrays
+			$age = array("Peter"=>"35", "Ben"=>"37", "Joe"=>"43");
+			// or
+			$age['Peter'] = "35";
+			$age['Ben'] = "37";
+			$age['Joe'] = "43";
+
+			//Loop through associative array
+			foreach($age as $x => $x_value) {
+    		echo "Key=" . $x . ", Value=" . $x_value;
+    		echo "<br>";
+			}
+
+	- Array methods:
+			count() - return the length
+	- Array sort methods
+			sort() - sort arrays in ascending order
+			rsort() - sort arrays in descending order
+			asort() - sort associative arrays in ascending order, according to the value
+			ksort() - sort associative arrays in ascending order, according to the key
+			arsort() - sort associative arrays in descending order, according to the value
+			krsort() - sort associative arrays in descending order, according to the key
+
+PHP Global Variables - Superglobals
+	- Several predefined variables in PHP are "superglobals", which means that they are always accessible, regardless of scope -
+		and you can access them from any function, class or file without having to do anything special.
+	- The PHP superglobal variables are:
+			$GLOBALS
+			$_SERVER
+			$_REQUEST
+			$_POST
+			$_GET
+			$_FILES
+			$_ENV
+			$_COOKIE
+			$_SESSION
+
+	$GLOBALS
+			- $GLOBALS is a PHP super global variable which is used to access global variables from anywhere in the PHP script
+				(also from within functions or methods).
+				PHP stores all global variables in an array called $GLOBALS[index]. The index holds the name of the variable.
+				Example:
+					$x = 75;
+					$y = 25;
+
+					function addition() {
+						$GLOBALS['z'] = $GLOBALS['x'] + $GLOBALS['y'];
+					}
+
+	$_SERVER
+		- $_SERVER is a PHP super global variable which holds information about headers, paths, and script locations.
+			Example:
+				$_SERVER['PHP_SELF'], $_SERVER['SERVER_NAME'],...
+
+	$_REQUEST
+		- $_REQUEST is used to collect data after submitting an HTML form.
+			Example:
+			<form method="post" action="<?php echo $_SERVER['PHP_SELF'];?>">
+				Name: <input type="text" name="fname">
+				<input type="submit">
+			</form>
+
+			<?php
+			if ($_SERVER["REQUEST_METHOD"] == "POST") {
+				// collect value of input field
+				$name = $_REQUEST['fname'];
+				if (empty($name)) {
+						echo "Name is empty";
+				} else {
+						echo $name;
+				}
+			}
+
+	 $_POST
+	 		- $_POST is widely used to collect form data after submitting an
+				HTML form with method="post". $_POST is also widely used to pass variables.
+				Example:
+				<form method="post" action="<?php echo $_SERVER['PHP_SELF'];?>">
+					Name: <input type="text" name="fname">
+					<input type="submit">
+					</form>
+
+					<?php
+					if ($_SERVER["REQUEST_METHOD"] == "POST") {
+						// collect value of input field
+						$name = $_POST['fname'];
+						if (empty($name)) {
+								echo "Name is empty";
+						} else {
+								echo $name;
+						}
+				}
+
+		$_GET
+			- $_GET can also be used to collect form data after submitting an HTML form with method="get".
+			 	$_GET can also collect data sent in the URL
+				Example:
+						<a href="test_get.php?subject=PHP&web=W3schools.com">Test $GET</a>
+						<?php
+							echo "Study " . $_GET['subject'] . " at " . $_GET['web'];
+						?>
+
+GET vs. POST
+	- Both GET and POST create an array (e.g. array( key => value, key2 => value2, key3 => value3, ...)). This array holds key/value
+	  pairs, where keys are the names of the form controls and values are the input data from the user.
+	- Both GET and POST are treated as $_GET and $_POST. These are superglobals, which means that they are always accessible,
+	  regardless of scope - and you can access them from any function, class or file without having to do anything special.
+	- $_GET is an array of variables passed to the current script via the URL parameters.
+	- $_POST is an array of variables passed to the current script via the HTTP POST method.
+	- Note: GET should NEVER be used for sending passwords or other sensitive information!
+	- Information sent from a form with the POST method is invisible to others (all names/values are embedded within the body of the
+		HTTP request) and has no limits on the amount of information to send.
+
+FORMS
+	- The $_SERVER["PHP_SELF"] is a super global variable that returns the filename of the currently executing script.
+	- The htmlspecialchars() function converts special characters to HTML entities. This means that it will replace HTML characters
+	  like < and > with &lt; and &gt;. This prevents attackers from exploiting the code by injecting HTML or Javascript code
+		(Cross-site Scripting attacks) in forms.
+	- Assume we have the following form in a page named "test_form.php":
+			<form method="post" action="<?php echo $_SERVER["PHP_SELF"];?>">
+		If a user enters the normal URL in the address bar like "http://www.example.com/test_form.php",the above code will be translated to:
+ 				<form method="post" action="test_form.php">
+		However, consider that a user enters the following URL in the address bar:
+		 	http://www.example.com/test_form.php/%22%3E%3Cscript%3Ealert('hacked')%3C/script%3E
+	  In this case, the above code will be translated to:
+		 	<form method="post" action="test_form.php/"><script>alert('hacked')</script>
+
+		Avoid $_SERVER['PHP_SELF'] exploits:
+			<form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
+		This converts to:
+			<form method="post" action="test_form.php/&quot;&gt;&lt;script&gt;alert('hacked')&lt;/script&gt;">
+	- Validate for data:
+			1) htmlspecialchars()
+			2) Strip unnecessary characters (extra space, tab, newline) from the user input data (with the PHP trim() function)
+			3) Remove backslashes (\) from the user input data (with the PHP stripslashes() function)
+
+		Example:
+		// define variables and set to empty values
+		$name = $email = $gender = $comment = $website = "";
+
+		if ($_SERVER["REQUEST_METHOD"] == "POST") {
+			$name = test_input($_POST["name"]);
+			$email = test_input($_POST["email"]);
+			$website = test_input($_POST["website"]);
+			$comment = test_input($_POST["comment"]);
+			$gender = test_input($_POST["gender"]);
+		}
+
+		function test_input($data) {
+			$data = trim($data);
+			$data = stripslashes($data);
+			$data = htmlspecialchars($data);
+			return $data;
+		}
+
+	- form required:
+			if ($_SERVER["REQUEST_METHOD"] == "POST") {
+				if (empty($_POST["name"])) {
+					$nameErr = "Name is required";
+				} else {
+					$name = test_input($_POST["name"]);
+				}
+				...
+			}
+
+		display errors:
+			Name: <input type="text" name="name">
+			<span class="error">* <?php echo $nameErr;?></span>
+
+PHP include and require Statements
+	- The include and require statements are identical, except upon failure:
+			require will produce a fatal error (E_COMPILE_ERROR) and stop the script
+			include will only produce a warning (E_WARNING) and the script will continue
+	- So, if you want the execution to go on and show users the output, even if the include file is missing, use the include statement.
+		Otherwise, in case of FrameWork, CMS, or a complex PHP application coding, always use the require statement to include a key file
+		to the flow of execution. This will help avoid compromising your application's security and integrity, just in-case one key file
+		is accidentally missing.
+	- Syntax
+			include 'filename';
+			require 'filename';
+	- Example:
+			<div class="menu">
+				<?php include 'menu.php';?>
+			</div>
+
+
+
+=================================PHP 7=========================================================================
+
+NULL coalesce - operator ??:
+	Example:
+		if(isset($_GET['name'])){
+				$name = $_GET['name'];
+		} else {
+				$name = '(unknown)';
+		}
+
+		echo "<h3>" . htmlspecialchars($name) . "</h3>";
+
+		// with operator ??
+		$name = $_GET['name'] ?? '(unknown)';
+		echo "<h3>" . htmlspecialchars($name) . "</h3>";
+
+Spaceship operator - <=> :
+	- compare two values(expression), depending on what expression is larger or equal we get different result
+	- if 1. operand < 2.operand => -1
+	- if 1. operand > 2.operand => +1
+	- if 1. operand = 2.operand => 0
+
+Splat operator
+	- array func_get_args ( void ) - Gets an array of the function's argument list.
+	- int func_num_args ( void ) - Gets the number of arguments passed to the function.
+	- splat operator: function addItems(...$items){ var_dump($items); }
+	- Examples:
+			//OLD WAY
+			function oldAddItemsToCart()
+			{
+				$argumentsCount = func_num_args();
+				var_dump($argumentsCount);
+				echo "<br>";
+
+				$arguments = func_get_args();
+				var_dump($arguments);
+				echo "<br>";
+			}
+
+			oldAddItemsToCart('fist', 'second');
+
+			//Splat operator
+			function addItemsToCart(...$items)
+			{
+				var_dump($items);
+				echo "<br>";
+			}
+
+			addItemsToCart('First', 'Second', 'Third');
+
+			// Splat operator in different way
+			function addItems($item1, $item2, $item3)
+			{
+				var_dump(func_get_args());
+				echo "<br>";
+			}
+
+			addItems(...['A', 'B', 'C']);
+
+Anonymous Classes
+	- class without name
+	- Example:
+			$analytics = new class {
+				public function __toString(){
+					return "Anonymous analytics!";
+				}
+
+				public function testAction(){
+					return "Test Action";
+				}
+			};
+
+			echo $analytics;
+			echo "<br>";
+			echo $analytics->testAction();
+
+Whitelisting Unserialization
+	Example:
+		$serialized_data = serialize($data);
+		$unserialized_data = unserialize($serialized_data,
+									["allowed_classes" => ["UserInfo", "ShoppingCart"]]);
+
+session_start() initialization options
+	- session_start() - starts session in PHP
+	- when calling session_start() we can provide an array of session settings we like to use, so we can overide some of
+		the php.ini session settings.
+		Example:
+			session_start(['cookie_lifetime' => 3600, 'read_and_close' => true]);

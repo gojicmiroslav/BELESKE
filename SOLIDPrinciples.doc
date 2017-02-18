@@ -1,0 +1,45 @@
+SOLID principles
+
+Single Responsibility Principle
+	- class(object, method or any entity) should have one and only the one reason to change
+	- class should do only one thing or have only one purpose, and all class behaviour should be aligned with this one purpose
+	- methods to check is class violates this principle:
+			- only one user(class) should use this class, so class has only one reason to change - when that user(class) change
+			- create sentences:
+					The [Classname][method] itself
+					
+				Examples:
+					The Hero attacks monster itself #=> OK
+					The Hero moves itself #=> OK
+					The Hero buys item itself #=> OK
+					The Hero saves progress itself #=> FAILS
+					
+Dependency Injection
+	- dependency injection is a software design pattern that allows the removal of hard-coded dependencies and makes it possible to change them,
+		whether at run-time or compile-time
+		In other words, instead of instantiate another class inside a target class and create a hard-coded dependency, this way we should pass
+		a object as a parameter.
+		Example:
+			# Bad
+			class Hero
+				def initialize
+					@dicepool = Dicepool.new  #hard-coded dependency
+				end
+			end
+				
+			hero = Hero.new
+				
+			# Injection
+			class Hero
+				def initialize(randomizer)
+					@randomizer = randomizer
+				end
+			end
+			
+			hero = Hero.new CardDeck.new
+			
+Open Closed Principle
+	- software entities(classes, modules, functions, etc) should be open for exension, but closed for modification
+	- it means if we wan't to change system we need to write a new code, without changing existing
+	- we usually use extension for new code
+	- it is not always possible to achieve this

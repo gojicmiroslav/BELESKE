@@ -1,0 +1,32 @@
+mkdir [dir-name]
+cd [dir-name]
+
+Generate project:
+	yo angular-fullstack [app-name]
+
+You can generate a new server endpoint using:
+	yo angular-fullstack:endpoint [endpoint-name]
+
+- List every installed generators
+		yo --generators
+
+Angular Generator
+	- URL: https://github.com/yeoman/generator-angular
+	- yo angular
+	- generators:
+			common
+	constant
+	controller
+	decorator
+	directive
+	factory
+	filter
+	main
+	provider
+	route
+	service
+	value
+	view
+	Example:
+		yo angular:route movies
+	

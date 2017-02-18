@@ -1,0 +1,117 @@
+Console command:
+  php artisan help
+  php artisan list //list all commands
+  php artisan help make:controller // help for generate controller
+
+  Example:
+    php artisan make:controller PostsController
+	  php artisan make:controller --resource PostsController // generates a resource actions in controller
+	
+	
+* Handle Forms POST requests
+	- all three returns a JSON
+	1) way
+			public function store(Request $request)
+			{
+				return $request->all();
+			}
+			
+	2) way - using Facade
+			public function store(Request $request)
+			{
+				return \Request::all();
+			}
+ 
+	3) way - helper function
+			public function store(Request $request)
+			{
+				return request()->all();
+			}
+			
+* Saving associated(one-to-many) model
+		1) way
+				public function store(Article $article)
+				{
+					$comment = new Comment;
+					$comment->body = request('body');
+					$article->comments()->save($comment);
+					return back();
+				}
+
+		2) way
+				public function store(Article $article)
+				{
+					$comment = new Comment(['body' => request('body')]); //we have to set $fillable fields in model for mass assigment
+					$article->comments()->save($comment);
+					return back();
+				}
+				
+		3) way
+				public function store(Article $article)
+				{
+					$article->comments()->create(['body' => request('body'));
+					return back();
+				}
+				
+		4) way
+				// article.php
+				public function addComment($comment)
+				{
+					return $this->comments()->save($comment);
+				}
+				
+				//controller
+				public function store(Article $article)
+				{
+					$article->addComment(
+						new Comment(['body' => request('body')])
+					);
+					
+					return back();
+				}
+				
+* Editing associated(one-to-many) model
+		// routes
+		Route::patch('comments/{comment}', 'CommentsController@update');
+		
+		public function update(Request $request, Comment $comment)
+		{
+			$comment->update($request->all());
+			return back();
+		}
+		
+		// view
+		<form method="POST" action="/notes/{{ $note->id }}">
+			{{ method_field('PATCH') }} //fake "PATCH" request
+
+			<div class="form-group">
+				<label for="noteBody">Body</label>
+				<textarea name="body" class="form-control">{{ $note->body }}</textarea>
+			</div>
+			
+			<div class="form-group">
+				<button type="submit" class="btn btn-primary">Edit Note</button>
+			</div>
+		</form>	
+		
+* Current login user
+		- Auth::user(); // current_user
+		
+* Validation
+	- $this->validate($request, []); // [] - rules
+	- rules can be:
+			- ['required', 'unique']
+			- "required|unique"
+		
+		Example:
+			$this->validate(request(), [
+				'body' => 'required'
+			]);
+			
+			// or
+			$this->validate($request, [
+				'body' => 'required'
+			]);
+			
+	- all errors are stored in $errors, which is available in all views 
+

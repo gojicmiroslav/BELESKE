@@ -1,0 +1,183 @@
+CSS
+	Resource:
+		https://developer.mozilla.org/en-US/docs/Web/CSS/
+
+Hexadecimal Colors
+	- RGB values can also be specified using hexadecimal color values in the form: #RRGGBB, where RR (red), GG (green) and BB (blue) are 
+		hexadecimal values between 00 and FF (same as decimal 0-255).
+		
+Viewport
+	- visible area of the screen
+
+CSS background properties:
+	background-color
+	background-image
+	background-repeat
+		repeat-x, repeat-y, repeat, no-repeat, space, round
+	background-attachment - if we want to picture holds position when scrolling we use background-attachment: fixed;
+	background-position - if background-repeat is no-repeat, we set background-position
+		<position>#
+				where 
+				<position> =  [[ left | center | right | top | bottom | <length-percentage> ] | 
+											[ left | center | right | <length-percentage> ] [ top | center | bottom | <length-percentage> ] | 
+											[ center | [ left | right ] <length-percentage>? ] && [ center | [ top | bottom ] <length-percentage>? ]]
+				where 
+				<length-percentage> = <length> | <percentage>
+				
+				background-position: 0px 0px,center;
+				background-position: right top;
+				
+Background - Shorthand property
+	- To shorten the code, it is also possible to specify all the background properties in one single property. This is called a shorthand property.
+	- background: #ffffff url("img_tree.png") no-repeat right top;
+	
+	When using the shorthand property the order of the property values is:
+			background-color
+			background-image
+			background-repeat
+			background-attachment
+			background-position
+	
+	It does not matter if one of the property values is missing, as long as the other ones are in this order.
+	
+CSS Margins
+	The CSS margin properties are used to generate space around elements.
+	
+CSS Padding
+	The CSS padding properties are used to generate space around content.
+	
+CSS Box Model
+	Content - The content of the box, where text and images appear
+	Padding - Clears an area around the content. The padding is transparent
+	Border - A border that goes around the padding and content
+	Margin - Clears an area outside the border. The margin is transparent
+	
+	IMPORTANT: When you set the width and height properties of an element with CSS, you just set the width and height of the content area. 
+						 To calculate the full size of an element, you must also add padding, borders and margins.
+						 The total width of an element should be calculated like this:
+								Total element width = width + left padding + right padding + left border + right border + left margin + right margin
+						 The total height of an element should be calculated like this:
+								Total element height = height + top padding + bottom padding + top border + bottom border + top margin + bottom margin
+
+Overflow
+	- specifies whether to clip content or to add scrollbars when the content of an element is too big to fit in a specified area.
+	- values:
+				visible - Default. The overflow is not clipped. It renders outside the element's box
+				hidden - The overflow is clipped, and the rest of the content will be invisible
+				scroll - The overflow is clipped, but a scrollbar is added to see the rest of the content
+				auto - If overflow is clipped, a scrollbar should be added to see the rest of the content
+				initial
+				inherit
+				
+Overflow-x
+	- specifies what to do with the left/right edges of the conten(vsible, hidden, scroll)
+
+Overflow-y
+	- specifies what to do with the top/bottom edges of the conten(vsible, hidden, scroll)
+	
+	// nastaviti: OUTLINE - http://www.w3schools.com/css/css_outline.asp
+	
+Margin
+	- for inline elements we can't have margin for the top and bottom, margin will be applied only for the left and right
+		Example:
+			span {
+				margin: 5px; /* only left and right, not top and bottom */
+			}
+			
+	- margin:10px 30px; // top,left - 10, 
+											// left,right - 30
+	- margin: 10px 20px 30px; // top - 10, 
+														//left,right - 20, 
+														//bottom - 30
+			
+Position
+	- syntax:
+			position: static | fixed | absolute | relative
+			
+	- botom - positive values moves element up and negative values moves element down.
+						Example:
+							position: absolute:
+							bottom: 40px; /* moves up 40px */
+							bottom: -40px; /* moves down 40px */
+	- top - positive values moves element down and negative values moves element up.
+	- right - positive values moves element to left and negative to right side
+	- left - positive values moves element to right and negative to left side
+	
+Line-height
+	- if we want to position text to vertical center
+			line-height: 150px; /* 150px is the height of the given element */
+		Example:
+			.child {
+				text-align: center; /* horizontal align */
+				line-height:150px; /* vertical align */
+			}
+			
+			<div class="child">
+				Test
+			</div>
+	
+	
+CSS3
+
+Box-sizing
+	- syntax: 
+			box-sizing: content-box|border-box|initial|inherit;
+	- values:		
+			content-box	- Default. The width and height properties (and min/max properties) includes only the content. 
+										Border, padding, or margin are not included
+										
+			border-box - The width and height properties (and min/max properties) includes content, padding and border, 
+									 but not the margin (content + padding + border)
+			
+	- Specify that block elements should have padding and border included in the element's total width and height:
+
+Selectors:
+	* :nth-child(num)
+			- The :nth-child(n) selector matches every element that is the nth child, regardless of type, of its parent.
+			
+RSCSS
+
+FLEX
+	- https://css-tricks.com/snippets/css/a-guide-to-flexbox/
+	- we need to have parent(flex container) and child(flex items - direct child of parent)
+	- flex container:
+			.container {
+				display: flex; /* or inline-flex */
+			}
+			
+		//now all direct childs of this container becomes a items automatically
+		
+* Flex container properties:
+		- justify-content
+		- align-items
+		- flex-direction
+		- flex-wrap
+		- flex-flow
+		- align-content
+		
+* main-axis - depends on flex-direction property(row default)		
+
+* justify-content - aligment along the main axis	
+		
+* align-items
+	- justify-content version for the cross-axis
+	- stretch - if we don't specify height, element will fill out availbale space inside of parent
+	 
+* flex-flow - shorthand flex-direction and flex-wrap properties
+	Example:
+		flex-flow: column nowrap;
+
+* Flex Item properties:
+		- 
+		
+* flex - shorthand for flex-grow, flex-shrink and flex-basis. The second and third parameters (flex-shrink and flex-basis) are optional. 
+				 Default is 0 1 auto.
+
+	
+Properties for the children - flex items:
+	- order: <integer>
+	- flex-grow: <number> /* default 0 */
+	- flex-shrink: <number> /* default 1 */
+	- flex-basis: <length> | auto /* default auto */
+	- flex: none | [ <'flex-grow'> <'flex-shrink'>? || <'flex-basis'> ]; Defaults: 0 1 auto
+	

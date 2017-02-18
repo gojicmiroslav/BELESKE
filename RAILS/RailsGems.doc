@@ -1,0 +1,66 @@
+Rails Gems
+
+Sidekiq
+	- handles multiple jobs concurently using threads
+	- using Redis to manage jobs Queue
+	- Start sidekiq from the root of your Rails application so the jobs will be processed (start listener):
+			bundle exec sidekiq
+	* IMPORTANT: it will automatically retry a job if there's an error. If there's an error in code in perform method and exception 
+		is raised, make shure that there is no side effect of running that same code again. This is a specially important when
+		working with emails, because we don't won't to send the same user the same email again.
+		To disable retry feature we can add in worker:
+			class SomeWorker 
+				include Sidekiq::Worker
+				sidekiq_options retry: false
+				...
+			end
+			
+		- we can specifiy a specific number of retry
+				sidekiq_options retry: 13
+			
+	* all code in worker should be thread safe - avoid sharing data that is mutuable between instances(data at the class level).
+		Example:
+			class SomeWorker 
+				include Sidekiq::Worker
+				@foo = 'var' # avoid this	
+				
+				def perform
+			end
+			
+	* database pool size(database.yml)- max number of threads conected to DB at same time. We should increase this number,
+		maybe event to 25
+		- default limit of concurently jobs in Sidekiq - 25
+		
+	* perform_in - perfom job in future
+	
+	* Prioritize queues
+			- we have mmultiple workers, and we want some to perform first
+			- to do this we need to assign worker to specific queue
+			- we do this with sidekiq_options
+					sidekiq_options queue: "hign"
+			- if we don't specify name of the queue, the name of the queue will be "default"
+			- now when we run sidekiq we can specify queues priorities with "-q" option
+				Example:
+					bundle exec sidekiq -q high,5  default
+					
+					// high, 5 - high queue with priority 5
+					// default - default queue with default priority 1
+					
+	* Monitoring Workers
+			- Sidekiq includes Web interface, which is Sinatra app that we can mount within Rails app
+			- in routes.rb
+					require 'sidekiq/web'
+					Rails.application.routes.draw do
+						...
+						mount Sidekiq::Web, at: '/sidekiq'
+					end
+					
+			  //Gemfile
+			  gem 'sinatra', require: false
+				gem 'slim'
+			  
+			  //url
+			  http://localhost:3000/sidekiq		
+
+	
+	

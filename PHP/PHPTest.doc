@@ -1,0 +1,83 @@
+PHP Test
+
+Unit Testing
+	- unit testing is testing isolated units of code(function or method) to ensure correctness
+	
+PHP Unit
+	- url: https://phpunit.de/
+	- test code in isolation
+	- running test:
+			vendor/bin/phpunit dir_name
+			vendor/bin/phpunit dir_name\file_name.php
+			vendor/bin/phpunit dir_name --filter=method_name
+			// or ...
+			vendor/bin/phpunit dir_name --filter method_name
+			vendor/bin/phpunit dir_name --filter=class_name::method_name
+			// or ...
+			vendor/bin/phpunit dir_name --filter class_name::method_name
+			
+			
+			Examples:
+				vendor/bin/phpunit dir_name --filter testTotal
+				vendor/bin/phpunit dir_name --filter ReceiptTest::testTotal
+			
+	- assertions:
+			assertEquals(expected, actual, failure_message) - use "=="
+			assertSame() - use "===" (check types)
+			
+	- setUp() - Before a test method is run, a template method called setUp() is invoked. setUp() is where you create the objects against 
+							which you will test.
+	- testDown() - Once the test method has finished running, whether it succeeded or failed, another template method called tearDown() is invoked. 
+									tearDown() is where you clean up the objects against which you tested.
+				
+	- configuration file - phpunit.xml
+		- url: https://phpunit.de/manual/current/en/organizing-tests.html#organizing-tests.xml-configuration
+		- run command:
+				vendor/bin/phpunit
+				vendor/bin/phpunit --testsuite testsuite_name_from_xml_file
+				vendor/bin/phpunit --testsuite testsuite_name_from_xml_file --fliter method_name
+				
+	* doubles
+			- https://phpunit.de/manual/current/en/test-doubles.html
+			- a generic term for any case where we replace a production object for testing purposes.
+			- three main reasons for using test doubles:
+					1) replace a dependency
+					2) ensure some conditions occurs
+					3) improve the performance of our tests
+			- variations of double objects:
+					1) dummy - replaces an object typically as an input, that isn't used or needed for the test. It is only used for the
+											signiture.
+											Example:
+												// code
+												public function total(array $items = [], $coupon)
+												{
+													$sum = array_sum($items);
+													if(!is_null($coupon)){
+														return $sum - ($sum * $coupon);
+													}
+
+													return $sum;
+												}
+												
+												// test
+												public function testTotal()
+												{
+													$input = [0, 1, 3, 10];
+													$coupon = null;
+													$output = $this->receipt->total($input, $coupon);
+													$this->assertEquals(14, $output, 'When summing the total should equal 14');
+												}
+												
+					2) fake - replaces an object in which we need a simplified version of the object, typically to achieve speed 
+										improvements or to eliminate side effects.
+					3) stub - provide a preset answer to method calls that we have decided ahead of time.
+					4) spy - acts as a high level stub, it allows us to also record information about what happened with this test double
+										(i.e. how many times it was called)
+					5) mock - acts as a hihher level stubs, they are preprogrammed with expectations, including the ability to both respond to
+										calls they know about and don't know about.
+										
+										Methods:
+											- getMockBuilder()
+				each of these are design to solve defferent variations of reasons for using doubles
+			
+			

@@ -1,0 +1,127 @@
+ jQuery Selectors
+
+	- derived from CSS selectors
+	- selectors for: 
+			elements,by id, name, attribute,...
+			attributes
+			form elements
+			hierarchy(parent, child, descendant, sibling)
+			elements by state(enabled, disabled, hidden, selected)
+			position
+			class
+
+	Basic Selectors
+
+	- $("selector")
+		$("selector").method();
+		$("select1, selector2, selectorN"); //mulitple selectors, comma separated
+		$("element[attr='value'][attr='value2']");
+
+	Multiple selection - example:
+		$("h1,h2,h3").text("blablabla");
+		$("#key1,#key2").text("dsdsdsds");
+		$("p, div, .title").text("dsdsd");
+
+	- wrapped sets:
+		$("selector")[0]; // first DOM element in array,
+		$("selector").get(0); // get(index)
+
+	Hierarchy selectors
+		- Descendant selector - Selects all elements that are descendants of a given ancestor.
+			$( "ancestor descendant" )
+			Example:
+				<form>
+					<div>Form is surrounded by the green border.</div>
+				 
+					<label for="name">Child of form:</label>
+					<input name="name" id="name">
+				 
+					<fieldset>
+						<label for="newsletter">Grandchild of form, child of fieldset:</label>
+						<input name="newsletter" id="newsletter">
+					</fieldset>
+				</form>
+
+				$( "form input" ).css( "border", "2px dotted blue" );
+				$( "form fieldset input" ).css( "backgroundColor", "yellow" );
+
+		- Child selector -  Selects all direct child elements specified by "child" of elements specified by "parent".
+				$("parent > child")	
+
+				One important point to consider with both the next adjacent sibling selector (prev + next) and the general sibling selector (prev ~ siblings) 				is that the elements on either side of the combinator must share the same parent.
+				Example:	
+					<ul class="topnav">
+						<li>Item 1</li>
+						<li>Item 2
+							<ul>
+							<li>Nested item 1</li>
+							<li>Nested item 2</li>
+							<li>Nested item 3</li>
+							</ul>
+						</li>
+						<li>Item 3</li>
+					</ul>
+
+					$( "ul.topnav > li" ).css( "border", "3px double red" );
+
+		- Next adjacent selector - Selects all next elements matching "next" that are immediately preceded by a sibling "prev".
+				$("prev + next")
+				Example:
+					<form>
+						<label for="name">Name:</label>
+						<input name="name" id="name">
+						<fieldset>
+							<label for="newsletter">Newsletter:</label>
+							<input name="newsletter" id="newsletter">
+						</fieldset>
+					</form>
+					<input name="none">
+					 
+					$( "label + input" ).css( "color", "blue" ).val( "Labeled!" );
+
+		- Next Siblings Selector - Selects all sibling elements that follow after the "prev" element, have the same parent, and match the filtering
+ 															"siblings" selector.
+
+				$("prev ~ siblings")
+				Example:
+					<div>div (doesn't match since before #prev)</div>
+					<span id="prev">span#prev</span>
+					<div>div sibling</div>
+					<div>div sibling <div id="small">div niece</div></div>
+					<span>span sibling (not div)</span>
+					<div>div sibling</div>
+					 
+					$( "#prev ~ div" ).css( "border", "3px groove blue" );
+
+	Basic selectors
+		- First selector - Selects the first matched DOM element.The :first pseudo-class is equivalent to :eq( 0 ). It could also be written as :lt( 1 ).
+ 			While this matches only a single element, :first-child can match more than one: One for each parent.
+				$("element:first")
+				Example:
+					<table>
+						<tr><td>Row 1</td></tr>
+						<tr><td>Row 2</td></tr>
+						<tr><td>Row 3</td></tr>
+					</table>
+					 
+					$( "tr:first" ).css( "font-style", "italic" );
+
+		- Last selector - Selects the last matched element.
+											:last selects a single element by filtering the current jQuery collection and matching the last element within it.
+				$(":last")
+				Example:
+					<table>
+						<tr><td>First Row</td></tr>
+						<tr><td>Middle Row</td></tr>
+						<tr><td>Last Row</td></tr>
+					</table>
+					
+					$( "tr:last" ).css({ backgroundColor: "yellow", fontWeight: "bolder" });
+
+		* First and last selectors are useful for appending a element, i.e. after last or before first
+
+
+
+
+		
+			

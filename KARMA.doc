@@ -1,0 +1,18 @@
+# Install Karma:
+$ npm install karma --save-dev
+
+# Install plugins that your project needs:
+$ npm install karma-jasmine karma-chrome-launcher --save-dev
+
+# Run Karma:
+$ ./node_modules/karma/bin/karma start
+
+Typing ./node_modules/karma/bin/karma start sucks and so you might find it useful to install karma-cli globally. You will need to do this if you want to run Karma on Windows from the command line.
+$ npm install -g karma-cli
+
+Generating the config file
+$ karma init
+
+# Start Karma using your configuration:
+$ karma start
+$ karma start my.conf.js

@@ -1,0 +1,28 @@
+Matchers:
+	- toBe() - compares with ===
+		Example:
+			it("The 'toBe' matcher compares with ===", function() {
+				var a = 12;
+				var b = a;
+
+				expect(a).toBe(b);
+				expect(a).not.toBe(null);
+			});
+	
+	- toEqual()
+	- toBeDefined() - compares against 'undefined'
+		Example:
+			it("The 'toBeDefined' matcher compares against `undefined`", function() {
+				var a = {
+				  foo: "foo"
+				};
+
+				expect(a.foo).toBeDefined();
+				expect(a.bar).not.toBeDefined();
+			});
+
+	- toBeUndefined() - 
+	- toBeTruthy()
+	- toBeNull()
+	- toBeFalsy()
+	

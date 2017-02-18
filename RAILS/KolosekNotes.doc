@@ -1,0 +1,39 @@
+KOLOSEK NOTES
+
+* Create table migration
+		bundle rails g migration CreateArticles
+		
+* Create table with reference key migration
+		bundle rails g migration CreateComments
+		
+		1) way
+				create_table :comments do |t|
+					t.string :commenter
+					t.text :body
+					t.references :article, index: true, null: false, foreign_key: true
+
+					t.timestamps
+				end
+
+		2) way		
+				create_table :comments do |t|
+					t.string :commenter
+					t.text :body
+					t.integer :article_id, index: true, null: false, foreign_key: true
+
+					t.timestamps
+				end
+
+ * Generate model
+		Options
+			--no-migration, --no-test-framework, --no-fixtures
+			
+		#creates model Article and migration	
+		bundle exec rails g model Artice  
+		
+		#creates model Article and WITHOUT migration
+		bundle exec rails g model Artice --no-migration  
+		
+		# creates only article.rb
+		bundle exec rails g model Article --no-migration --no-test-framework --no-fixtures
+		

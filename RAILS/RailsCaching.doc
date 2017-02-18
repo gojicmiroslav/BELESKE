@@ -1,0 +1,536 @@
+RAILS CACHING
+	- resources:
+			https://www.sitepoint.com/speed-things-up-by-learning-about-caching-in-rails/
+			http://blog.bigbinary.com/2016/01/25/caching-in-development-environment-in-rails5.html
+			https://signalvnoise.com/posts/3690-the-performance-impact-of-russian-doll-caching
+			https://signalvnoise.com/posts/3113-how-key-based-cache-expiration-works
+			https://www.speedshop.co/2015/07/15/the-complete-guide-to-rails-caching.html
+			https://devcenter.heroku.com/articles/caching-strategies#fragment-caching
+			https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/http-caching
+			https://www.mnot.net/cache_docs/
+			
+	- Gems:
+			https://github.com/Shopify/identity_cache
+		
+	- Caching means to store content generated during the request-response cycle and to reuse it when responding to similar requests.
+	- three types of caching tecnhiques: page, action and fragment caching
+	- By default Rails provides fragment caching. In order to use page and action caching you will need to add  
+		'actionpack-page_caching' and 'actionpack-action_caching' to your Gemfile
+	- DEVELOPMENT CACHING IS TURNED OFF BY DEFAULT FOR ALL CACHING TYPES
+	- command for creating a development cache in Rails 5:
+		rails dev:cache
+		
+		# this command automatically restarts a server
+	- disabling development cache in Rails 5 - same command:
+		rails dev:cache
+		
+	- why cache? The answer is simple. Speed. With Ruby, we don’t get speed for free because our language isn’t very fast to begin with 
+		Ruby performance in the Benchmarks Game vs Javascript. . We have to get speed from executing less Ruby on each request. 
+		The easiest way to do that is with caching. Do the work once, cache the result, serve the cached result in the future.
+	- The response-time threshold for a user to feel as if they are freely navigating your site, without waiting for the site to load, 
+		is 1 second or less. That’s not a 1-second response time, but 1 second “to glass” - 1 second from the instant the user clicked or 
+		interacted with the site until that interaction is complete (the DOM finishes painting)
+	- In order to consistently achieve a 1 second to glass webpage, server responses should be kept below 300ms
+	- ActiveRecord::Relations are lazily loaded, meaning the database query isn’t executed until the results are actually accessed (usually in your view).
+		
+	- best practice: MOVE EXPIRE CACHE IN SWEEPER
+	
+	# in config/development.rb
+		if Rails.root.join('tmp/caching-dev.txt').exist?
+			config.action_controller.perform_caching = true
+
+			config.cache_store = :memory_store
+			config.public_file_server.headers = {
+				'Cache-Control' => 'public, max-age=172800'
+			}
+		else
+			config.action_controller.perform_caching = false
+
+			config.cache_store = :null_store
+		end		
+		
+		# we are checking for file 'tmp/caching-dev.txt', if it exists we are in caching mode
+		
+	Snippets of code in Rails:
+		def dev_cache
+			if File.exist? 'tmp/caching-dev.txt'
+				File.delete 'tmp/caching-dev.txt'
+				puts 'Development mode is no longer being cached.'
+			else
+				FileUtils.touch 'tmp/caching-dev.txt'
+				puts 'Development mode is now being cached.'
+			end
+
+			FileUtils.touch 'tmp/restart.txt'
+		end
+		
+Rails Caching Mechanism
+	- in console:
+			cache = ActiveSupport::Cache::MemoryStore.new
+			cache.read('city')   # => nil
+			cache.write('city', "Duckburgh")
+			cache.read('city')   # => "Duckburgh"
+		
+*Page caching
+	- it means that future http request doesn't need to hit Rails app at all
+	- the way it works it that whole content of the page is cached in to a file, which is then served by front-end server
+	- While this is super fast it can't be applied to every situation (such as pages that need authentication)
+	- because the webserver is serving a file directly from the filesystem you will need to implement cache expiration
+	- this incredible speed-up is only available to stateless pages where all visitors are treated the same
+	- Content management systems -- including weblogs and wikis -- have many pages that are a great fit for this approach, 
+		but account-based systems where people log in and manipulate their own data are often less likely candidates
+	- Starting from Rails 4, page caching has been extracted to a separate gem 'actionpack-page_caching'
+	- gem: https://github.com/rails/actionpack-page_caching
+		# or if errors in bundler
+		gem 'actionpack-page_caching', git: 'https://github.com/rails/actionpack-page_caching.git'
+	- steps:
+			# Gemfile
+			gem 'actionpack-page_caching'
+			bundle install
+			# config/application.rb
+			config.action_controller.page_cache_directory = "#{Rails.root.to_s}/public/deploy" #to specify where to store your cached pages
+	- file for saving cache 'page_cache_directory' can be set in:
+			1) controller
+					Example:
+						self.page_cache_directory = -> { Rails.root.join("public", request.domain) }
+			2) config file(application.rb)
+					Example:
+						config.action_controller.page_cache_directory = "#{Rails.root.to_s}/public/cached_pages"
+			3) nowhere, folder and files will be created acording to url
+	- flush cache - for example, in action 'update', when some item changes
+			expire_page url_path
+			
+			Example:
+				def update
+					if @product.update 
+						expire_page products_path
+						expire_page product_path(@product)
+						expire_page '/'
+						FileUtils.rm_rf "#{page_cache_directory}/products/page"
+						...
+					end
+				end
+
+			# BEST PRACTICE: moved this lines in sweeper and use them in nedeed action(update, destroy,...)
+			URL: https://github.com/rails/rails-observers
+			- Action Controller Sweepers are the terminators of the caching world and responsible for expiring caches when model objects change. 
+				They do this by being half-observers, half-filters and implementing callbacks for both roles.
+			- We observe given model and ovveride given callback to observe when model changes:
+				Example:
+						observe Product
+						
+						def after_update
+							...
+						end
+			
+			Steps:
+					- gem 'rails-observers', git: 'https://github.com/rails/rails-observers.git'
+					- make file app/sweepers/product_sweeper.rb
+						Example:
+							class ProductSweeper < ActionController::Caching::Sweeper
+								observe Product
+
+								def after_update(product)
+									expire_page products_path
+									expire_page product_path(product)
+									expire_page '/'
+									FileUtils.rm_rf "#{page_cache_directory}/products/page"
+								end
+							end
+					- in product_controller.rb add:
+							caches_page :index, :show
+							cache_sweeper :product_sweeper
+
+*Fragment Caching
+	- when different parts of the page need to be cached and expired separately you can use Fragment Caching
+	- caches only part of the page
+	- anything that we wont to cache we put inside 'cache' block
+		<% cache do %>
+			...
+		<% end %>
+		
+		Example:
+				<% cache do %>
+					<div id="recent_articles">
+						<h3>Recent Articles</h3>
+						<ul>
+						<% @recent_articles.each do |article| %>
+							<li><%= link_to article.name, article %></li>
+						<% end %>
+						</ul>
+					</div>
+				<% end %>
+		
+	- This functionality exists in Rails’ core, so you don’t have to add it manually.
+	- in the server console we can see:
+			Read fragment views/localhost:3000/articles/1/630cc694e3a052fb19da9bc43a813622
+	- if dont pass a name to 'cache' method, it will create a cache name using a current URL:
+			example: views/localhost:3000/articles/1/630cc694e3a052fb19da9bc43a813622
+		This means it will write a new cache every time URL changes, for example: views/localhost:3000/articles/3/630cc694e3a052fb19da9bc43a813622.
+	- we can change cache name by supplying argument to cache call
+				<% cache 'recent_articles do %>
+					<div id="recent_articles">
+						<h3>Recent Articles</h3>
+						<ul>
+						<% @recent_articles.each do |article| %>
+							<li><%= link_to article.name, article %></li>
+						<% end %>
+						</ul>
+					</div>
+				<% end %>
+				
+			- now we we change url, it will always use the same cache:
+					Read fragment views/recent_articles/ff2b05298c8ca67d21c146ddd2215eaa
+					
+		- Problem with name and expired fragment digest: 
+				https://reinteractive.com/posts/197-if-you-explicitly-expire-cached-fragments-opt-out-of-cache-digests
+				- starting from Rails 4, Rails adds a cache digest to the fragment name. Cache digest depends on the current template and
+					its dependencies(i.e. “views/hello/e3225f7c7bbadd41c6ea556b7b7a03b1”)
+				- The code that expires the fragment, however, is outside the context of this template, so it does not know the cache digest. 
+					As with Rails 3, it will try to expire the fragment named “views/hello” – but that’s not what our fragment is called anymore. 
+					The fragment, then, is no longer being expired.
+				Solution:
+					<% cache 'hello', :skip_digest => true do %>
+						...
+					<% end %>
+		:skip_digest - stop appending cache digest to cache name
+									
+									
+	- When your application receives its first request to this page, Rails will write a new cache entry with a unique key. 
+		A key looks something like this:
+				views/products/1-201505056193031061005000/bea67108094918eeba42cd4a6e786901
+			
+			The views bit is self-explanatory. The todos part is based on the Class of the ActiveRecord object. The next bit is a combination 
+			of the id of the object (123 in this case) and the updated_at value (some time in 2012). The final bit is what’s called the template 
+			tree digest. This is just an md5 hash of the template that this cache key was called in. When the template changes 
+			(e.g., you change a line in your template and then push that change to production), your cache busts and regenerates a new cache 
+			value. This is super convenient, otherwise we’d have to expire all of our caches by hand when we changed anything in our templates!
+			
+			There two reasons to cache automatically expires:
+				- if we change a record in DB(update_at changes)
+				- or if we change view (template digest changes)
+				
+			Note that this technique doesn’t actually expire any cache keys - it just leaves them unused. 
+			Instead of manually expiring entries from the cache, we let the cache itself push out unused values when it begins to run out of space. 
+		
+	- You can give an Array to cache and your cache key will be based on a concatenated version of everything in the Array. 
+		This is useful for different caches that use the same ActiveRecord objects. Maybe there’s a todo item view that depends on the 
+		current_user:
+			Example:
+			<% todo = Todo.first %>
+			<% cache([current_user, todo]) do %>
+				... a whole lot of work here ...
+			<% end %>
+			
+			Example:
+				<% cache ["Article", @article] do %>
+					...
+				<% end %>
+				
+				#=> views/Article/articles/1-20170116145849222633/ffe4ee41c9f5417b78a5a95d27675ef2
+			
+	- If you want to cache a fragment under certain conditions, you can use "cache_if" or "cache_unless":
+			<% cache_if admin?, product do %>
+				<%= render product %>
+			<% end %>
+	- collection caching - The render helper can also cache individual templates rendered for a collection. 
+			It can even one up the previous example with each by reading all cache templates at once instead of one by one. 
+			This is done by passing cached: true when rendering the collection:
+			Example:
+					<%= render partial: 'products/product', collection: @products, cached: true %>
+					
+					#or simple
+					<%= render @products, cached: true %>
+						
+			All cached templates from previous renders will be fetched at once with much greater speed. 
+			Additionally, the templates that haven't yet been cached will be written to cache and multi fetched on the next render.		
+	- if we wish to expire cache manually, use the "expire_fragment" and pass cache key to it:
+			@product = Product.find(params[:id])
+			# do something...
+			expire_fragment(@product)	
+
+		Method 'cache'
+			- Syntax:
+					cache(name = {}, options = {}, &block)
+			- This helper exposes a method for caching fragments of a view rather than an entire action or page. 
+				This technique is useful caching pieces like menus, lists of new topics, static HTML fragments, and so on. 
+				This method takes a block that contains the content you wish to cache.
+			- accepts String or object(model)
+					# string
+					<% cache "recent_articles" %>
+					...
+					<% end %>
+					
+					# object
+					<% cache @article %>
+						...
+					<% end %>
+			- 'cache' method that accepts cache storage’s name. It can be a string or an object:
+					#views/products/index.html.erb
+					<% @products.each do |product| %>
+						<% cache product do %>
+							<%= product.title %>
+						<% end %>
+					<% end %>
+
+					#Or
+					#views/products/index.html.erb
+					<% @products.each do |product| %>
+						<% cache "product-#{product.id}" do %>
+							<%= product.title %>
+						<% end %>
+					<% end %>
+		
+			- If you pass an object to the cache method, it will take its id automatically, append a timestamp and generate a proper cache key 
+				(which is an MD5 hash). The cache will automatically expire if the product was updated.
+				For example:
+						<% cache @article do %>
+							<h1><%= @article.name %></h1>
+							<%= @article.content %>
+						<% end %>
+						
+						- cache @article, behind the scenes calls: @article.cache_key. We can check in rails console for key:
+							Example:
+								rails c
+								a = Article.first
+								a.cache_key # articles/1-20170113221206070403 (name-of-the-model/id-updated_at)
+								a.touch #=> sets the updated_at to current time
+								a.cache_key #=> articles/1-20170114203226468303 - cache key changed
+				
+		Template digest
+			- The template digest that's added to the cache key is computed by taking an md5 of the contents of the entire template file. 
+				This ensures that your caches will automatically expire when you change the template file.
+			- Note that the md5 is taken of the entire template file, not just what's within the cache do/end call. 
+				So it's possible that changing something outside of that call will still expire the cache.
+			- Additionally, the digestor will automatically look through your template file for explicit and implicit dependencies, and include 
+				those as part of the digest.
+			- The digestor can be bypassed by passing skip_digest: true as an option to the cache call:
+					<% cache project, skip_digest: true do %>
+						<b>All the topics on this project</b>
+						<%= render project.topics %>
+					<% end %>
+					
+		Method 'cache_key'
+			- syntax:
+					cache_key(*timestamp_names)
+			- Returns a cache key that can be used to identify this record.
+		
+		Method 'cache_fragment_name'
+			- syntax:
+					cache_fragment_name(name = {}, skip_digest: nil, virtual_path: nil) 
+			- This helper returns the name of a cache key for a given fragment cache call. By supplying skip_digest: true to cache, 
+				the digestion of cache fragments can be manually bypassed. This is useful when cache fragments cannot be manually expired unless 
+				you know the exact key which is the case when using memcached.
+			- The digest will be generated using virtual_path: if it is provided.
+
+				Source:
+				# File actionview/lib/action_view/helpers/cache_helper.rb, line 197
+				def cache_fragment_name(name = {}, skip_digest: nil, virtual_path: nil)
+					if skip_digest
+						name
+					else
+						fragment_name_with_digest(name, virtual_path)
+					end
+				end
+				
+				Example:
+					# views/articles/show.html.erb
+					<% cache "recent_articles", :skip_digest => true do %>
+						<% @recent_articles.each do |article| %>
+								<li><%= link_to article.name, article %></li>
+						<% end %>
+					<% end %>
+					
+					cache_fragment_name("recent_articles") #=> ["recent_articles", "8a7f1d19b8a83263145332fc9d107989"]
+					cache_fragment_name("recent_articles", skip_digest: true) #=> "recent_articles"
+					
+		Method 'expire_fragment'
+			- syntax:
+					expire_fragment(key, options = nil)
+			- removes fragment from the cache
+			
+		Tips:
+			- add to model assocation 'belongs_to' option 'touch: true'. This will update 'update_at' field od all models 
+				that belongs to this model.
+				Example:
+					class Comment < ApplicationRecord
+						belongs_to :article, touch: true
+					end
+					
+					# this means when comment is created, update or destroyed it will call 'touch' on its associated article
+					
+			- better to use model as parameter to cache method then use a string name, because of expiring. 
+				Whe could use combination - array of name and model object(["recent", article]):
+				Example:
+					<% cache "recent_articles", :skip_digest => true do %>
+						<% @recent_articles.each do |article| %>
+								<% cache ["recent", article] do %>
+									<li><%= link_to article.name, article %></li>
+								<% end %>
+						<% end %>
+					<% end %>
+					
+*Russian doll Caching
+	- You may want to nest cached fragments inside other cached fragments. This is called Russian doll caching.
+	- The advantage of Russian doll caching is that if a single product is updated, all the other inner fragments can be reused when 
+		regenerating the outer fragment.
+		Example:
+			# views/products/index.html.erb
+			<% cache "products" do %>
+				<%= render @products, cached: true %>
+			<% end %>
+	- cached file will expire if the value of updated_at changes for a record on which the cached file directly depends. 
+		However, this will not expire any cache the fragment is nested within.	
+		Example:
+			<% cache product do %>
+				<%= render product.games %>
+			<% end %>
+			
+			# which in turn renders this view
+			<% cache game do %>
+				<%= render game %>
+			<% end %>
+			
+		If any attribute of game is changed, the updated_at value will be set to the current time, thereby expiring the cache. 
+		However, because updated_at will not be changed for the product object, that cache will not be expired and your app will serve stale data. 
+		To fix this, we tie the models together with the touch method:
+			class Product < ApplicationRecord
+				has_many :games
+			end
+			 
+			class Game < ApplicationRecord
+				belongs_to :product, touch: true
+			end
+			
+		With touch set to true, any action which changes updated_at for a game record will also change it for the associated product, 
+		thereby expiring the cache.
+		
+	- we’re going to stack cache fragments inside each other 
+		Example:
+			<% cache('todo_list') do %>
+				<ul>
+					<% @todos.each do |todo| %>
+						<% cache(todo) do %>
+							<li class="todo"><%= todo.description %></li>
+						<% end %>
+					<% end %>
+				</ul>
+			<% end %>
+				
+	- But there’s a problem with my above example code - let’s say I change an existing todo’s description from “walk the dog” to 
+		“feed the cat”. When I reload the page, my todo list will still show “walk the dog” because, although the inner cache has changed, 
+		the outer cache (the one that caches the entire todo list) has not! That’s not good. We want to re-use the inner fragment caches, but we also want to bust the outer cache at the same time.
+	- Russian doll caching is simply using key-based cache expiration to solve this problem. When the ‘inner’ cache expires, 
+		we also want the outer cache to expire. If the outer cache expires, though, we don’t want to expire the inner caches. 
+		Let’s see what that would like in our todo_list example above:
+		Example:
+			<% cache(["todo_list", @todos.map(&:id), @todos.maximum(:updated_at)]) do %>
+				<ul>
+					<% @todos.each do |todo| %>
+						<% cache(todo) do %>
+							<li class="todo"><%= todo.description %></li>
+						<% end %>
+					<% end %>
+				</ul>
+			<% end %>
+			
+		#Now, if any of the @todos change (which will change @todos.maximum(:updated_at)) or an Todo is deleted or added to @todos (changing @todos.map(&:id)), our outer cache will be busted
+		
+*Model caching
+	- method 'fetch'
+			- for writing and reading
+			Examples:
+				Rails.cache.fetch("articles"){ Article.all }
+				Rails.cache.fetch("articles")
+				Rails.cache.fetch("articles", force: true){ "Test" }
+				Rails.cache.fetch("articles") #=> "Test"
+				Rails.cache.fetch("articles", expires_in: 1.minute){ Article.all }
+				Rails.cache.delete("articles")
+				Rails.cache.fetch([article, "foo"]){ 123 }
+				
+				# Set all values to expire after one minute.
+				cache = ActiveSupport::Cache::MemoryStore.new(expires_in: 1.minute)
+				cache.write('foo', 'original value') # name, value
+				
+				# article - calls a article.cache_key behind the scenes
+				Rails.cache.fetch([article, "foo"]){ Article.count  } #=> 6
+				Rails.cache.fetch([article, "foo"]) #=> 6
+				article.touch
+				Rails.cache.fetch([article, "foo"]) #=> nil
+				
+	- we have to be careful when we writing and reading Active Record data directly to the cache like this, so if DB schema changes,
+		it can have side effects. We have flush all related cached data when deploying
+				
+HTTP Caching
+	- managed through HTTP header request, and its often stored in users browser, but not always
+	- HTTP caching relies on HTTP_IF_NONE_MATCH and HTTP_IF_MODIFIED_SINCE headers. Basically, these headers are being sent by the client
+		to check when the page’s content was last modified and whether its unique id has changed. This unique id is called an ETag and is 
+		generated by the server.
+	- The client receives an ETag and sends it inside the HTTP_IF_NONE_MATCH header on subsequent requests. If the ETag sent by the client 
+		does not match the one generated on the server, it means the page has been modified and needs to be downloaded again. 
+		Otherwise, a 304 (“not modified”) status code is returned and a browser uses a cached copy of the page.
+	- There are two methods that can be used to implement HTTP caching: stale? and fresh_when.
+	
+	Methods:
+		- fresh_when(object = nil, etag: nil, weak_etag: nil, strong_etag: nil, last_modified: nil, public: false, template: nil)
+			Example:
+				@product = Product.find(params[:id])
+				fresh_when etag: @product
+				# now if we run: curl -I http://localhost:3000/products/1 - ETag stays the same for each request
+				# u server console we can see: Completed 304 Not Modified
+				
+				fresh_when etag: @product, last_modified: @product.updated_at
+				# adds Last modified to header and it can be used by browser to determine is cache still up to date
+				curl -I http://localhost:3000/products/1 --header 'If-Modified-Since: Mon, 16 Jan 2017 19:15:53 GMT'
+				
+			Best practice:
+				fresh_when @product - it mill set ETAG and LAST_MODIFIED automatically
+
+Dynamic Page Caching				
+	
+		
+*Which cache backend should I use?
+	1) ActiveSupport::FileStore - This is the default. With this cache store, all values in the cache are stored on the filesystem.
+	2) ActiveSupport::MemoryStore - This cache store puts all of the cache values in, essentially, a big thread-safe Hash, 
+																	effectively storing them in RAM.
+	3) Memcache and dalli - dalli is the most popular client for Memcache cache stores. Memcache was developed for LiveJournal in 2003, 
+													and is explicitly designed for web applications.
+	4) Redis and redis-store redis-store is the most popular client for using Redis as a cache.
+	5) LRURedux - a memory-based cache store, like ActiveSupport::MemoryStore, but it was explicitly engineered for performance by Sam Saffron, co-founder of Discourse.
+	
+	ActiveSupport::MemoryStore
+		- MemoryStore stores cached values directly in RAM in the form of a big Hash.
+		- it is thread-safe
+		
+		Advantages:
+			- it's fast
+			- it's easy to set up
+					config.cache_store = :memory_store
+		
+		Disadvantages
+			- caches can't be shared across processes and Hosts
+			- caches add to total RAM usages 
+			
+		When to use:
+			- if we have one or two servers, with a few workers each, and we are storing very small amounts of cached data (<20MB)
+			
+	Memcache and dalli
+		- While Memcache benefits from having some absolutely enormous production deployments, it is under a somewhat slower pace of 
+			development than other cache stores (because it’s so old and well-used, if it ain’t broke, don’t fix it).
+			
+			Advantages
+				- Distributed, so all processes and hosts can share. Each cache key is only written once across the entire system.
+				
+			Disadvantages
+				- Distributed caches are susceptible to network issues and latency. Of course, it’s much, much slower to access a value across 
+					the network than it is to access that value in RAM or on the filesystem
+				- expensive - Running FileStore or MemoryStore on your own server is free. Usually, you’re either going to have to pay to set up 
+					your own Memcache instance on AWS or via a service like Memcachier.
+				- Cache values are limited to 1MB. In addition, cache keys are limited to 250 bytes.
+				
+			When should I use Memcache?
+				- If you’re running more than 1-2 hosts, you should be using a distributed cache store. 
+					However, I think Redis is a slightly better option, for the reasons I’ll outline below.
+					
+	Redis and redis-store
+		

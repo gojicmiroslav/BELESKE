@@ -1,0 +1,6 @@
+- npm install -g bower
+- bower install jquery
+
+- bower install angular angular-mocks
+- search for what bower has about, for example angular:
+		bower search angular

@@ -1,0 +1,452 @@
+RAILS API
+	- A properly designed API should return two things: an HTTP response status-code and the response body.Testing the status-code is necessary
+ 		for web applications with user authentication and resources with different permissions. 
+	- testing the response body should just verify that the application is sending the right content.
+
+	HTTP Status Code
+		Typical HTTP responses 
+			200: OK - Basically self-explanitory, the request went okay.
+			401: Unauthorized - Authentication credentials were invalid.
+			403: Forbidden - The resource requested is not accessible - in a Rails app, this would generally be based on permissions(authorization).
+			404: Not Found - The resource doesn’t exist on the server.
+
+	API Testing is Integration Testing
+		- Capybara is wrong tool for testing API
+		- instead use Rack::Test with RSpec request specs
+
+		Example:
+			# API returns a token on a successful login
+				# spec/requests/api/v1/messages_spec.rb
+				describe "Messages API" do
+					it 'sends a list of messages' do
+						FactoryGirl.create_list(:message, 10)
+
+						get '/api/v1/messages'
+
+						json = JSON.parse(response.body)
+
+						# test for the 200 status-code
+						expect(response).to be_success
+
+						# check to make sure the right amount of messages are returned
+						expect(json['messages'].length).to eq(10)
+					end
+				end
+
+				# add json = JSON.parse(response.body) to helper method
+				# spec/support/request_helpers.rb
+				module Requests
+					module JsonHelpers
+						def json
+							JSON.parse(response.body)
+						end
+					end
+				end
+
+				# add the following line inside the config block of spec_helper.rb
+				RSpec.configure do |config|
+				  config.include Requests::JsonHelpers, type: :request
+				end	
+
+		Example:
+			# getting a single message
+				# spec/requests/api/v1/messages_spec.rb
+				describe "Messages API" do
+					it 'retrieves a specific message' do
+						message = FactoryGirl.create(:message)    
+						get "/api/v1/messages/#{message.id}"
+
+						# test for the 200 status-code
+						expect(response).to be_success
+
+						# check that the message attributes are the same.
+						expect(json['content']).to eq(message.content) 
+
+						# ensure that private attributes aren't serialized
+						expect(json['private_attr']).to eq(nil)
+					end
+				end
+
+	Using constraints to enforce subdomain
+		- keeping our API under its own subdomain allows load balancing traffic at the DNS level
+			#config/routes.rb
+			resources :episodes 																	# https://cz-zombies.com/episodes
+			resources :zombies, constraints: { subdomain: 'api' } # https://api.cz-zombies.com/zombies
+			resources :humans, constraints: { subdomain: 'api' }  # https://api.cz-zombies.com/humans
+
+			#..OR
+			resources :episodes
+			
+			constraints subdomain: 'api' do
+				resources :zombies
+				resources :humans
+			end
+
+			#Network configuration for supporting subdomains in development
+			/etc/hosts
+			127.0.0.1 cz-zombies.com	
+			127.0.0.1 api.cz-zombies.com
+
+			# on local machine port number is still required:
+			cz-zombies.com:3000
+	Using namespaces to keep controllers organized
+		- it's good practices to keep web controllers separate from API controllers
+			#config/routes.rb
+				constraints subdomain: 'api' do
+					namespace :api do
+						resources :zombies
+					end
+				end
+
+				resources :pages
+		
+		- Zombie controller needs to go inside api module
+			#app/controllers/api/zombie_controller.rb
+				module Api
+					class ZombieController < ApplicationController
+					end
+				end	
+				
+		- enforcing both a subdomain constraint and Api namespace gives us the following URL:
+				http://api.cs-zombies.com/api/zombies
+					// there is an unnecessary duplication
+		- we can fix that by passing 'path' option to namespace
+				#config/routes.rb
+				constraints subdomain: 'api' do
+					namespace :api, path: '/' do
+						resources :zombies
+					end
+				end	 
+				// namespace is preserved
+				http://api.cs-zombies.com/zombies
+
+				# shorter syntax:
+				namespace :api, path: '/', constraints: { subdomain: 'api' } do
+					resources :zombies
+				end
+
+	API case consistency
+		#app/controllers/api/zombies_controller.rb
+		module Api
+			class ZombieController < ApplicationController
+			end
+		end
+
+		# To use API instead of Api(which is by Rails convention)
+		# config/initializers/inflections.rb
+		ActiveSupport::Inflector.inflections(:en) do |inflect|
+			inflect.acronym 'API'
+		end
+
+		# now in: app/controllers/api/zombies_controller.rb
+		module API
+			class ZombieController < ApplicationController
+			end
+		end
+
+	Status Codes(https://httpstatuses.com/)
+		- 200, OK => Successful GET
+		- 204, No Content => Successful DELETE or PUT
+		- 201, Created => Successful POST
+		- 422, Unprocessable Entity => Well formed request but there's a semantic error, i.e. problem creating or updating a resource.
+		- 401, Unauthorized => Authentication credentials missing or incorrect
+
+		Examples:
+			def index
+				@posts = Post.all
+				render json: @posts, status: :ok 
+			end
+
+	Pagination
+		- /contacts?limit=25&offset=50
+
+	Side-load Associated Resources
+		- resources that are associated with other resources
+		- /contacts/25?include=notes 
+
+	Non-resources responses
+		- something that is not resources, for example: /calculate, /translate, /convert
+		- use verbs
+		- another way is POST /calculations, /translations, /conversions
+
+	Caching
+		- in HTTP there is "conditional get", client gets a list of contacts, and next time if that list is not changed, there should not be another
+			request. They should go for browser cache or another caching mechanism and get it.
+		- one way to do it is to set some headers: 
+				- last_modified # when was the resource last modified
+				- etag # identifies a specific version of a resource
+		- if both have changed - 304 Not Modified
+		- in Rails:
+				def show
+					render json: @contact if stale?(@contact) # stale - helper that does this properly
+				end
+
+	HTTPS
+		- # config/environments/production.rb
+			MyApp::Application.configure do
+				config.force_ssl = true
+			end
+
+	GZIP Compression
+		- to reduce bandwidth
+			
+			# config/application.rb
+		  class Application < Rails::Application
+				config.middleware.use Rack::Deflater
+			end
+
+	CORS - Same Origin Problem
+		- client and server must on the same hostname - problem
+		- gem 'rack-cors'
+
+	Authentication
+		- basic - username & password
+				- send username and password with every request - problem
+		- token - API key
+		- OAuth - like Valey key
+
+	Documentation
+		- gem 'rspec_api_documentation'
+		- gem 'apipe_rails'
+		- https://apiblueprint.org/
+		- https://apiary.io/
+
+	ActiveModelSerializer
+		- rails g serializer post
+		- da bi se json podaci prikazali po JSON specifikaciji, uraditi sledece:
+				- u config/initializers dodati fajl active_model_serialization.rb
+				- dodati: 
+					# u config/initializers/active_model_serialization.rb
+					ActiveModelSerializers.config.adapter = :json_api	
+		- ActiveModelSerializer se koristi za dobavljanje podataka, ali i ne za CRUD
+
+	PARAMS WITH CURL
+		- Example: 
+				create_table :tables do |t|
+				  t.integer :number
+				  t.integer :seats
+
+				  t.timestamps
+				end
+
+				#params in controller
+				{"table"=>{"number"=>"7", "seats"=>"77"}, "controller"=>"tables", "action"=>"create"}
+				params[:table] #{"number"=>"7", "seats"=>"77"}
+				params[:controller] #tables
+				params[:table][:number]
+
+				# curl
+				curl -X POST -d="table[number]=1&table[seats]=2" http://localhost:3000/tables
+
+	CURL OPTION
+		- curl http://localhost:3000
+		- curl -X POST -d="table[number]=1&table[seats]=2" http://localhost:3000/tables
+		- Creating curl GET task:
+			touch bin/curl
+			sudo chmod +x bin/curl	
+	
+			//add to bin/curl
+			curl http:localhost:3000/tables
+
+			bin/curl
+
+		- creating curl POST task:
+			touch bin/curl_post
+			sudo chmod +x bin/curl_post
+
+			//add to bin/curl_post
+			curl -v -X POST \
+			 -H "Content-Type: application/json" \
+			 -d @bin/table.json \
+			 http://localhost:3000/tables
+
+			 // -v => curl option for showing request and response
+
+			touch bin/table.json
+	
+			//add to table.json
+			{
+				"table": {
+					"number": 16,
+					"seats": 100
+				}
+			} 	
+	- option: "-I" - include only response header, without body, for example: Content-Type, Reponse, Status, Content-Length,...
+		Example:
+			curl -I https://api.github.com
+
+
+==============================Carlos Souza - Building Better Web API with Rails ====================================================
+//nastaviti: 10:00
+	Routes:
+			resources :projects do
+				collection do
+					get 'archived' # gets map to controllers action 'archived'
+				end
+
+				member do
+					post 'archive' # gets map to controllers action 'archive'
+				end
+			end
+
+		gives routes:
+					archived_projects GET    /projects/archived(.:format)    projects#archived
+	  				archive_project	POST   /projects/:id/archive(.:format) projects#archive
+         					 projects GET    /projects(.:format)             projects#index
+                  					POST   /projects(.:format)             projects#create
+        						project GET    /projects/:id(.:format)         projects#show
+										        PATCH  /projects/:id(.:format)         projects#update
+										        PUT    /projects/:id(.:format)         projects#update
+										        DELETE /projects/:id(.:format)         projects#destroy
+
+	- Problem - controller gets really fat if there is lot of this collection of member routes.
+		Solution - keep a route, but map routes to different controllers:
+				resources :projects do
+				collection do
+					get 'archived', to: 'archived_projects#index'
+					get 'active', to: 'active_projects#index'
+					get 'susoended', to: 'suspended_projects#index'
+				end
+
+				member do
+					post 'archive', to: 'archived_projects#create'
+					post 'active', to: 'active_projects#create'
+					post 'suspended', to: 'suspended_projects#create'
+				end
+			end
+
+	Status Code	
+		- a status code is worth a thousand words
+		- first take a look on status code to determine what to do next
+
+	Authentication
+		- for API most commonly used is: token-based authentication
+		- can easily expire
+		- we can have multiple tokens for each user(each use can have different token)
+		- different access rules can be implemented
+		- authentication: out-of-band proccess. It's not part of API calls, user have to go to the web-site, usually the profile page, and he will
+			get token from there and add it to the application.
+			Example in Rails - how to authenticate user:
+				module API
+					class ProjectsController < ApplicationController::API
+						before_action :authenticate_or_request
+
+						protected
+
+						def authenticate_or_request
+							authenticate_or_request_with_http_token do |token, opt|
+								User.find_by(auth_token: token)
+							end
+						end
+					end
+				end
+
+				authenticate_or_request_with_http_token - must return something truthly. If return something truthly, the request will continue.
+
+	Generating Token
+		- UUID - universaly unique identifier(rfc4122)
+		- in Ruby standard library:
+				SecureRandom.uuid
+
+			Example in Rails:		
+				class User
+					before_create :set_auth_token
+			
+					private
+
+					def set_auth_token
+						return if auth_token.present?
+						self.auth_token = generate_auth_token
+					end
+
+					def generate_auth_token
+						SecureRandom.uuid.gsub(/-/, '') # ommits the hyphens
+					end
+				end
+
+	Token based auth with Curl
+		- use -H option - indicates that we are passing the custom header
+				curl -IH "Authorization: Token token=16d54f0943434909f090490394lff904034" \
+				http://localhost:3000/episodes
+
+				//if we get 200, we are authenticated
+				HTTP/1.1 200 OK
+				Content-Type: application/json; charset=utf-8	
+
+	Test API
+		- not the time and place to test business logic(business logic are tested in unit tests)
+		- what should we test:
+				- status code
+				- mime types
+				- authentication
+		- how should we test: requesting endpoint and verifying responses(sort of a black box testing)
+		- easiest way in Rails is with a integration tests
+					rails g integration_test <doing-something>
+
+		Example:
+				require 'test_helper'
+
+				class ListingProjectsTest
+					setup { host! 'api.example.com' }
+
+					test 'returns list of projects' do
+						get '/projects'
+						assert_equal 200, response.status
+						refute_empty response.body # make shure resopnse.body is not empty
+					end
+				end
+
+		Testing accessing rules
+			class ListingProjectsTest
+				setup { @user = User.create! }
+				setup { host! 'api.example.com' }
+
+				test 'valid authentication with token' do
+					get '/projects', {}, { 'Authorization' => "Token token=#{@user.auth_token}" }
+					assert_equal 200, response.status
+					assert_equal Mime[:json], response.content_type
+				end
+
+
+				test 'invalid authentication' do
+					get '/projects', {}, { 'Authorization' => "Token token=#{@user.auth_token}fake" }
+					assert_equal 401, response.status
+				end
+			end
+
+ApiOnRails Book
+	Creating API namespace
+		- mkdir app/controllers/api				
+		- #routes.rb
+				namespace :api do
+
+				end
+
+			#By defining a namespace under the routes.rb file. Rails will automatically map that namespace to a directory matching the name under the
+			 controllers folder, in our case the api/ directory.
+
+	List Rails supported MIME types
+		- rails c
+		- Mime::SET.collect(&:to_s)		
+
+	Generate base URI under subdomain
+		- something like api.market_place_api.dev
+		- Setting the api under a subdomain is a good practice because it allows to scalate the application to a DNS level
+		- #routes
+			  namespace :api, defaults: { format: :json },
+                              constraints: { subdomain: 'api' }, path: '/'  do
+					# We are going to list our resources here
+				end
+
+				# path: '/' - This is telling Rails to set the starting path for each request to be root in relation to the subdomain
+
+	Common api patterns
+		URI Pattern					Description
+		api.example.com/		I my opinion this is the way to go, gives you a better interface and isolation, and in the long term can help you to quickly
+ 												scalate (http://www.makeuseof.com/tag/optimize-your-dns-for-faster-internet/)
+		example.com/api/		This pattern is very common, and it is actually a good way to go when you don’t want to namespace your api under a subdomain
+		example.com/api/v1	This seems like a good idea, by setting the version of the api through the URL seems like a more descriptive pattern, but this
+ 												way you enforce the version to be included on URL on each request, so if you ever decide to change this pattern, this becomes
+ 												a problem of maintenance in the long-term
+
+	

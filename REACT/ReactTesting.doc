@@ -1,0 +1,107 @@
+REACT TESTING
+	Resources:
+		- http://reactkungfu.com/2015/07/approaches-to-testing-react-components-an-overview/
+
+	Libraries:
+		react-addons-test-utils
+		chai
+		chai-jquery
+		jsdom
+		mocha
+		sinon (for mocking)
+		
+Tests Keywords:
+	- describe - use describe to group similar tests
+	- it - one single test
+	- expect - make assertion about things we testing
+	- before
+	- beforeEach
+	- after 
+	- afterEach
+		
+	 
+			Example:
+				describe('App', () => {
+					it('Shows correct test', () => {
+						expect();
+					});
+				});
+				
+expect(component) - expect return object
+	Examples:
+	expect(component).to.contain('React simple starter');
+	
+Best Practice:
+	- one React Component with one test file
+		Example:
+			app/components/comment_box.js
+			test/components/comment_box_test.js	
+			
+	- we have to declare variables that we use in before and beforeEach, so it can be used in tests
+		Example:
+				describe('CommentBox', () => {
+					let component;
+
+					beforeEach(() => {
+						component = renderComponent(CommentBox);
+					});
+
+					it('has the correct class', () => {
+						expect(component).to.have.class('comment-box');
+					});
+					
+					...
+				});
+			
+Mocha:
+	- when we add new test file, live reloading doesnt work. we have to restart
+	
+Chai-jQuery
+		- expect(component).to.have.class('comment-box');
+		- expect(component.find('textarea')).to.exist;
+		- expect(component.find('button')).to.exist;
+		
+Karma
+	-  karma start
+	
+Chai
+		- eql - deeply compare values
+			Examples:
+					expect([1,2,3]).to.eql([1,2,3]); //true
+					expect([1,2,3]).to.equall([1,2,3]); //false
+					
+		- equal - Asserts that the target is strictly equal (===) to value. 
+							Alternately, if the deep flag is set, asserts that the target is deeply equal to value. Compares objects rather then data
+							
+React Addons Test Utils				
+	- renderIntoDocument()
+			Example:	
+				it('should format seconds', () => {
+					let clock = TestUtils.renderIntoDocument(<Clock/>);
+				});
+	- set state in test - using setState() like in normal React
+				let clock = TestUtils.renderIntoDocument(<Clock/>);
+				clock.setState({ count: 10 });
+				
+	- scryRenderedComponentsWithType - find all child components(or some items that are not components) that are rendered in parent component.
+		Syntax:
+			let arr_of_components = scryRenderedComponentsWithType(parentComponent, childItem)
+			
+	- simulation:
+			Syntax:
+					TestUtils.Simulate.{eventName}(element, [eventData]);
+					
+			Simulate has a method for every event that React understands.
+			Examples:
+					TestUtils.Simulate.change()
+					TestUtils.Simulate.click()
+					
+				
+				
+			
+				
+Sinon
+	
+Sinon-Chai
+	- https://github.com/domenic/sinon-chai
+			

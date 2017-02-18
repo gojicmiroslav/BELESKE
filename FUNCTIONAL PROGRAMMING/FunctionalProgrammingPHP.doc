@@ -1,0 +1,53 @@
+FUNCTIONAL PROGRAMMING - PHP
+
+Filter
+	- array_filter(arr, callback)
+	
+Anonymous functions - Closures
+	- Anonymous functions, also known as closures, allow the creation of functions which have no specified name. 
+		They are most useful as the value of callback parameters, but they have many other uses.
+	- Anonymous functions are implemented using the Closure class.
+	- Closures can also be used as the values of variables; PHP automatically converts such expressions into instances of the Closure 
+		internal class. Assigning a closure to a variable uses the same syntax as any other assignment, including the trailing semicolon:
+		Example:
+			$greet = function($name)
+			{
+				printf("Hello %s\r\n", $name);
+			};
+
+			$greet('World');
+	
+	- Inheriting variables from the parent scope - keyword "use"
+		- Closures may also inherit variables from the parent scope. Any such variables must be passed to the use language construct.
+		- Two types:
+				1. Inherit by value
+						Closures makes a "snapshot" of variables value, if that value are change, slosure doesn't no about updated value.
+						Example:
+								$message = "Message";
+
+								$example = function() use ($message){
+									var_dump($message);
+								};
+								$example(); // "Message"
+								$message = "New Message";
+								$example(); // "Message"
+				2. Inherit by reference - &
+						Example:
+								$message = "Message";
+
+								$example = function() use (&$message){
+									var_dump($message);
+								};
+								$example(); // "Message"
+								$message = "New Message";
+								$example(); // "New Message"					
+		
+	- Closure Class - class used to represent anonymous functions.	
+	- Closures may also inherit variables from the parent scope. Any such variables must be passed to the use language construct.
+	- Closures can also accept regular arguments
+		Example:
+			$message = "Message";
+			$example = function ($arg) use ($message) {
+				var_dump($arg . ' ' . $message);
+			};
+			$example("hello"); // "hello Message" 

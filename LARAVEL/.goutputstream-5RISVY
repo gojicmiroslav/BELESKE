@@ -1,0 +1,144 @@
+DATABASE
+
+* Fetch data from database - 2 ways:
+	1) DB Query builder
+	2) Eloquent ORM
+
+IMPORTANT - before use mysql DB, we have to do two things:
+	- create database
+	- set database name, username and password in .env file
+
+
+DB Query Builder
+	Example;
+		DB::table('cards')->insert(['title' => 'My new card', 'created_at' => new DateTime(), 'updated_at' => new DateTime()]);
+		DB::table('cards')->get();
+		DB::table('cards')->where('title', 'My new cards')->first();
+		DB::table('cards')->where('title', 'My new cards')->delete();
+
+
+ELOQUENT
+	- where() must end with get().Example:
+			Post::where('title', 'Title')->orderBy('title')->take(1)->get();
+	- save() - insert or update model
+	- create() - save a new model in a single line.Accepts an array of attributes.  The inserted model instance will be   							returned to you from the method.However, before doing so, you will need to specify either a fillable or 							guarded attribute on the model,as all Eloquent models protect against mass-assignment by default.
+	- update() - The update method expects an array of column and value pairs representing the columns that should be 							updated
+	- delete() - delete model on a model instance. We first have to retrieve the model from the database.
+			$post = Post::find($id);
+			$post->delete();
+
+	- destroy() - if you know the primary key of the model, you may delete the model without retrieving it
+			Post::destroy(1); // $id - 1
+
+	- deleteing models by query
+			Post::where('active', 0)->delete();
+
+Builder - Illuminate/Database/Eloquent/Builder
+
+Many-to-many relations:
+	- php artisan make:migration create_roles_users_table --create=role_user
+	- add to migration:
+				Schema::create('role_user', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('user_id');
+            $table->integer('role_id');
+            $table->timestamps();
+        });
+        
+ASSOCIATION
+	One-To-Many
+		- Article |-> Comment
+		// in migration
+		Schema::create('comments', function (Blueprint $table) {
+				$table->increments('id');
+				$table->integer('article_id')->unsigned()->index();
+				$table->text('body');
+				$table->timestamps();
+		});
+		
+		// hard coding one-to-many in tinker
+		$article = App\Article::first();
+		$comment = new App\Comment;
+		$comment->body = 'Some text';
+		$comment->article_id = 1;
+		$comment->save();
+		
+		//with relationshis
+		// article.rb model
+		public function comments()
+		{
+			return hasMany('App\Comment');
+			//or ..
+			return hasMany(App\Comment::class);
+		}
+		
+		$article = App\Article::first();
+		$article->comments; // return Eloquent\Collection (array)
+		$article->comments[0];
+		$article->comments->first(); // we can do this since it returns Collection
+		
+		$article->comments(); // return relation\HasMany
+		$article->comments()->first()->body;
+		
+		
+IMPORTANT - $article->comments()->first() vs $article->comments->first()
+	* $article->comments-first() - fetching a collection of i.e 500 records and performing that query. Once we have
+			that collection(glorifide array) we are getting just the first item of that array collection.
+			
+	* $article->comments()->first() - we modifing the database query itself 
+
+TINKER
+	- php artisan tinker
+	- Example:
+			App\Post::all();
+			// Creating data
+			$post = App\Post::create(['title'=> 'PHP From Thinker', 'content'=> 'PHP content from tinker']);
+			$post = new App\Post;
+			$post->title = "Another title from tinker";
+			$post->save()
+
+			// using bcrypt() function for password
+			App\User::create(['name'=> 'Miroslav Gojic', 'email'=> 'miroslav@gmail.com', 'password'=> bcrypt('deronje')]);
+
+			//Finding records
+			$post = App\Post::find(1);
+			$post = App\Post::where('user_id', 1)->first();
+			$post = App\Post::whereId(1)->first();
+
+			//Update data
+			$post = App\Post::find(1);
+			$post->title = "Updated title from tinker";
+			$post->save();
+
+			//Delete data
+			$post->delete();
+			App\Post::destroy(1);
+
+			//Relations
+			$user = App\User::whereId(1)->first();
+			$user->posts;
+
+RELATION CRUDs
+	One to One
+		- Example:
+				//create
+				$user = User::findOrFail($id);
+				$address = new Address(['name' => 'Djure Jaksica 6 Deronje']);
+				$user->address()->save($address);
+
+				//update
+				$address = Addrees::where('user_id', $user_id);
+				//or..
+				$address = Addrees::where('user_id', '=', $user_id);
+				//or..
+				$address = Addrees::whereUserId($user_id)->first(); //camel-case
+				$address->name = "Some new Address";
+				$address->save();
+
+				//read
+				$user = User::findOrFail($user_id);
+				echo $user->address->name;
+
+				//delete
+				$user = User::findOrFail($user_id);
+				$user->address->delete();

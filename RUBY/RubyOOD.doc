@@ -1,0 +1,23 @@
+RubyOOD
+
+Constructor with Hash parameters:
+	def initialize(arr = {})
+		@name = arr.fetch(:name, "Default")
+	end
+	
+Inheritance
+	- if we want to enforce to child overide parents method, we raise exception in parent method 
+		Example:
+			class Action
+				def some_action
+					raise "You must implement this method"
+				end
+			end
+			
+			class ChildAction < Action
+				def some_action
+					...
+				end
+			end
+
+

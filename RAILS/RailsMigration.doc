@@ -1,0 +1,64 @@
+RAILS MIGRATIONS
+	 * add_reference(table_name, *args)
+				- add refence column in table. The reference column is integer by default, the :type option can be used to specify a different type.
+				- alias: add_belongs_to	
+				- options hash:
+						:type - the reference column type, defaults to :integer
+						:index - add an appropriate index, defaults to false
+						:foreign_key - Add an appropriate foreign key constraint. Defaults to false(This is alias for: add_foreign_key)
+						:null - Whether the column allows nulls. Defaults to true.
+						:polymorphic - Whether an additional _type column should be added. Defaults to false.
+				- can be also added in migration:
+						create_table :comments do |t|
+							...
+				      t.references :article, foreign_key: true
+							...
+				    end
+
+				Example:
+						add_reference(:products, :user) # creates a user_id integer column
+						add_reference(:products, :user, type: :string) # creates a user_id string column
+						add_reference(:products, :user, index: true) # creates a user_id integer column and index
+						add_reference(:products, :user, index: { unique: true }) # creates a user_id integer column with unique index
+						add_reference(:products, :user, index: { name: 'my_user_index' }) # creates a user_id integer column with index	name					
+						add_reference(:products, :user, :foreign_key: true) # creates a user_id integer column and foreign key
+	
+
+		* add_foreign_key(referencirajuca_tabela, referencirana_tabela, options = {})
+				- The foreign key will be named after the following pattern: fk_rails_<identifier>.
+					Identifier is a 10 character long string which is deterministically generated from the from_table and column. 
+					A custom name can be specified with the :name option.
+				- options hash:
+						:column - The foreign key column name on from_table. Defaults to to_table.singularize + "_id"
+						:primary_key - The primary key column name on to_table. Defaults to id.
+						:name - The constraint name. Defaults to fk_rails_<identifier>.
+						:on_delete - Action that happens ON DELETE. Valid values are :nullify, :cascade and :restrict
+						:on_update - Action that happens ON UPDATE. Valid values are :nullify, :cascade and :restrict
+				
+				Examples:
+						add_foreign_key :posts, :users
+
+						# generates
+						ALTER TABLE `posts`
+						ADD CONSTRAINT `posts_user_id_fk`
+						FOREIGN KEY (`user_id`) REFERENCES `users`(id);
+
+						# creating a foreign key on a specific column
+						add_foreign_key :posts, :users, column: :author_id, primary_key: "lng_id"
+
+						# generates
+						ALTER TABLE "posts" 
+						ADD CONSTRAINT fk_rails_58ca3d3a82 
+						FOREIGN KEY ("author_id") REFERENCES "users" ("lng_id")
+
+						# creating a cascading foreign key
+					  add_foreign_key :posts, :users, on_delete: :cascade
+
+						# generates
+						ALTER TABLE `posts`
+						ADD CONSTRAINT `posts_user_id_fk`
+						FOREIGN KEY (`user_id`) REFERENCES `users`(id)
+						ON DELETE CASCADE;
+						
+
+							

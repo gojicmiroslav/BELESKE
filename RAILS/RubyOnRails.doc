@@ -1,0 +1,189 @@
+SOURCES:
+	- http://www.rubydoc.info/
+
+RAILS ROUTING
+	- singular resource:
+		get 'profile', to: 'users#show' # or
+		get 'profile', to: :show, controller: :users
+
+	- adding more RESTful actions - You are not limited to the seven routes that RESTful routing 	creates by default. If you like, you may add additional routes that apply to the collection or individual members of the collection.
+	To add a member route, just add a member block into the resource block:
+		resources :photos do
+			member do
+				get 'preview'
+			end
+		end
+
+	This will recognize /photos/1/preview with GET, and route to the preview action of PhotosController, with the resource id value passed in params[:id]. It will also create the preview_photo_url and preview_photo_path helpers.
+
+	If you don't have multiple member routes, you can also pass :on to a route, eliminating the block:
+		resources :photos do
+  			get 'preview', on: :member
+		end
+
+	Non-Resourceful Routes
+		- bound parameters:
+			get ':controller(/:action(/:id))'
+
+		If an incoming request of /photos/show/1 is processed by this route (because it hasn't matched any previous route in the file), then the result will be to invoke the show action of the PhotosController, and to make the final parameter "1" available as params[:id]. This route will also route the incoming request of /photos to PhotosController#index, since :action and :id are optional parameters, denoted by parentheses.
+
+		- dynamic segments
+			You can set up as many dynamic segments within a regular route as you like. Anything other than :controller or :action will be available to the action as part of params. If you set up this route:
+				get ':controller/:action/:id/:user_id'
+
+			An incoming path of /photos/show/1/2 will be dispatched to the show action of the PhotosController. params[:id] will be "1", and params[:user_id] will be "2".		
+
+		- static segments
+			You can specify static segments when creating a route by not prepending a colon to a fragment:
+				get ':controller/:action/:id/with_user/:user_id'
+
+			This route would respond to paths such as /photos/show/1/with_user/2. In this case, params would be { controller: 'photos', action: 'show', id: '1', user_id: '2' }.
+
+		- the query string
+			The params will also include any parameters from the query string. For example, with this route:
+				get ':controller/:action/:id'
+
+			An incoming path of /photos/show/1?user_id=2 will be dispatched to the show action of the Photos controller. params will be { controller: 'photos', action: 'show', id: '1', user_id: '2' }.
+
+		- defining defaults
+			You can also define other defaults in a route by supplying a hash for the :defaults option. This even applies to parameters that you do not specify as dynamic segments. For example:
+				get 'photos/:id', to: 'photos#show', defaults: { format: 'jpg' }
+
+			Rails would match photos/12 to the show action of PhotosController, and set params[:format] to "jpg".
+
+		- naming routes
+			You can specify a name for any route using the :as option:
+				get 'exit', to: 'sessions#destroy', as: :logout
+
+			This will create logout_path and logout_url as named helpers in your application. Calling logout_path will return /exit
+
+			You can also use this to override routing methods defined by resources, like this:
+				get ':username', to: 'users#show', as: :user
+
+			This will define a user_path method that will be available in controllers, helpers and views that will go to a route such as /bob. Inside the show action of UsersController, params[:username] will contain the username for the user. Change :username in the route definition if you do not want your parameter name to be :username.
+
+		- redirect
+			You can redirect any path to another path using the redirect helper in your router:
+				get '/stories', to: redirect('/articles')
+
+			You can also reuse dynamic segments from the match in the path to redirect to:
+				get '/stories/:name', to: redirect('/articles/%{name}')
+
+			You can also provide a block to redirect, which receives the symbolized path parameters and the request object:
+				get '/stories/:name', to: redirect { |path_params, req| "/	articles/#{path_params[:name].pluralize}" }
+				get '/stories', to: redirect { |path_params, req| "/articles/#{req.subdomain}" }
+
+			Please note that default redirection is a 301 "Moved Permanently" redirect. Keep in mind that some web browsers or proxy servers will cache this type of redirect, making the old page inaccessible. You can use the :status option to change the response status:
+				get '/stories/:name', to: redirect('/articles/%{name}', status: 302)
+
+	Customizing Resourceful Routes
+
+
+RAILS COMMAND LINE
+	- all commands can run with -h or --help
+
+	Rails console
+		- rails c
+		- Inside the rails console you have access to the app and helper instances.
+			With the app method you can access url and path helpers, as well as do requests.
+				>> app.root_path
+				=> "/"
+ 
+				>> app.get _
+				Started GET "/" for 127.0.0.1 at 2014-06-19 10:41:57 -0300
+
+			With the helper method it is possible to access Rails and your application's helpers.
+				>> helper.time_ago_in_words 30.days.ago
+				=> "about 1 month"
+ 
+				>> helper.my_custom_helper
+				=> "my custom helper"	
+
+		- bin/rails
+			Since Rails 5.0+ has rake commands built into the rails executable, bin/rails is the new default for running commands.
+			You can get a list of bin/rails tasks available to you, which will often depend on your current directory, by typing bin/rails --help. Each task has a description, and should help you find the thing you need.
+
+DATABASE
+	- rails db:create - creates development and test databases
+
+RAILS GENERATOR
+	- rails g - check options for rails generator
+
+ACTIVE JOB
+	- in rails c
+	- to get adapter:
+				ActiveJob::Base.queue_adapter
+	- we can change adapter in config/environments or in initializers/.
+		Example:		
+				// config/initializers/active_job_settings.rb
+				ActiveJob::Base.queue_adapter = :inline
+				// or..
+				ActiveJob::Base.queue_adapter = :delayed_job
+	- Rails doesn'e make shure that we have installed :delayed_job, we have to do it ourselves. In Gemfile add:
+			gem 'delayed_job_active_record'
+			gem 'daemons'
+
+			// get delayed jobs count
+			Delayed::Job.count #=> example: 1
+			
+			// start delayed job
+			./bin/delayed_job run # or start
+
+			Delayed::Job.count #=> now is 0
+
+  - URL for ActiveJob adapters: http://api.rubyonrails.org/classes/ActiveJob/QueueAdapters.html
+
+FLASH
+	- the flash is a special part of a session which is cleared with each request. This means that values stored there
+		will only be available in the next request.
+		Example:
+			flash[:notice] = "You have successfully logged out."
+	- it is possible to assign a flash message as part of the redirection.
+		Example:
+			redirect_to root_url, notice: "You have successfully logged out."
+	- If you want a flash value to be carried over to another request, use the keep method:
+		Example:
+			class MainController < ApplicationController
+					# Let's say this action corresponds to root_url, but you want
+					# all requests here to be redirected to UsersController#index.
+					# If an action sets the flash and redirects here, the values
+					# would normally be lost when another redirect happens, but you
+					# can use 'keep' to make it persist for another request.
+					def index
+							# Will persist all flash values.
+							flash.keep
+			 
+							# You can also use a key to keep only some kind of value.
+							# flash.keep(:notice)
+							redirect_to users_url
+					end
+			end
+
+Using data attribute in jquery's AJAX call with Rails strong parameters:
+		$.ajax({
+			...
+			data: {
+	      article: {
+          name: name,
+          checked: false
+        }
+		  }
+			...
+		});
+
+    // in Article controller
+    def create
+    	@article = Article.save(article_params)
+    	...
+    end
+
+    private
+
+    def article_params
+    	params.require(:article).permit(:name, :checked)
+    end
+
+RAILS API
+	
+
+

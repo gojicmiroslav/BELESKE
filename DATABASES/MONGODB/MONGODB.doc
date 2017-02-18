@@ -1,0 +1,31 @@
+MongoDB
+	Run MongoDB:
+		sudo service mongod start
+		sudo service mongod stop
+		sudo service mongod restart	
+	
+Start:
+		sudo mongod
+		sudo mongo
+
+Command:
+	use bookstore; // creates new db and switch to it
+	db.createCollection('books'); // creates new collection on current db
+	db.genres.insert({ name:'Suspense' }); // inserts new data in genre collection
+	db.genres.find(); // finds all data in collection
+		
+Query Operations:
+	- Conditional operators:
+			- $all, $exists, $mod, $ne, $in, $nin, $nor, $or, $size, $type, $lt, $lte, $gt, $gte
+
+			//find all posts with any tags
+			> db.posts.find({ tags: { $exists: true } })
+
+			//find posts matching regular expression
+			> db.posts.find({ speaker:/^cha*/i })
+
+			//count posts by author
+			> db.posts.find({ speaker: 'Chander Dhall' }).count()
+
+	
+

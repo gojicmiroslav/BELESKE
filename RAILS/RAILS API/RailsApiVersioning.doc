@@ -1,0 +1,53 @@
+RAILS API VERSIONING
+
+Versioning
+	-  when we build API we will make changes that will brake API. Best way to deal with this is versioning.
+	   Example:
+		# routes
+		namespace :api, defaults: { format: :json } do
+			namespace :v1
+		end
+
+Versioning - Carlos Souza
+	Semantic versioning
+		- http://semver.org
+		- works great for software libraries, not so great for services
+		- 2.0.0
+			major - incompatible changes
+			minor - backwards compatible changes
+			patch - backward-compatible bug fixes
+
+	Versioning services
+		- only major version
+		- changes cannot break existing clients
+		- no need to bump version on compatible changes
+		- compatible changes:	
+			- addition of a new format(i.e. XML, JSON)
+			- addition of new property on a resource
+			- renaming of an end-point(use 3xx status code)
+
+Versioning - BOOK
+	- mkdir app/controllers/api/v1
+	- #routes.rb
+		namespace :api, defaults: { format: :json }, constraints: { subdomain: 'api' }, path: '/'  do
+	    		scope module: :v1 do
+		     		 # We are going to list our resources here
+    			end
+  		end
+	- By this point the API is now scoped via de URL. For example with the current configuration an end point for retrieving a product would be like:
+		http://api.marketplace.dev/v1/products/1
+
+	Improving the versioning
+		- we need to improve the API version access through HTTP Headers. This has two benefits:
+				- Removes the version from the URL
+				- The API description is handle through request headers
+
+		HTTP Request
+			HTTP header fields are components of the message header of requests and responses in the Hypertext Transfer Protocol (HTTP). They define the operating parameters of an HTTP transaction.
+			
+			Header Name	Description																												Example
+			Accept			Content-Types that are acceptable for the response																		Accept: text/plain
+			Authorization	Authentication credentials for HTTP authentication																		Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==
+			Content-Type	The MIME type of the body of the request (used with POST and PUT requests)											Content-Type: application/x-www-form-urlencoded
+			Origin			Initiates a request for cross-origin resource sharing (asks server for an ‘Access-Control-Allow-Origin’ response header) .	Origin: http://www.example-social-network.com
+			User-Agent		The user agent string of the user agent																					User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:12.0) Gecko/20100101 Firefox/21.0	

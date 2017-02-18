@@ -1,0 +1,105 @@
+AJAX
+	- Asynchronous JavaScript and XML
+	- Asynchronous - content doesn't load at the same time
+  - browser send and receives data in background
+  
+* AJAX Request  
+  - AJAX Request - enabled by XMLHttpRequest object(JS)
+  - XMLHttpRequest methods:
+			new
+			open(metohd, url, async)
+			send()
+				
+	- GET request - for retrieving data
+	- POST request - for sending/changing data
+			- need to change header for content type
+					setRequestHeader(header, value)
+					
+			Example for forms - header "Content-type"
+				setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+				// x-www-form-urlencoded means: this form contain data	
+				//send data as argument of send() method
+  
+	- Example - GET
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET", "script.php", true); // async = true
+			xhr.send();
+			
+	- Example POST - Sending Forms
+			var xhr = new XMLHttpRequest();
+			xhr.open('POST', 'form_process.php', true);
+			setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+			xhr.send("firstname=Bob&lastname=Smith");
+			
+* AJAX Response
+		- response can be text or XML (responseText, responseXML)
+			Example:
+				var text = xhr.responseText;
+				var xml = responseXML;
+		- usually we have to parse the response:
+				- XML
+				- JSON
+				
+		- Example of JSON
+				- what we getting back from the server is string
+					
+					JS object:
+						var person = {
+							'firstname': 'Bob',
+							'lastname': 'Smith'
+						}
+						
+					JSON response from server - just a string
+						var response = "{
+							'firstname': 'Bob',
+							'lastname': 'Smith'
+						}";
+						
+					// we have to parse that string - turn it to JSON object
+					// when working with XML, responseXML does this step automatically
+					var person = JSON.parse(response);
+					
+				  // Full example with JSON - it wont work because we did not wait for response from server
+				 	var xhr = new XMLHttpRequest();
+					xhr.open("GET", "script.php", true); // async = true
+					xhr.send();
+					var person = JSON.parse(xhr.responseText);
+					var target = document.getElementById("main");
+					taget.innerHTML = person.firstname;
+					
+* State
+	- XMLHttpRequest has a method readyState
+	- readyState - indicate the status of current XMLHttpRequest
+	- readyState values:
+			0 - connection created but not opened
+			1 - connection opened
+			2 - request sent, received by server
+			3 - response in progress (we've starting to get data, but only partial data)
+			4 - response complete (success or failure)
+			
+		state move from 0 -> 1 -> 2 -> 3 -> 4
+		
+	- onreadystatechange - detect when state is changed
+			- receives JS function
+			- called each time readyState changes
+			
+		Example:
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET", "script.php", true); // async = true
+			
+			xhr.onreadystatechange = function(){
+				if(xhr.readyState === 4 && xhr.status == 200){
+				  var person = JSON.parse(xhr.responseText);
+					var target = document.getElementById("main");
+					taget.innerHTML = person.firstname;
+				}
+			};
+			
+			xhr.send();
+						
+			
+					
+					
+					
+					
+					

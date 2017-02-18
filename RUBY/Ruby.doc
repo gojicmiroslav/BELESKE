@@ -1,0 +1,445 @@
+Topic:
+	- proc
+ 	- blocs
+	- mixins
+	- modules
+	- symbols are immutable and reusable, retaining the same object_id
+
+Global variables are declared with the ‘$’ symbol and can be declared and used anywhere within your program
+
+Setter and getter methods in Ruby are generated with the attr_accessor method. attr_accessor is used to generate 		instance variables for data that’s not stored in your database column.
+
+Difference between class and instance variables: Class variables are created with the prefix ‘@@’ and are shared by all objects in a class. Instance variables are created with the prefix ‘@’ and belong to a single object within a class.
+
+Proc
+	- blocks of code that are not executed immediately
+  - call - invokes Proc blocks
+		Example:
+			discount = Proc.new do |price|
+				price - (price * 0.15)
+			end
+
+			discount.call(100) #85
+
+- we can passing function to another function as argument using Proc
+	Example:
+		discount = Proc.new do |price|
+			price - (price * 0.15)
+		end
+
+		def map(list, fn)
+			results = []
+			list.each do |item|
+				results << fn.call(item)
+			end
+			results
+		end
+
+		prices = [10,20,30,40,50]
+		puts map(prices, discount)
+
+	 - passing proc object to built-in object method:
+			prices.map(&discount) #=> [8.5, 17.00, 25.5, 34.0, 42.5]
+
+Method map and map!:
+	map:
+		- invokes the given block once for each element of self. Creates a new array containing the values returned by the 				block.
+		- Syntax: map{ |item| block } -> new_arr
+	
+	map!:
+		- invokes the given block once for each element of self, replacing the original element with the value returned by 				the block 
+		- Syntax: map!{ |item| block } -> arr
+
+	with_index:
+		- both of these functions have a option with_index
+
+	&proc_object
+		- we can pass in to map function a proc object.
+
+	block
+		- we can pass in to the map function a do-end block of code
+
+	Examples:
+		a = [10, 20, 30, 40, 50]
+
+		# map
+		new_arr = a.map { |item| item + 10 }
+		print "Map\n"
+		puts new_arr
+
+		# map with_index
+		new_arr = a.map.with_index { |item, index| item + index }
+		print "Map With Index\n"
+		puts new_arr
+
+		# map!
+		a.map! { |item| item + 10 }
+		print "Map!\n"
+		puts a
+
+		# map! with_index
+		new_arr = a.map!.with_index { |item, index| item + index }
+		print "Map With Index\n"
+		puts new_arr
+
+		# &proc object
+		prices = [100, 75, 80, 90, 50]
+		tax = Proc.new do |price|
+			price + (price * 0.2)
+		end
+		new_prices = prices.map(&tax)
+
+		# do-end block
+		new_prices2 = prices.map do |price|
+			price + (price * 0.2)
+		end
+		print "New prices 2\n"
+		puts new_prices2
+
+Method block_given?
+	- Returns true if yield would execute a block in the current context
+		Example:
+				def check_for_block
+					if block_given?
+						yield
+					else
+						"No block given"
+					end
+				end
+
+				puts check_for_block
+				puts check_for_block { "I am block" }
+				check_for_block do
+					puts "I am block"
+				end
+	
+Method yield
+	- stops a method at this point, then runs the block of code that is passed in, and once that block of code has been finished, it regimes 
+		method where he have left off 	
+	- we can pass an arguments
+
+		Example:
+				def print_and_yield
+					puts "Before calling yield"
+					yield
+					puts "After calling yield"
+				end
+
+				print_and_yield do
+					puts "I am the block"
+				end
+
+				# yield with arguments
+				def each_in_list(list)
+					for i in 0..(list.length - 1)
+						yield(list[i])
+					end
+				end
+
+				each_in_list([1,2,3,4,5]) do |x|
+					puts x * 2
+				end
+
+				def map_words(sentence)
+					results = []
+					sentence.split.each do |word|
+						results << yield(word)
+					end
+					results
+				end
+
+				map_words("My name is Misa") do |word|
+					puts "Word #{word} is size of #{word.size}"
+				end
+
+Lambda
+	- special type of Proc object
+		Examples:
+			cheap = lambda { |price| price < 50 }
+			puts cheap.call(100)
+			# or
+			cheap2 = -> (price) { price < 50 }
+			puts cheap2.call(20)
+
+			# multiple arguments
+			cheaper = -> (price1, price2) { [price1, price2].min }
+			puts "Cheaper: #{cheaper.call(100,30)}" 
+
+	
+Lambda vs Proc:
+		p = Proc.new { |x| puts "You call me with the argument #{x.inspect}"}
+		l = -> x { puts "You call me with the argument #{x.inspect}" }
+		p.call #=> "You call me with the argument nil"
+		l.call #=> ArgumentError
+
+Currying
+	- calling proc objects with some arguments now, and some arguments later
+	- curry - returns a curried proc.Returns a curried proc. If the optional arity argument is given, it determines the 		number of arguments. A curried proc receives some arguments. If a sufficient number of arguments are supplied, it 		passes the supplied arguments to the original proc and returns the result. Otherwise, returns another curried proc 			that takes the rest of arguments.
+		Examples:
+			mult = -> x,y { x * y }
+			double = mult.curry[2]
+			p double[7] #=> 14
+
+			b = proc {|x, y, z| (x||0) + (y||0) + (z||0) }
+			p b.curry[1][2][3]           #=> 6
+			p b.curry[1, 2][3, 4]        #=> 6
+			p b.curry(5)[1][2][3][4][5]  #=> 6
+			p b.curry(5)[1, 2][3, 4][5]  #=> 6
+			p b.curry(1)[1]              #=> 1
+
+			b = proc {|x, y, z, *w| (x||0) + (y||0) + (z||0) + w.inject(0, &:+) }
+			p b.curry[1][2][3]           #=> 6
+			p b.curry[1, 2][3, 4]        #=> 10
+			p b.curry(5)[1][2][3][4][5]  #=> 15
+			p b.curry(5)[1, 2][3, 4][5]  #=> 15
+			p b.curry(1)[1]              #=> 1
+
+			b = lambda {|x, y, z| (x||0) + (y||0) + (z||0) }
+			p b.curry[1][2][3]           #=> 6
+			p b.curry[1, 2][3, 4]        #=> wrong number of arguments (4 for 3)
+			p b.curry(5)                 #=> wrong number of arguments (5 for 3)
+			p b.curry(1)                 #=> wrong number of arguments (1 for 3)
+
+			b = lambda {|x, y, z, *w| (x||0) + (y||0) + (z||0) + w.inject(0, &:+) }
+			p b.curry[1][2][3]           #=> 6
+			p b.curry[1, 2][3, 4]        #=> 10
+			p b.curry(5)[1][2][3][4][5]  #=> 15
+			p b.curry(5)[1, 2][3, 4][5]  #=> 15
+			p b.curry(1)                 #=> wrong number of arguments (1 for 3)
+
+			b = proc { :foo }
+			p b.curry[]                  #=> :foo
+
+Recommended functional techniques:
+	- map, select, inject,...
+	- blocks for lists of data	
+  - lambdas for running code later
+
+OBJECT-ORIENTED
+	Object in Ruby are defined by two things:
+		- local state
+		- objects can send message to each other. Messages are methods calls.
+	- in Ruby everything is object
+	- Classes in Ruby a also classes
+			class User end
+			john = User.new;
+			User.class #=> Class, class is object of Class
+			module M; end
+			M.class #=> Module, module are also object
+			p = Proc.new{ puts "I am..."}
+			p.class #=> blocks are also objects
+
+	Definition of object:
+		A collection of references to other objects(local state), that respond to certain messages.
+
+	- every object has special method called "method", and thing that is return is object of Method class.
+		Example:
+			class User
+				def hi
+					puts "Hi from User"
+				end
+			end
+			user = User.new
+			user.method(:hi) #=> Method class
+
+Primitive data types
+	- their state can't be represent with another object;
+	- String, Numbers(Float, Fixnum, Rational), Array, Hash, Bollean(True, False), Symbol,... 
+	- but Ruby doens't want to break the idea that everything is an object, so we can call a methods on this primitive types
+	Example:
+		a = 44
+		a.class #=> Fixnum
+		a.methods
+		a.even? #=> true
+	- this special object we create without using syntax: object = Class.new, but directly: a = 44
+
+Class
+	- local state in object is set using instance variable(@variable)
+	- in Ruby local state of the object is the set of his instance variables
+		Example:
+			def User
+				def initialize(age)
+					@age = age
+				end
+			end
+	
+	- clasess are objects to, so it means that they have methods also
+	- method new is predefined in every class
+			user = User.new
+	- we can create new object using static methods(prefix self)
+		Example:
+			class User
+				def self.new_voter(age)
+					new(age)	
+				end
+			end
+			voter = User.new_voter(44)
+
+Methods
+	- conventions
+			class User
+				def initialize(name)
+					@name = name
+				end
+
+				def name
+					@name
+				end
+
+				def name=(name)
+					@name = name
+				end
+			end
+
+			misa = User.new("Misa Gojic")
+			puts misa.name
+			misa.name = "Miroslav Gojic"
+			puts misa.name
+
+	- method can take an optional parameter
+			def greet(name, informal=false)
+				if informal
+					"Hi #{name}"
+				else
+					"Hello #{name}"
+				end
+			end
+
+			puts greet("Misa", true)
+  - we can have multiple optional parameters, only rules is it must be first or the last parameters. We can't 
+		make the first and last parameter an optional
+  - to change optional third last parameter, we have to give value for all previous parameters, even if we don't
+		want to change those values		
+		Example:			
+				def greet(name, informal=true, shout=false)
+					greeting = if informal then "Hi" else "Hello" end
+					message = "#{greeting} #{name}"
+
+					if shout
+						message.upcase
+					else
+						message
+					end
+				end
+
+				puts greet("Misa", false, true)
+
+	- if we using a hashes, we change only desired parameter, if there are multiple parameters before him
+		Example:
+				def greet(name, informal: true, shout: false)
+					greeting = if informal then "Hi" else "Hello" end
+					message = "#{greeting} #{name}"
+
+					if shout
+						message.upcase
+					else
+						message
+					end
+				end
+
+				puts greet("Misa", shout: true)
+	- every method in Ruby returns a value
+
+Duck Typing
+	- if it walks like a duck, and quacks like a duck it pobably is a duck
+	- we don't care what the object is, but how object behaves
+		Example:
+			def duck_info(obj)
+				if obj.respond_to?(:name)
+					obj.name
+				else
+					obj.to_s
+				end
+			end
+
+			puts duck_info(User.new)
+
+MODULES
+	- a Module is a collection of methods and constants.	
+	- the methods in a module may be:
+				- instance methods
+				- module methods
+	- Instants methods appear as methods in a class when the module is included, module methods do not
+	- conversely(obrnuto), module methods may be called without creating an ecapsulating object, while instance methods may not
+	- Modules are a way of grouping together methods, classes, and constants. Modules give you two major benefits:
+				- Modules provide a namespace and prevent name clashes.
+				- Modules implement the mixin facility. 
+	- a module can't have instances, because a module isn't a class, we can include a module within a class definition.When this happens, all the
+		module's instance methods are suddenly available as methods in the class as well. They get mixed in
+
+	Mixins
+		- they pretty much eliminate the need for multiple inheritance, providing a facility called a mixin.
+
+	Include statement
+		- it has nothing to do with files
+				- C programmers use a preprocessor directive called #include to insert the contents of one file into another during compilation. The Ruby
+ 					include statement simply makes a reference to a named module. If that module is in a separate file, you must use require to drag that 
+					file in before using include
+		- a Ruby include does not simply copy the module's instance methods into the class. 
+				- Instead, it makes a reference from the class to the included module.If multiple classes include that module, they'll all point to the same
+				  thing. If you change the definition of a method within a module, even while your program is running, all classes that include that module
+ 					will exhibit the new behavior.[Of course, we're speaking only of methods here. Instance variables are always per-object, for example.]
+ 	- we should put "self" or module name inf front of a method name
+		Example:
+			module Greeter
+				def self.greet
+					...
+				end
+				
+				# or...
+				def Greeter.greet
+					...
+				end
+			end
+	
+	
+Ruby Loops
+	* while, until, for
+	* break, next, redo, retry
+		
+	* While - executes code while conditional is "true"
+			- Syntax:
+					while conditional do
+						code
+					end
+
+					Example:
+						while $i < $num  do
+							puts("Inside the loop i = #$i" )
+							$i +=1
+						end
+			- while modifier
+					Syntax:
+						code while condition
+						//or
+						begin
+							code
+						end while conditional
+						
+	* Until - executes code while conditional is "false".
+			- Syntax:
+					until conditional do
+						code
+					end
+			- until modifier
+					code until conditional
+					//or
+					begin
+						code
+					end until conditional
+					
+	* For
+			- Syntax:
+					for variable [, variable, ...] in expression do
+						code
+					end
+					
+				Example:
+					for i in 0..5 do
+						puts i
+					end
+		
+			
+
+
+				

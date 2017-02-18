@@ -1,0 +1,45 @@
+RAILS
+	Resources:
+		- https://gorails.com/
+		- https://www.destroyallsoftware.com
+		- https://www.rubytapas.com/
+		
+* Console
+		- we can specify environment for the console
+				bin/rails console staging
+				
+		- If you wish to test out some code without changing any data(any modification in DB will be rollback), 
+			we can do that by invoking: 
+				bin/rails console --sandbox.
+				
+* rails console
+		- Inside the rails console you have access to the app and helper instances
+		- With the helper method it is possible to access Rails and your application's helpers.
+		- Example:
+				app.root_path 						#=> '/'
+				app.new_user_session_path #=> '/users/sign_in'
+				helper.time_ago_in_words 30.days.ago
+				helper.my_custom_helper
+				
+				// performing request to the application
+				app.root_path
+				app.get _ #=> "_" - result of the previous command
+				app.get app.new_user_session_path
+				
+		- methods on Integration testing can be called on app object
+		- More examples:
+				app.cookies #=> which cookies are set
+				app.response
+				app.response.headers
+				puts app.response.body
+				app.request
+				app.request.headers["HTTP_HOST"]
+				reload!
+				
+* Using gems with console(irb)
+		- gem install hirb
+		- file ~/.irbrc is evaluated when irb console loads. We can put settings there
+			(or in ~/.rvm/rubies/ruby-2.4.0 - for RVM)
+		- 
+				
+				

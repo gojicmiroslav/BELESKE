@@ -1,0 +1,336 @@
+Best practices
+	Resources:
+		- http://www.rubydoc.info/github/bbatsov/rubocop/Rubocop/Cop/Style/GuardClause
+		- http://blog.bigbinary.com/categories/Rails-5
+
+=================================================================================================================================		
+SHORT:
+	- tell don't ask
+	- kod imenovanja izbegavati da se ime klase spominje u nazivu metode:
+			# bad
+				Task.limited_public_users_tasks
+	- ako se prosledjuje samo instanca kao parametar, onda to sugerise da treba da bude metoda nad instancom - ili u modelu ili dekoratoru
+	- How do I create multiple records or multiple factories of the same class?
+
+=================================================================================================================================	
+		
+	- add foreign key constaints in migrations -> https://robots.thoughtbot.com/referential-integrity-with-foreign-keys
+				Example:
+					class User < ActiveRecord::Base
+						has_many :posts, dependent: :destroy
+						validates :name, presence: true
+					end
+
+					class Post < ActiveRecord::Base
+						belongs_to :user
+						validates :user, presence: true
+					end
+
+					# migration
+					def change
+						add_foreign_key :posts, :users
+					end
+
+					# this will run SQL
+					ALTER TABLE `posts`
+					ADD CONSTRAINT `posts_user_id_fk`
+					FOREIGN KEY (`user_id`) REFERENCES `users`(id);
+
+					# add_foreign_key(referencirajuca_tabela, referencirana_tabela) - dodavanje CONSTRAINT FOREIGN KEY. Za tabele koristiti imena iz baze.
+
+					# With the foreign key in place, any operation that causes a post to point to a non-existent user will fail. 
+					# It’s important to realize that a user_id of NULL is allowed, so we still need appropriate presence validations and NOT NULL constraints.
+					t.integer :user_id, null: false
+
+					# Removing a foreign key	
+							# let Active Record figure out the column name
+							remove_foreign_key :accounts, :branches
+							# remove foreign key for a specific column
+							remove_foreign_key :accounts, column: :owner_id
+							 
+							# remove foreign key by name
+							remove_foreign_key :accounts, name: :special_fk_name
+
+	- avoid bypassing validations with methods like save(validate: false), update_attribute, and toggle.
+	- avoid instantiating more than one object in controllers.
+	- Avoid naming methods after database columns in the same class.
+	- Don't change a migration after it has been merged into master if the desired change can be solved with another migration.
+		//nastaviti - https://github.com/kolosek/guides/tree/master/best-practices
+
+
+FormFor(form_for)
+	- Message - belongs_to :chatroom
+		Chatroom - has_many :messages 
+	- # in view
+				<%= form_for [@chatroom, Message.new] do |f| %>
+	-	# in routes.rb 
+			resources :chatrooms do
+				resources :messages
+			end		
+
+	- Tell Dont ask - tell objects what to do, dont ask them questions about their state
+	- Guard clause - simplifies code and improves readability
+			Examples:
+				def publish
+					if !is_approved || user == 'Loblaw'
+						return false
+					end
+					
+					self.published_on = Time.now
+					self.save
+				end
+
+				def require_admin
+					return if current_user && current_user.role == 'admin'
+
+					flash[:error] = "You are not an admin"
+					redirect_to root_path
+				end
+				
+				# bad
+				def test
+					if something
+						work
+						work
+						work
+					end
+				end
+
+				# good
+				def test
+					return unless something
+					work
+					work
+					work
+				end
+			
+	- Avoid calling other domain objects from callbacks. Callbacks are methods that get called at certain moments of an object's life cycle
+		Example:
+			class User < ActiveRecord::Base
+				before_create :set_token
+				
+				protected
+				
+				def set_token
+					// Referencing other models in a callback
+					//  - introduces tight coupling
+					//	- affects the object's database lifecycle
+					self.token = TokenGenerator.create(self)
+				end
+			end
+			
+	- it is convention to set callback methods as protected
+	- Callbacks should only be for modifying internal state
+			class User < ActiveRecord::Base
+				before_create :set_name
+				
+				protected
+				
+				def set_name
+					self.name = self.login.capitalize if name.blank?
+				end
+			end
+
+Fat Model Tiny Controller
+	- multiple calls to the same object indicates a code smell
+		Example:
+				class ItemController < ApplicationController
+					def publish
+						if @item.is_approved? && @item.user != 'Loblaw'
+							..
+						else
+							...
+						end
+					end
+				end
+				
+	- tell, don't ask
+			Solution:
+				
+	
+
+Single Responsibility Principle
+	- can be applied to any “entity”, be it a class, a module, a method and so on.
+	- One way of thinking about what is a responsibility is to think of it as a reason for a class to change.
+		So, we can define this principle as: a class should have only one reason to change.
+	- example: https://github.com/spree/spree/blob/v0.70.5/core/app/models/creditcard.rb
+	
+Active Record:
+	1) Use find_each to iterate over a collection of AR objects. Looping through a collection of records from the database 
+			(using the all method, for example) is very inefficient since it will try to instantiate all the objects at once. In that case, batch processing methods allow you to work with the records in batches, thereby greatly reducing memory consumption. [link]
+					# bad
+					Person.all.each do |person|
+						person.do_awesome_stuff
+					end
+
+					Person.where('age > 21').each do |person|
+						person.party_all_night!
+					end
+
+					# good
+					Person.find_each do |person|
+						person.do_awesome_stuff
+					end
+
+					Person.where('age > 21').find_each do |person|
+						person.party_all_night!
+					end
+
+	2) When persisting AR objects always use the exception raising bang! method or handle the method return value. 
+		 This applies to create, save, update, destroy, first_or_create and find_or_create_by. 
+				# bad
+				user.create(name: 'Bruce')
+
+				# bad
+				user.save
+
+				# good
+				user.create!(name: 'Bruce')
+				# or
+				bruce = user.create(name: 'Bruce')
+				if bruce.persisted?
+					...
+				else
+					...
+				end
+
+				# good
+				user.save!
+				# or
+				if user.save
+					...
+				else
+					...
+				end
+				
+	3) Consider using named placeholders instead of positional placeholders when you have more than 1 placeholder in your query. 
+				# okish
+				Client.where(
+					'created_at >= ? AND created_at <= ?',
+					params[:start_date], params[:end_date]
+				)
+
+				# good
+				Client.where(
+					'created_at >= :start_date AND created_at <= :end_date',
+					start_date: params[:start_date], end_date: params[:end_date]
+				)
+	4) Favor the use of find over where when you need to retrieve a single record by id. 
+				# bad
+				User.where(id: id).take
+
+				# good
+				User.find(id)
+				
+	5) Favor the use of find_by over where and find_by_attribute when you need to retrieve a single record by some attributes.
+				# bad
+				User.where(first_name: 'Bruce', last_name: 'Wayne').first
+
+				# bad
+				User.find_by_first_name_and_last_name('Bruce', 'Wayne')
+
+				# good
+				User.find_by(first_name: 'Bruce', last_name: 'Wayne')
+				
+	6) Favor the use of where.not over SQL. [link]
+				# bad
+				User.where("id != ?", id)
+
+				# good
+				User.where.not(id: id)
+				
+	7) When specifying an explicit query in a method such as find_by_sql, use heredocs with squish. 
+		 This allows you to legibly format the SQL with line breaks and indentations, while supporting syntax highlighting in many tools 
+		 (including GitHub, Atom, and RubyMine). 
+				User.find_by_sql(<<-SQL.squish)
+					SELECT
+						users.id, accounts.plan
+					FROM
+						users
+					INNER JOIN
+						accounts
+					ON
+						accounts.user_id = users.id
+					# further complexities...
+				SQL
+
+		String#squish removes the indentation and newline characters so that your server log shows a fluid string of SQL rather than something 
+		like this:
+				SELECT\n    users.id, accounts.plan\n  FROM\n    users\n  INNER JOIN\n    acounts\n  ON\n    accounts.user_id = users.id
+				
+	8) Prefer has_many :through to has_and_belongs_to_many. Using has_many :through allows additional attributes and validations on the join model. 
+				# not so good - using has_and_belongs_to_many
+				class User < ActiveRecord::Base
+					has_and_belongs_to_many :groups
+				end
+
+				class Group < ActiveRecord::Base
+					has_and_belongs_to_many :users
+				end
+
+				# preferred way - using has_many :through
+				class User < ActiveRecord::Base
+					has_many :memberships
+					has_many :groups, through: :memberships
+				end
+
+				class Membership < ActiveRecord::Base
+					belongs_to :user
+					belongs_to :group
+				end
+
+				class Group < ActiveRecord::Base
+					has_many :memberships
+					has_many :users, through: :memberships
+				end
+	
+	9) Always use the new validations. 
+				# bad
+				validates_presence_of :email
+				validates_length_of :email, maximum: 100
+
+				# good
+				validates :email, presence: true, length: { maximum: 100 }
+				
+	10) Keep custom validators under app/validators.
+	
+	11) Consider extracting custom validators to a shared gem if you're maintaining several related apps or the validators are generic enough.
+	
+	12) Use named scopes freely. 
+				class User < ActiveRecord::Base
+					scope :active, -> { where(active: true) }
+					scope :inactive, -> { where(active: false) }
+
+					scope :with_orders, -> { joins(:orders).select('distinct(users.id)') }
+				end
+				
+	13) When a named scope defined with a lambda and parameters becomes too complicated, it is preferable to make a class method 
+			instead which serves the same purpose of the named scope and returns an ActiveRecord::Relation object. 
+			Arguably you can define even simpler scopes like this. 
+
+				class User < ActiveRecord::Base
+					def self.with_orders
+						joins(:orders).select('distinct(users.id)')
+					end
+				end
+				
+	
+ActiveRecord methods:
+	- Model.column_names - returns array of column names
+			Example: Article.column_names #=> ["id", "title", ...]
+	- Model_instance.attributes - returns a hash of column_name => column_value
+			Example: article.attributes - { "id"=>1, "title"=> "Some article", ... }
+							 article.attributes["title"] #=> "Some article"	
+							 
+GIT COMMANDS:
+	git commit # for all changes
+	git pull origin master
+	git push
+
+
+
+
+
+
+
+

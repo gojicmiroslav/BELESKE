@@ -1,0 +1,190 @@
+FUNCTIONAL PROGRAMMING IN JavaScript
+
+Anjana Vakil - Learning Functional Programming with JavaScript - JSUnconf 2016
+	*	Functional programming - a programming paradigm, a programming style, a mindest
+	* do everything with functions: input->output
+			- takes an input and gives an output
+			- thinking of functions as a flow of data
+
+		Example:
+		- non-functional
+				var name = "Misa";
+				var greeting = "Hi, I am ";
+				console.log(greeting + name); # "Hi, I am Misa"	
+
+		- functional
+				function greet(name){
+					return "Hi, I am " + name;
+				}	
+
+				greet("Misa"); # "Hi, I am Misa"
+
+	* avoid side effects, use "pure" functions
+			- side effect is anything that function might do that isn't computing output from input.
+			- for example, printing something to the console is not returning the output, it's doing something else - side effects
+			- or, if we using globaly defined variable to compute its output, that doesn't depend only on the input of that function, so that's not 
+				a pure, it is taking something from outside of function.
+			- pure - take only input to compute output and nothing else
+
+			Example:
+				- not pure
+						var name = "Misa"; //global variable
+	
+						function greet(){
+							console.log("Hi, I am " + name);
+						}
+
+				- pure
+						function greet(name){
+							return "Hi, I am " + name;
+						}
+
+	* use higher-order functions - functions can be inputs/outputs
+			Example:
+				function makeAdjectifier(adjective){
+					return function (string){
+						return adjective + " " + string;
+					};
+				}
+
+				var coolifier = makeAdjectifier("cool");
+				coolifier("cool conference"); # "cool conference"
+
+
+	* don't iterate - use map, reduce, filter
+			- don't use for, while,...
+
+	* avoid mutability - use immutable data 
+			- mutation - change object in place
+			- immutable - it can't be changed, once we set it's there forever, it's never gonna change
+
+			Example:
+				- mutation(bad!)
+						var rooms = ['H1', 'H2', 'H3'];
+						rooms[2] = "H4";
+						rooms; # ['H1', 'H2', 'H4']
+
+				- no mutation(good!)
+						var rooms = ['H1', 'H2', 'H3'];
+						var newRooms = rooms.map(function(room){
+							if(room === "H3"){
+									return "H3";
+							} else {
+									return room;	
+							}
+						});
+						
+						newRooms; # ['H1', 'H2', 'H4']
+						rooms; # ['H1', 'H2', 'H3']
+
+	* persistent data structures for efficient immutability
+			- structural sharing - https://en.wikipedia.org/wiki/Persistent_data_structure
+			- FP libraries for JS:
+					Mori - https://github.com/swannodette/mori
+					Immutable.js - https://facebook.github.io/immutable-js
+					Underscore - http://underscorejs.org
+					Lodash - https://lodash.com
+					Ramda - http://ramdajs.com
+			- https://maryrosecook.com/blog/post/a-practical-introduction-to-functional-programming
+						
+
+FunFunFunctions - Functional Programming
+
+Higher-order Functions
+	- in JS functions are values
+	- functions can be passed to other functions - higher-order functions
+	- Higher-order functions are good for:
+			- composition - we can compose many small functions into a big function
+				Example:
+					var animals = [
+						{ name: "Fluffkins", species: "rabit"},
+						{ name: "Caro", species: "dog"},
+						{ name: "Hamiltom", species: "fish"},
+						{ name: "Harold", species: "dog"},
+						{ name: "Ursula", species: "cat"}
+					];
+					
+					var dogs = animals.filter((animal)=>{
+						return animal.species === "dog";
+					});
+
+Array Higher-order Functions - map, filter, forEach, reduce
+	map 
+		- goes through an array, and transform each element of array. It transforms array in a new array with the same number of elements.
+	
+	filter 
+		- transforms array into a new array with the same or less number of elements
+			Syntax:
+					var new_arr = arr.filter(callback(element, index, array) [, thisArgs]);
+	reduce 
+		- The reduce() method applies a function against an accumulator and each value of the array (from left-to-right) to reduce it to 
+			a single value.
+		- With reduce we can implement any other array transformation(map, filter,..)
+		-	Syntax:
+				arr.reduce(callback(accumulator, currentValue, currentIndex) [,initialValue])
+				
+				accumulator - The accumulated value previously returned in the last invocation of the callback, or initialValue, if supplied.
+				currentValue - the currentElement being processed in the array
+				currentIndex - The index of the current element being processed in the array. 
+											 Starts at index 0, if an initialValue is provided, and at index 1 otherwise.
+				array - the array reduce was called upon
+
+				Example:
+					let totalAmount = orders.reduce((sum, order, currentIndex, array) => {
+						return sum + order.amount;
+					}, 0);
+
+Currying
+	- when a function doesn't take all of its arguments upfront. Instead, it takes a first argument, and then a function returns a another function
+		which we call with a second argument, which in turn will return another function that we call with a third argument and so on until all of the
+		arguments have been provided. Function at the end of the chain returns a value that we actually wants.
+		Example:
+				let dragonCur = 
+					name =>
+						size =>
+							element=>
+								`${name} is a ${size} dragon that breathes ${element}`
+
+				console.log(dragonCur('red')('big')('fire'));
+			
+	- the idea with currying is that function can pass through application and gradually(postepeno) receives the arguments that it needs
+		Example:
+				let redDragon = dragonCur("Red")
+				console.log(redDragon('big')('fire'));
+				let bigRedDragon = dragonCur('BIG')('RED');
+				console.log(bigRedDragon('fire'));
+				
+Recursion
+	- programming concept
+	- definition of recursion is calling a function on itself
+		Example:
+				let countDownFrom = (num) => {
+					if(num === 0) return;
+					console.log(num);
+					countDownFrom(num - 1);	
+				};
+
+				countDownFrom(10);
+				
+Promises
+	- The Promise object is used for asynchronous computations. A Promise represents a value which may be available now, or in the future, 
+		or never.
+			Syntax
+				new Promise( /* executor */ function(resolve, reject) { ... } );
+				
+				executor - A function that is passed with the arguments resolve and reject. The executor function is executed immediately by the 
+										Promise implementation, passing resolve and reject functions (the executor is called before the Promise constructor even
+										returns the created object). The resolve and reject functions, when called, resolve or reject the promise respectively. 
+										The executor normally initiates some asynchronous work and then, once that completes, calls either the resolve or reject 
+										function to resolve the promise or else reject it if an error occurred.
+										If an error is thrown in the executor function, the promise is rejected. The return value of the executor is ignored.
+
+
+
+
+
+
+
+		
+
+

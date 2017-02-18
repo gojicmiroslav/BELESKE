@@ -1,0 +1,13 @@
+LINUX
+
+* Add path to $PATH variable:
+	- in files ~/.bashrc or ~/.bash_profile add:
+			export PATH="~/.composer/vendor/bin:$PATH"
+			// or...
+			export PATH="$HOME/.composer/vendor/bin:$PATH"
+			// or to the end of $PATH
+			export PATH="$PATH:$HOME/.composer/vendor/bin"
+			
+* Check hard disk
+		- df
+		- df -H

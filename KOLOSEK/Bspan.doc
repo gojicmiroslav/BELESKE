@@ -1,0 +1,15 @@
+BSPAN
+
+ * Types of users:
+		Individual(Guest user) 
+		Enterprise users
+
+* Flow:
+		home -> log-in ->  javascript/user/login/login.js -> users/session_controller#create
+		
+* After login goes to:		
+		- pages/individual_dashboard
+		
+* two types of dashboards:
+		- pages/individual_dashboard
+		- pages/company_dashboard

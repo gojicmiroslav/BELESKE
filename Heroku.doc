@@ -1,0 +1,47 @@
+Heroku:
+	- heroku create
+	- heroku rename mg-photo-app
+	- git push heroku master
+	- heroku run rake db:migrate
+
+
+Manage Config Vars(environment variables) on heroku
+	- config, config:set, config:get, config:unset
+
+	- Example:
+		heroku config:set GITHUB_USERNAME=joesmith
+		Adding config vars and restarting myapp... done, v12
+		GITHUB_USERNAME: joesmith
+
+		$ heroku config
+		GITHUB_USERNAME: joesmith
+		OTHER_VAR:    production
+
+		$ heroku config:get GITHUB_USERNAME
+		joesmith
+
+		$ heroku config:unset GITHUB_USERNAME
+		Unsetting GITHUB_USERNAME and restarting myapp... done, v13
+
+	- in Ruby you access the environment variables using the ENV['KEY'] pattern - so now you can write 	an initializer like so:
+		AWS::S3::Base.establish_connection!(
+		 :access_key_id   => ENV['S3_KEY'],
+		 :secret_access_key => ENV['S3_SECRET']
+		)
+
+Production and development mode
+	Many languages and frameworks support a development mode. This typically enables more debugging, as well as dynamic reloading or recompilation of changed source files.
+	For example, in a Ruby environment you could set a RACK_ENV config var to development to enable such a mode.
+
+Commands:
+	- heroku run:detached rake db:migrate
+	- restart DB:
+		heroku pg:reset DATABASE
+	- To run the migrations and seed for your database, run:
+ 		heroku run rake db:setup
+ 	- Or if you feel like want to do it individually:
+ 		heroku run rake db:migrate
+	- And then
+ 		heroku run rake db:seed
+ 	- to establish a psql session with your remote database use heroku pg:psql.
+

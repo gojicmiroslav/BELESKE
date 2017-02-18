@@ -1,0 +1,64 @@
+Migrations
+	
+* create new migration:
+		php artisan make:migration <name>
+
+	Options:
+		--create=table_name	
+		--table=table_name
+
+	Example:
+		php artisan make:migration create_test_table
+		php artisan make:migration create_cards_table
+			// generates empty upd and down metohds
+				public function up()
+		    {
+		        //
+		    }
+
+		    public function down()
+		    {
+		        //
+		    }		
+
+		php artisan make:migration create_cards_table --create=cards
+			// generates
+				public function up()
+		    {
+		        Schema::create('cards', function (Blueprint $table) {
+		            $table->increments('id');
+		            $table->timestamps();
+		        });
+		    }
+
+		    public function down()
+		    {
+		        Schema::dropIfExists('cards');
+		    }
+
+		php artisan make:migration add_username_to_users_table
+
+
+	- flag "--table=table_name"
+				php artisan make:migration add_description_to_posts_table --table=posts
+
+* Run migration:
+			php artisan migrate
+		- options:
+				--database=database_name
+
+* migrate:install     
+		- Create the migration table in database
+		- option:
+			--database=database_name
+
+  - migrate:refresh     
+  		- Reset and re-run all migrations
+				// Refresh the database and run all database seeds...
+					php artisan migrate:refresh --seed
+
+  - migrate:reset       Rollback all database migrations
+  - migrate:rollback    Rollback the last database migration
+		You may rollback a limited number of migrations by providing the step option to the rollback command. For example, 			the following command will rollback the last five migrations:
+				php artisan migrate:rollback --step=5
+  - migrate:status      Show the status of each migration

@@ -1,0 +1,34 @@
+Accessing Port:
+	- server.address().port
+		Example:
+			var server = app.listen(5000, function () {
+  			console.log('Example app listening on port: ' + server.address().port);
+			});
+
+ENABLE CROS ON EXPRESS:	
+	Examples:
+		app.use(function(req, res, next){
+			res.header("Access-Control-Allow-Origin", "*");
+			res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+			// since this is custom middleware we need to call next()
+			next();
+		});
+
+		app.use(function(req, res, next) {
+			res.header('Access-Control-Allow-Origin', '*');
+			res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+			res.header('Access-Control-Allow-Headers', 'Content-Type');
+			next();
+		});
+
+IMPORTANT EXPRESS NPM MODULES:
+	- body-parser
+	- multer
+
+IMPORTANT NOTES:
+	- on custom middleware always call next() on the end
+		Example:
+			app.use(function(req, res, next){
+				...
+				next();
+			);

@@ -1,0 +1,9 @@
+SQL
+
+Limit
+	1) MySQL
+				- select * from customer limit 10;
+				- select * from customer limit 10,11; //LIMIT start,count (start column = start+1)
+				- select * from customer limit 10 offset 11; //LIMIT count offset start
+	2) PostgreSQL
+				https://www.postgresql.org/docs/9.6/static/queries-limit.html

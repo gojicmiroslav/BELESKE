@@ -1,0 +1,85 @@
+FUNCTIONAL PROGRAMMING
+
+- Functional programming - a programming paradigm, a programming style, a mindest
+- do everything with functions: input->output
+	- takes an input and gives an output
+	- thinking of functions as a flow of data
+		Example:
+			let a = 3;
+			function add(b){
+				return a + b;
+			}
+
+- avoid side effects, use "pure" functions
+	Example:
+		let result;
+		function add(a, b){
+			result = a + b;
+			return result;
+		}
+		
+- for the same input input always gets same output
+	Example:
+		function add(a,b){
+			return a + b + new Date().getSeconds();
+		}
+
+- use higher-order functions - functions can be inputs/outputs
+- don't iterate - use map, reduce, filter
+
+- avoid mutability - use immutable data 
+		- mutation - change object in place
+		- immutable - it can't be changed, once we set it's there forever, it's never gonna change
+		
+		Don't update arguments(objects and arrays in JS - passed by reference, not by value) that are passed in.
+		Example(ES6):
+			function changeProp(obj){
+				return {
+					...obj,
+					name: 'Jen'
+				};
+				
+				// WRONG:
+				//obj.name = 'Jen';
+				//return obj;
+			}
+			
+			let res = changeProp({
+				name: "misa",
+				age: 25
+			});
+		
+		
+			
+Currying
+	- when a function doesn't take all of its arguments upfront. Instead, it takes a first argument, and then a function returns a another function
+		which we call with a second argument, which in turn will return another function that we call with a third argument and so on until all of the
+		arguments have been provided. Function at the end of the chain returns a value that we actually wants.
+		
+Recursion
+	- programming concept
+	- definition of recursion is calling a function on itself
+	
+METHOD COMPARISING
+	Array:
+		1) JS - filter
+					var new_array = arr.filter(callback[, thisArg])
+			 Ruby - select, select!
+		 
+		2)  JS - forEach
+					arr.forEach(callback[, thisArg])
+				Ruby - each
+				
+		3) JS - map
+					var new_array = arr.map(callback[, thisArg])
+			 Ruby - map, map!
+				
+
+
+
+
+
+
+
+		
+

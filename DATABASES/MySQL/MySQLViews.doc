@@ -1,0 +1,73 @@
+MySQL Views
+	-	A database view is a virtual table or logical table which is defined as a SQL SELECT query with joins.
+	- A database view is dynamic because it is not related to the physical schema. The database system stores database views as a SQL SELECT statement
+ 		with joins. When the data of the tables changes, the view reflects that changes as well.
+	- Disadvantages of database view:
+			- Performance: querying data from a database view can be slow especially if the view is created based on other views.
+			- Tables dependency: you create a view based on underlying tables of the a database. Whenever you change the structure of those tables that view
+		 		associated with, you have to change the view as well.
+
+	- MySQL processes queries against the views in two ways:
+			- in a first way, MySQL creates a temporary table based on the view definition statement and executes the incoming query on this temporary table.
+			- In a second way, MySQL combines the incoming query with the query defined the view into one query and executes the combined query.
+
+	- MySQL allows you to create a view based on other views. 
+	- MySQL view’s restrictions:
+			- We cannot create an index on a view - MySQL uses indexes of the underlying tables.For the views that use the temptable algorithm, indexes are
+ 				not utilized when you query data against the views.
+			- You cannot use subqueries in the FROM clause of the SELECT statement defined the view before MySQL 5.7.7
+			- If you drop or rename tables that a view is based on, MySQL does not issue any errors. However, MySQL does invalidate the view. You can use the
+ 				CHECK TABLE statement to check whether the view is valid.
+			- A simple view can be updatable. A view created based on a complex SELECT statement with join, subquery, etc., cannot be updatable.
+			- MySQL does not support materialized view
+
+	Creating View:
+		Syntax:
+			create view [algorithm = {merge | temptable | udefined}]
+			views [database_name].[view_name]
+			as
+			[select statement]
+
+		View processing algorithms:
+			MERGE - MySQL first combines the input query with the SELECT statement, which defines the view, into a single query.The MERGE  algorithm is not
+ 							allowed if the SELECT statement contains aggregate functions such as MIN, MAX, SUM, COUNT, AVG, etc., or DISTINCT, GROUP BY, HAVING,
+						 	LIMIT, UNION, UNION ALL, subquery.  If the MERGE  algorithm is not allowed, MySQL changes the algorithm to UNDEFINED.
+			TEMPTABLE - MySQL first creates a temporary table based on the SELECT statement that defines the view, and then it executes the input query
+ 									against this temporary table. A view that uses TEMPTABLE  algorithm is not updatable.
+			UNDEFINED - default algorithm when you create a view without specifying an explicit algorithm. The UNDEFINED algorithm lets MySQL make a choice
+ 									of using MERGE or TEMPTABLE  algorithm. MySQL prefers MERGE  algorithm to TEMPTABLE  algorithm because the MERGE algorithm is much
+ 									more efficient.
+
+	Rules that the SELECT statement must follow:
+		- The SELECT  statement can contain a subquery in WHERE clause but not in the FROM clause.
+		- The SELECT statement cannot refer to any variables including local variables, user variables, and session variables
+
+
+	Example:
+			CREATE VIEW SalePerOrder AS
+				SELECT 
+				    orderNumber, SUM(quantityOrdered * priceEach) total
+				FROM
+				    orderDetails
+				GROUP by orderNumber
+				ORDER BY total DESC;	
+
+			show tables;
+			show full tables;
+
+	Example:
+		// creating views with joins
+		CREATE VIEW customerOrders AS
+		  SELECT 
+		      d.orderNumber,
+		      customerName,
+		      SUM(quantityOrdered * priceEach) total
+		  FROM
+		      orderDetails d
+		          INNER JOIN
+		      orders o ON o.orderNumber = d.orderNumber
+		          INNER JOIN
+		      customers c ON c.customerNumber = c.customerNumber
+		  GROUP BY d.orderNumber
+		  ORDER BY total DESC;		
+

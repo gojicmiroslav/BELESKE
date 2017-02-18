@@ -1,0 +1,33 @@
+Laravel Views
+
+- Helpers:
+    https://laravel.com/docs/5.4/helpers
+    https://laravel.com/api/5.4/index.html
+
+- assets are stored in "public" directory
+
+- Dynamically add CSS and JS
+    1) way
+        <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
+        <script src="{{ asset('js/bootstrap.min.js') }}"></script>
+
+    2) way - TODO
+        HTML::
+        
+* Show link in views:
+		- <a href="/cards/{{ $card->id }}">{{ $card->title }}</a>
+		
+		//or extract in model function path()
+			public function path()
+			{
+				return '/cards/' . $this->id;
+			}
+			
+			<a href="{{ $card->path() }}">{{ $card->title }}</a>
+			
+* Forms
+	- TIP: name of the form elements show correspond to the name of the column in the DB
+    
+    
+
+

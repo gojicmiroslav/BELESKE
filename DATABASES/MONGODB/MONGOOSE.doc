@@ -1,0 +1,71 @@
+Mongoose
+
+- connection:
+		//Connect to mongoose
+		mongoose.connect('mongodb://localhost/bookstore');
+		let db = mongoose.connection;
+		db.on('error', console.error.bind(console, 'connection error...'));
+		db.once('open', () => {
+			console.log('bookstore db opened');
+		});
+
+Schema
+	- Types: String, Date
+		Example:
+			var bookSchema = mongoose.Schema({
+					title: {
+						type: String,
+						required: true
+					}
+			});
+
+Methods:
+	1) Model.findById(id, [projection], [options], [callback]) 
+			- Finds a single document by its _id field. findById(id) is almost* equivalent to findOne({ _id: id }). If you want to query by a 
+				document's _id, use findById() instead of findOne().
+				Parameters
+					- id - Object, Number, String
+					- projection - Object, optional fields to return
+					- options - Object
+					- callback - Function
+	
+				Example:
+					Book.findById(id, function(err, book){
+						
+					});
+					
+	2) Model.create(obj(s), callback)
+			- Shortcut for saving one or more documents to the database. Model.create(docs) does new MyModel(doc).save() for every doc in
+				docs.
+				Parameters:
+					- obj(s) - Array, Object
+				Returns: Promise
+	
+			Example:
+				Course.create({ title: "C# for Sociopaths", featured: true, published: new Date('1/1/2015'), tags: ['C#'] }); 
+				
+				// pass individual objects
+				Candy.create({ type: 'jelly bean' }, { type: 'snickers' }, function(err, jellybean, snickers){
+						...
+				});	
+				
+				// pass an array
+				var array = [{ type: 'jelly bean' }, { type: 'snickers' }];
+				Candy.create(array, function (err, candies) {
+					if (err) // ...
+
+					var jellybean = candies[0];
+					var snickers = candies[1];
+					// ...
+				});
+
+				// callback is optional; use the returned promise if you like:
+				var promise = Candy.create({ type: 'jawbreaker' });
+					promise.then(function (jawbreaker) {
+					// ...	
+				})
+				
+	3) Model.findOneAndUpdate (or findAndModify())
+				
+	
+		

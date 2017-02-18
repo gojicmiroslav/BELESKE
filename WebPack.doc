@@ -1,0 +1,182 @@
+WebPack
+	Two ways:
+ 		1) file: webpack.config.js
+			- run weback:
+					webpack
+
+			- run with NODE_ENV = production:
+					NODE_ENV=production webpack
+
+		2) way
+				- add <script type="text/javascript" src="bundle.js" charset="utf-8"></script> to index.html
+				- add .js files
+
+			 Run command:
+					webpack ./file1.js ./file2.js bundle.js
+
+	- a prettier output
+			webpack --progress --colors
+
+Watchmode
+	- we don’t want to manually recompile after every change.
+	- With watchmode, Webpack will watch your files and when one of them changes, it will immediately rerun the build and 		recreate your output file.
+	- There are 2 ways to enable watchmode
+			1) from console
+					webpack --watch
+			2) in webpack.config.js add key watch: true
+					module.exports = {
+						entry: "./app.js",
+						output: {
+							filename: "bundle.js"
+						}, 
+						watch: true
+					}
+	- if watch mode doesn't work:
+			echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+
+Development server
+	- npm install webpack-dev-server -g
+	- run:
+				webpack-dev-server --progress --colors
+	- url: localhost:8080
+	- If you go to http://localhost:8080/webpack-dev-server/, you should see your application running there, along with any log statements in your app.
+	- The dev server uses Webpack’s watch mode. It also prevents webpack from emitting the resulting files to disk.
+	   Instead it keeps and serves the resulting files from memory. This means that you will not see the webpack-dev-server build in bundle.js, 
+		to see and run the build, you must still run the webpack command.
+
+	Live reload
+		- webpack-dev-server --hot
+		- "--hot" command will add live reload after something is changed inside our files so we don't need to refresh the browser every time we 
+			change our code.
+
+	Defining a config file - webpack.config.js
+		- entry -  name of the top level file or set of files that we want to include in our build, can be a single file or an array of files
+			Example of array of files:
+				module.exports = {
+					entry: ["./global.js", "./app.js"],
+					output: {
+						filename: "bundle.js"
+					}
+				}
+				
+	- output - an object containing your output configuration
+				
+Webpack loaders and preloaders
+	- loaders are how Webpack learns new functionality. Loaders allow you to preprocess files as you require() or “load” them
+	- To add a loader in Webpack, you must first create a key named module that is an object. In the module object, create a key named loaders that is an 
+		array. In the array, create an object for each loader.
+		 Example:
+				module.exports = {
+				 entry: ["./global.js" , "./app.js"],
+				 output: {
+					 filename: "bundle.js"
+				 },
+				 module: {
+					 loaders: [
+						 {
+							 test: /\.es6$/,
+							 exclude: /node_modules/,
+							 loader: 'babel-loader',
+							 query: {
+								 presets: ['react', 'es2015'] 
+							 }
+						 }
+					 ]
+				 },
+				 resolve: {
+					 extensions: ['', '.js', '.es6']
+				 },
+				}
+
+			Keys:
+				- test — a regular expression that tests what kind of files to run through this loader. We have added a regex to test all files with an 
+									es6 extension.
+				- exclude - which files the loader should exclude /ignore. We have added the node_modules folder.
+				- loader — the name of the loader we are going to use (babel-loader).
+				- query — You can pass options to the loader by writing them as a query 
+									string(https://github.com/webpack/loader-utils) or by using the query property as we have done above.
+				- We have also added a key named ‘resolve’ to our module.exports object. resolve is a section which lets us specify what kind of file types we 
+					can process without specifically giving them a file extension. 
+					This will allow us to use syntax such as:
+								require('./logger');
+						instead of:
+								require('./logger.es6');
+		
+	- preloaders run before loaders do
+			Example:
+				module.exports = {
+				 entry: ["./global.js" , "./app.js"],
+				 output: {
+					 filename: "bundle.js"
+				 },
+				 module: {
+					 preLoaders: [
+							{
+								test: /\.js$/,
+								exclude: /node_modules/,
+								loader: 'jshint-loader'
+
+							}
+					 ],
+					 loaders: [
+						 {
+							 test: /\.es6$/,
+							 exclude: /node_modules/,
+							 loader: 'babel-loader',
+							 query: {
+									cacheDirectory: true, 
+									presets: ['react', 'es2015'] 
+							 }
+							}
+					 ]
+				 },
+				 resolve: {
+					 extensions: ['', '.js', '.es6']
+				 }
+				}
+
+NPM start	
+	- in package.json:
+			"scripts": {
+  			"start": "webpack-dev-server"
+			},
+	- npm start
+
+Production Webpack bundles	
+	- To run a production bundle, letting webpack minify your code, run Webpack with a -p flag:
+				webpack -p // this will produce minifed bundle
+	
+Working with different config files for production vs development
+	- using strip-loader
+	- strip-loader is a loader to strip arbitrary functions out of your production code (we will use this later) .
+	- npm install strip-loader --save-dev
+	- create webpack-production.config.js:
+			var WebpackStripLoader = require('strip-loader');
+			var devConfig = require('./webpack.config.js');
+
+			var stripLoader = {
+				test: [/\.js$/, /\.es6$/],
+			 	exclude: /node_modules/,
+			 	loader: WebpackStripLoader.loader('console.log')
+			};
+
+			devConfig.module.loaders.push(stripLoader);
+			module.exports = devConfig;
+
+		- loader: WebpackStripLoader.loader('console.log') - Here we are asking strip-loader to remove any console.log 							statements from our build. WebpackStripLoader.loader() takes any number of arguments
+	- In the terminal, run:
+			webpack --config webpack-production.config.js -p
+		//This runs webpack with the config flag, letting us specify a custom config file. -p minifies the code 
+			for production. Now there are no console.log statements in our bundle.
+
+Loaders:	
+	- babel-core - babel npm package
+	- babel-loader - babel module for Webpack
+	- babel-preset-es2015 - babel preset for all es2015 plugins.
+	- babel-preset-react - babel preset for all React plugins
+
+TUTORIALS LINKS:
+	- http://code.tutsplus.com/tutorials/introduction-to-webpack-part-1--cms-25791
+	- https://medium.com/@dabit3/beginner-s-guide-to-webpack-b1f1a3638460#.nopjjtiry
+
+	

@@ -1,0 +1,11 @@
+LINUX
+
+Disk space
+	* df - report file system disk space usage
+		Options:
+			"-h" - human readable
+			"-k" - block size
+		
+			Example:
+				df -h
+				df -k

@@ -1,0 +1,59 @@
+Attribute selectors:
+		- http://api.jquery.com/category/selectors/attribute-selectors/
+		- AttributeHas selector
+				$("selector[attr]") // select element if he has an attribute
+				Example:
+						<div id="hey">with id</div>					
+						$( "div[id]" ).one( "click", function() {
+							var idString = $( this ).text() + " = " + $( this ).attr( "id" );
+							$( this ).text( idString );
+						});
+
+		- AttributeEquals selector
+				$("selector[attr='value']") 
+				Example:
+						<input type="radio" name="newsletter" value="Hot Fuzz">
+						$( "input[value='Hot Fuzz']" ).next().text( "Hot Fuzz" );
+
+		- AttributeNotEqual selector
+				$("selector!='value'") 
+				Example:
+						<input type="radio" name="newsletter" value="Hot Fuzz">
+						$( "input[name!='newsletter']" ).next().append( "<b>; not newsletter</b>" );	
+
+		- AttributeStartsWith selector
+				$("selector[attr^'value']")	
+				Example:
+						<input name="newsletter">
+						$( "input[name^='news']" ).val( "news here!" );
+		
+		- AttributeEndsWith selector 
+				$("selector[attr$'value']") 
+				Example:
+						<input name="newsletter">
+						$( "input[name$='letter']" ).val( "a letter" );					
+
+		- AttributeContains selector
+				$("selector[attr*'value']")
+				Example:
+						<input name="man-news">
+						$( "input[name*='man']" ).val( "has man in it!" )
+
+		- AttributeContainsPrefix selector		
+				$("selector[attr|='value']")
+				Example:
+						<a href="example.html" hreflang="en">Some text</a>
+						<a href="example.html" hreflang="en-UK">Some other text</a>
+						<a href="example.html" hreflang="english">will not be outlined</a>
+						 
+						$( "a[hreflang|='en']" ).css( "border", "3px dotted green" );
+
+		- AttributeMultiple selector
+				$("selector[attr_filter1][attr_filter2]...[attr_filterN]")
+				Example:
+					<input id="man-news" name="man-news">
+					<input name="milkman">
+					<input id="letterman" name="new-letterman">
+					<input name="newmilk">
+					 
+					$( "input[id][name$='man']" ).val( "only this one" );

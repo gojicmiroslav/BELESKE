@@ -1,0 +1,384 @@
+LOOPS
+	While loop
+		- runs its code as long as its boolean expression is true
+				while(*some expression is true*){
+					//code...
+				}
+
+Typeof operator
+	- identifying the "type" of value inside a variable or expression
+		> typeof true #=> boolean
+		> typeof "sdsdsd" #=> string
+		> typeof 42 #=> number
+		> typeof undefined #=> undefined
+		> typeof null #=> object
+
+Function Expressions
+	- building functions within code execution rather than at program load time
+	- function declarations
+		Example:
+			function diffOfSquares(a,b){
+				return a*a - b*b;
+			}
+		
+		// builds in memory immediately when a programs loads
+	
+	- function expression:
+		Example:
+			var diff = function diffOfSquares(a,b){
+				return a*a - b*b;		
+			};
+
+			// it loads only when this pretically line of code is reached in program
+			// needs a semicolon at the end 
+			// the name of the function(diffOfSquares) is optional, we could use anonymous function	
+					var diff = function (a,b){
+						return a*a - b*b;		
+					};
+
+	- a variable that holds a function can be passed into other functions
+		Example:
+				var greeting = function(){
+					console.log("Hello World");
+				};
+
+				function printMessage(message){
+					message();
+				}
+
+				printMessage(greeting);
+	- function expression with array map function. The map() method will always take in a function as a parameter(function declaration pr variable that holds a function), and return a new array with the results.
+	- map function works like a loop that applies a function to each array index	
+		Example:	
+			var numbers = [12,3,4,5,6,3,4,55,33];
+
+	- returning function from a function using function expressions. Since functions can be treated as expressions, they
+		can also be returned like values.
+			function test(){
+				// some code...
+				return <function expression>
+			}
+			var results = numbers.map(<function>);
+
+	//nastaviti 3 - last
+
+
+JS Best Practices
+	Ternary conditions
+		- syntax:
+				someCondition ? pickThisIfTrue : pickThisIfFalse;
+			Example:	
+				var isArthur = false;
+				var weapon;
+				weapon = isArthur ? "Excalibur" : "Longsword";
+				console.log("Weapon: " + weapon);
+		- compound ternary conditions - we can use compound Boolean expresions to make ternary decisions.
+			Example:
+				isKing = true;
+				console.log("Weapon is: " + (isArthur && isKing ? "Excalibur" : "Longsword"));
+
+		- ternaries can take actions - any executable statement can serve as a ternary's response choice. We can take 				actions
+			not just return value, left or right.
+			Example:
+				isArthur && isKing ? alert("Hail Arthur, king of the Britain") : alert("Tralalalala");
+		- multiple actions in ternaries
+			Example:
+				var helmet;
+				isArthur && isKing ? (helmet = "Goosewhite", weapon = "Excalibur") : (helmet = "Iron Helm", weapon = 					"Longsword");
+				console.log("Weapon is: " + weapon + " and helmet is " + helmet);
+		- ternaries can be nested - a ternary can hold other ternaries within each of the possible responses
+			Example:
+				var isArcher = true;
+				isKing = false;
+
+				isArthur && isKing ? 
+					(helmet = "Goosewhite", weapon = "Excalibur") 
+					: 
+					isArcher ?   (helmet = "Longbow", weapon = "Mail Helm")
+							   : (helmet = "Iron Helm", weapon = "Longsword");
+
+				console.log("Weapon is: " + weapon + " and helmet is " + helmet);
+
+	Logical assignment
+		- logical operators can make conditions assignments even shorter than ternaries.
+		- the "OR" operator	
+			Example:
+				var armory = {
+					addSword: function(sword){
+						// using ternary operators
+						//this.swords = this.swords ? this.swords : [];
+
+						//better
+						this.swords = this.swords || [];
+						this.swords.push(sword);
+					},
+
+					getSwords: function(){
+						return this.swords;
+					},
+
+					printSwords: function(){
+						console.log("=============================================");
+						console.log("Swords");
+						this.swords.forEach(function(sword){
+							console.log("Sword: " + sword);		
+						});
+					}
+				};
+
+				armory.swords = [];
+				armory.addSword("Excalibur");
+				armory.printSwords();
+				armory.addSword("Longsword");
+				armory.printSwords();
+
+		- when all elements are "falsy", we'll get the LAST "falsy" found.
+			Example:
+				var result4 = 0 || "" || undefined;
+				console.log("Results 4: " + result4); //=> undefined
+
+				var result5 = undefined || "" || 0;
+				console.log("Results 5: " + result5); //=> 0
+
+	- logical "AND" operator -> &&
+			- takes the rightmost "truthy" value or the first "falsy" value
+				Example:			
+					var resultl1 = undefined && 42; //=> undefined
+			- when all elements are "truthy", && will return the LAST "truthy" value found
+					var result = "King" && "Arthur"; //=> Arthur
+			- when all elements are "falsy", && will return the FIRST "falsy" value found
+					var result = undefined && ""; //=> undefined
+
+	Performance tips
+		- Use a prototype for shared stuff. Give all common methods that a "class" of objects will use to the
+			constructor's prototype
+			Example:
+					function SignalFire(ID, startingLogs){
+						this.fireId = ID;
+						this.logsLeft = startingLogs;
+					}
+
+					SignalFire.prototype = {
+						addLogs: function(numLogs){
+							this.logsLeft += numLogs;
+						},
+
+						lightFire: function(){
+							console.log("Light fire");
+						},
+
+						smokeSignal: function(message){
+							console.log("Smoke signal");
+						},
+
+						getLogs: function(){
+							return this.logsLeft;
+						}
+					};
+
+					var fireOne = new SignalFire(1, 20);
+					var fireTwo = new SignalFire(2, 10);
+					var fireThree = new SignalFire(3, 12);
+
+					fireOne.addLogs(8);
+					fireTwo.addLogs(2);
+					fireThree.addLogs(10);
+
+"this" keyword
+	- every function while executing has a reference to its current execution context called "this". 
+	- Execution context - how is function called when its called
+	- 4 rules for how "this" keyword gets bound, all depend on call-site - place in code where function gets executed, with open-close parentheses.
+			1) Default binding
+					- if we are in "strict mode" (use strict) default the "this" keyword to the "undefined" value. If we are not in strict mode default the this keyword
+						to the global object.
+					- so in default binding "this" is either: "undefined" or global value, and can't be anything else.
+					Example:
+						function foo(){
+							console.log(this.bar);
+						}
+						va bar = "Here";
+						foo(); // "Here"
+			
+			2) Implicit binding
+					- base, context object at the call-site becomes "this" keyword
+						Example:
+							function foo(){
+								console.log(this.bar);
+							}
+							
+							var o1 = { bar: "bar1", foo: foo };
+							var o2 = { bar: "bar2", foo: foo };
+							o1.foo(); // "bar1"
+							o2.foo(); // "bar2"
+							
+			3) Explicit binding
+					- hard binding mechanism
+					- methods:
+							bind - for creating a new function
+							call, apply - for calling a function
+					- bind function - The bind() method creates a new function that, when called, has its this keyword set to the provided value, 
+														with a given sequence of arguments preceding any provided when the new function is called.
+														Syntax:
+																fun.bind(thisArg[, arg1[, arg2[, ...]]])
+					- if we use "call" or "apply" at the call-site, we explicit saying which object is this(first argument).
+						Example:
+							function foo(){
+								console.log(this.bar);
+							}
+							
+							va bar = "bar1";
+							var obj = { bar: "bar2" };
+							foo(); // "bar1"
+							foo.call(obj); // "bar2"
+							
+			4) "new" keyword
+					- when we put the new keyword in front of any function call, ut turns that function call to a "constructor call".
+					- when we put the new keyword in front of a function call, it it going ti do 4 things:
+							1. a brand new empty object will be created
+							2. that object gets linked to a different object
+							3. that new object gets boundas the "this" keyword or the purposes of that function call
+							4. if that function otherwise does not return anything, than will implicitly insert "return this", so that new object
+									will be returned.
+	
+ObjectCreation
+	bind and this
+		- in function the "this" keyword doesn't refer to the context where function was defined, it refers to the context where the function
+			is being called.
+			
+Scope
+	- set of variables we can access. In JS object and functions are also variables
+	- JS has function scope - scope changes inside a functions
+	- variables declared within a JS function become LOCAL to the function. Local variables have local scope. They can only be accessed within
+		the function.
+		Example:
+				function myFunction(){
+					var carName = "Volvo";
+				}
+				
+				console.log(carName); # undefined
+				
+	- variables declared outside of a function becomes GLOBAL. Global variable have global scope.
+	- if we assign a value to a variable that has not been declared, it will automatically become a global.
+		Example
+			console.log(carName); # Volvo
+			
+			function myFunction(){
+				carName = "Volvo";
+			}
+			
+Closure
+	- when a function "remembers" its lexical scope even when the function is executed outside of that lexical scope
+		Example:
+			function makeFunc(){
+				let name = "Chrome";
+
+				function displayName(){
+					console.log(`Name: ${name}`)
+				}
+
+				return displayName
+			}
+
+			let myFunc = makeFunc;
+			myFunc()(); # Name: Chrome
+			
+	- function body has access to variables that are defined outside of function body. Function REALLY have access to the outside variables scope,
+		it doesn't snapshot outside variables
+		
+		Example:
+			let me = 'Misa Gojic'
+			
+			function greet(){
+				console.log(`Hello ${me}`);
+			}
+			
+			greet() # Hello Misa Gojic
+			me = "Bruce Wayne"
+			greet() # Hello Bruce Wayne
+			
+			
+	- A closure is a special kind of object that combines two things: a function, and the environment in which that function was created.
+		The environment consists of any local variables that were in-scope at the time that the closure was created. 
+
+	- all functions is JS are closures (syncronuos and asyncronuos)
+	- Languages such as Java provide the ability to declare methods private, meaning that they can only be called by other methods in the same class.
+		JavaScript does not provide a native way of doing this, but it is possible to emulate private methods using closures
+		Example - module pattern:
+				const counter = (() => {
+					var privateCounter = 0;
+
+					function changeBy(val){
+						privateCounter += val;
+					}
+
+					return {
+						getCounter: () => { 
+							return privateCounter 
+						},
+						increment: () => {
+							privateCounter++;
+						}
+					}
+				})();
+
+				console.log(counter.privateCounter); // undefined
+				console.log(counter.getCounter()); // 0
+				counter.increment();
+				console.log(counter.getCounter()); // 1
+
+Object Prototype
+	- the Object.prototype is PROPERTY that represents the Object prototype object
+	- The Object.prototype is on the top of the prototype chain.
+	- Objects created using an object literal, or with new Object(), inherit from a prototype called Object.prototype.
+	- every JavaScript object has a prototype. The prototype is also an object. All JavaScript objects inherit their properties and methods from their prototype.
+	- All JavaScript objects (Date, Array, RegExp, Function, ....) inherit from the Object.prototype.
+	- analogy - delagate
+	- prototype exists only on functions for case we want use function as constructor with "new" keyword
+				
+Object.create
+	- creates a new object with the specified prototype object and properties
+		Syntax:
+				var new_obj = Object.create(proto[, propertiesObject])
+			
+				proto - the object which should be the prototype of the newly-created object.
+
+Object.setPrototypeOf				
+	- Syntax:
+			Object.setPrototypeOf(dest, source);
+				
+"new" keyword
+	- when we put the new keyword in front of any function call, ut turns that function call to a "constructor call".
+	- when we put the new keyword in front of a function call, it it going ti do 4 things:
+			1. a brand new empty object will be created
+			2. that object gets linked to a object - prototype of constructor function
+			3. that new object gets bound as the "this" keyword for the purposes of that function call (execute constructor with the "this"
+					bound to the new object that was created)
+			4. if that function(function constructor) does not return anything, than will implicitly insert "return this", so that new object
+					will be returned.
+
+arguments keyword
+	- object of passed arguments that aacts like an array, have an length property
+
+
+prototype vs __proto__
+	- every object in JS has __proto__ linkage to the Object
+		let cat = { name: "cat" };
+		console.log(cat.__proto__); // Object
+		// or 
+		console.log(Object.getPrototypeOf(cat)); // Object
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+

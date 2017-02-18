@@ -1,0 +1,45 @@
+RailsCasts:
+
+Dynamic forms:
+	ProductType |--> ProductField 
+
+
+Nested Model Forms:
+	Survey |--> Question |--> Answers
+	
+	- accepts_nested_attributes_for
+		Example:
+			# in survey.rb
+			accepts_nested_attributes_for :questions
+			
+			# in _form
+		
+						
+RAILS OBSERVER
+	- URL: https://github.com/rails/rails-observers
+	- This gem contains two observers:
+			- Active Record Observer
+			- Action Controller Sweeper
+	- Active Record Observer - watch for model life-cycle callbacks(before_save, after_save,...) to implement trigger-like behaviour outside the original class
+	- Action Controller Sweeper - Sweepers are the terminators of the caching world and responsible for expiring caches when model objects change. 
+																They do this by being half-observers, half-filters and implementing callbacks for both roles.		
+																
+N + 1 Query
+	- gem: https://github.com/flyerhzm/bullet
+	- help to kill N+1 queries and unused eager loading
+	- example, Category has many Products
+	- on same page shows categories and products for given category
+	- # categories_controller/show
+			def show
+				@categories = Category.order(:name).includes(:products) # eager loading
+			end
+			
+TREES
+	- gem 'ancestry'
+	
+UPGRADING RAILS VERSION
+	- make a new branch
+			git checkout -b rails4
+	- change version of Rails in Gemfile
+	- change branch of a gem from github:
+			gem 'paper_trail', github: 'airblade/papir_trail', branch: 'rails4'

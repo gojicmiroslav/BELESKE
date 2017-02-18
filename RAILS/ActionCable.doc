@@ -1,0 +1,159 @@
+Action Cable
+	- framework for working with WebSockets
+	- allows real-time features using a constant connection between server and clients(a pipe that stays open between server and client while they comunicating), like a telephone call. Web is typically not working this way, it is request-response cycle(like sending a letter).
+	- comprised of server-side Ruby and client-side JavaScript
+	- uses Redis pubsub to track communications
+
+Uses for ActionCable:
+	- streaming content such as video
+ 	- interactive content such as online games, or similar application where we swapping many messages per second with the server
+ 	- real-time communications such as chat. Before this is done in Rails using pooling(every few second we check is someone outhere).
+
+ActionCable terminology:
+ 	- Cable - single connection between server and client
+ 	- Channel - stream of data to which clients can subscribe
+ 	- Subscriptions - a client's currently subscribed channels. Single client, single Web browser can be subscribed to multiple channels of
+		streaming informations at the same time, but they always comes through one single cable, one connection between server and the client.
+ 	- Broadcast - message sent on channel to all subscribed clients to that channel
+
+Use:
+ 	- first we have to enable in routes.rb:
+			# config/routes.rb
+			Rails.application.routes.draw do
+				...
+				mount ActionCable.server => "/cable" # route to use for communication with ActionCable
+			end		
+
+ 	- we need to create channel:
+			class ChatRoomChannel < ApplicationCable::Channel
+				# subscribed and unsubsribed are two standard actions
+				# this method do what ever we want to do when client subscribes or unsubscribes from a channel
+				def subscribed
+					stream_from("chat_room_channel")
+				end
+
+				# custom action
+				def speak(data)
+					ActionCable.server.broadcast("chat_room_channel", :message => data['message'])
+				end
+			end	
+
+ 	- set cable in JS
+			var App = {};
+			App.cable = ActionCable.createConsumer();
+
+			// Subscription JS
+			// create a new subscription and assign it to room
+			App.room = App.cable.subscriptions.create("ChatRoomChannel", {
+				connected: function(data){},
+				disconnected: function(data){},
+				received: function(data){
+					alert(data['message']);
+				},
+
+				// custom speak - calling custom action in ChatRoomChannel
+				speak: function(message){
+					this.perform('speak', { message: message })
+				} 
+			}); 		
+
+	- communication JS
+			// we call anywhere in our code
+			App.room.speak("Hello ActionCable");
+
+		It:
+			- calls this.perform('speak'), which
+			- calls ChatRoomChannel#speak, which
+			- calls ActionCable.server.broadcast, which sends message out to that channel
+			- message goes to streamed WebSocket
+			- triggers App.room.received on all subscribers, which
+			- calls alert(data['message'])
+
+Url examples:
+	https://github.com/rails/actioncable-examples
+	
+ACTION-CABLE - ROR Guide
+
+Server-Side Components:
+		1) Connections (app/channels/application_cable/connection.rb)
+				- for every WebSocket accepted by the server, a connection object is instantiated
+				- this object becomes the parent of all the channel subscriptions that are created from there on
+				- the connection itself does not deal with any specific application logic beyond authentication and authorization
+				- the client of a WebSocket connection is called the connection consumer. An individual user will create one consumer-connection 
+					pair per browser tab, window, or device they have open.
+				
+		2) Channels (app/channels/application_cable/channel.rb)
+				- a channel encapsulates a logical unit of work, similar to what a controller does in a regular MVC setup
+				- Rails creates a parent ApplicationCable::Channel(app/channels/application_cable/channel.rb) class for encapsulating
+					shared logic between your channels.
+				- Then you would create your own channel classes. For example, you could have a Chatrooms and an AppearanceChannel.	
+					Command:
+						rails g channel Chatrooms
+					
+						# app/channels/chat_channel.rb
+						class ChatroomsChannel < ApplicationCable::Channel
+							...
+						end
+						
+				- Consumers subscribe to channels, acting as subscribers.Their connection is called a subscription. 
+						# app/channels/chat_channel.rb
+						class ChatChannel < ApplicationCable::Channel
+								# Called when the consumer has successfully
+								# become a subscriber of this channel.
+								def subscribed
+									current_user.chatrooms.each do |chatroom|
+										stream_from "chatroom:#{chatroom.id}"
+									end
+								end
+						end
+					
+Client-Side Components:
+	1) Connections
+	
+
+NOTES:
+		- any of ActionCable subscriptions on the client-side(e.g app/assets/javascripts/channels/chatrooms.js) have method "this.perform".
+			In this method we can call any method on the server-side and passed a parameter as JSON.
+			Example:
+					#app/assets/javascripts/channels/chatrooms.js
+					App.chatrooms = App.cable.subscriptions.create("ChatroomsChannel", {
+						connected: function(){...},
+
+						disconnected: function(){...},
+
+						received: function(data){...},
+
+						send_message: function(chatroom_id, message){
+							this.perform({ chatroom_id: chatroom_id, message: message });
+						}
+					});
+				
+			On the server-side we can define a method we just call in this.perfom method on the client-side. JSON object is converted to Ruby hash.
+			Example:
+					#app/channels/chatrooms_channels.rb
+					# Be sure to restart your server when you modify this file. Action Cable runs in a loop that does not support auto reloading.
+					class ChatroomsChannel < ApplicationCable::Channel
+							def subscribed
+								...
+							end
+
+							def unsubscribed
+								...
+							end
+
+							def send_message(data)  		
+								Rails.logger.info "[DATA]#{data}" 
+								@chatroom = Chatroom.find(data["chatroom_id"])
+								message = @chatroom.messages.create(body: data["body"], user: current_user)
+								MessageRelayJob.perform_later(message)
+							end
+					end
+					 
+			# This way we dont need a MessagesController any more, because we dont use Ajax		
+
+				
+
+				
+			
+			
+			

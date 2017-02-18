@@ -1,0 +1,324 @@
+NAMESPACES
+
+In the PHP world, namespaces are designed to solve two problems that authors of libraries and applications encounter when creating re-usable code elements such as classes or functions:
+  - Name collisions between code you create, and internal PHP classes/functions/constants or third-party classes/functions/constants.
+  - Ability to alias (or shorten) Extra_Long_Names designed to alleviate the first problem, improving readability of source code.
+
+Defining Namespaces:
+  - namespace must be the first statement in the scripts
+      Example:
+      <html>
+      <?php
+        namespace MyProject; //error
+      ?>
+  - the same namespace may be defined in multiple files, allowing splitting up of a namespace's contents across the filesystem.
+  - define() will define constants exactly as specified.  So, if you want to define a constant in a namespace,
+    you will need to specify the namespace in your call to define(), even if you're calling define() from within
+    a namespace.
+    <?php
+      namespace test;
+      define('MESSAGE', 'Hello world!');
+    ?>
+
+    The following code will define two constants in the "test" namespace.
+
+    <?php
+      namespace test;
+      define('test\HELLO', 'Hello world!');
+      define(__NAMESPACE__ . '\GOODBYE', 'Goodbye cruel world!');
+    ?>
+
+Declaring a single namespace (PHP 5 >= 5.3.0, PHP 7)
+  namespace MyProject;
+
+Declaring sub-namespaces (PHP 5 >= 5.3.0, PHP 7)
+  -  PHP namespaces also contain the ability to specify a hierarchy of namespace names
+      namespace MyProject\Sub\Level;
+
+Defining multiple namespaces in the same file (PHP 5 >= 5.3.0, PHP 7)
+  - Multiple namespaces may also be declared in the same file. There are two allowed syntaxes.
+    1) syntax
+        - Declaring multiple namespaces, simple combination syntax
+        - This syntax is not recommended for combining namespaces into a single file.
+          Instead it is recommended to use the alternate bracketed syntax.
+        Example:
+        <?php
+          namespace MyProject;
+
+          const CONNECT_OK = 1;
+          class Connection { /* ... */ }
+          function connect() { /* ... */  }
+
+          namespace AnotherProject;
+
+          const CONNECT_OK = 1;
+          class Connection { /* ... */ }
+          function connect() { /* ... */  }
+        ?>
+    2) syntax
+        - Declaring multiple namespaces, bracketed syntax
+        - It is strongly discouraged as a coding practice to combine multiple
+          namespaces into the same file. The primary use case is to combine multiple PHP scripts into the same file.
+        Example:
+        <?php
+          namespace MyProject {
+            const CONNECT_OK = 1;
+            class Connection { /* ... */ }
+            function connect() { /* ... */  }
+          }
+
+          namespace AnotherProject {
+            const CONNECT_OK = 1;
+            class Connection { /* ... */ }
+            function connect() { /* ... */  }
+          }
+        ?>
+
+        - To combine global non-namespaced code with namespaced code, only bracketed syntax is supported.
+          Global code should be encased in a namespace statement with no namespace name as in:
+
+    3) syntax
+        - Declaring multiple namespaces and unnamespaced code
+        Example:
+        <?php
+          namespace MyProject {
+
+            const CONNECT_OK = 1;
+            class Connection { /* ... */ }
+            function connect() { /* ... */  }
+          }
+
+          namespace { // global code
+            session_start();
+            $a = MyProject\connect();
+            echo MyProject\Connection::start();
+          }
+        ?>
+
+    4) syntax
+        - Declaring multiple namespaces and unnamespaced code
+        Example:
+        <?php
+          declare(encoding='UTF-8');
+          namespace MyProject {
+            const CONNECT_OK = 1;
+            class Connection { /* ... */ }
+            function connect() { /* ... */  }
+          }
+
+          namespace { // global code
+            session_start();
+            $a = MyProject\connect();
+            echo MyProject\Connection::start();
+          }
+        ?>
+
+Using namespaces
+  - class name can be referred to in three ways:
+      1) Unqualified name, or an unprefixed class name like $a = new foo(); or foo::staticmethod();.
+         If the current namespace is currentnamespace, this resolves to currentnamespace\foo.
+         If the code is global, non-namespaced code, this resolves to foo.
+         Example:
+         <?php
+            namespace Foo\Bar\subnamespace;
+
+            const FOO = 1;
+            function foo() {}
+            class foo
+            {
+              static function staticmethod() {}
+              }
+          ?>
+
+      2) Qualified name, or a prefixed class name like $a = new subnamespace\foo(); or subnamespace\foo::staticmethod();.
+         If the current namespace is currentnamespace, this resolves to currentnamespace\subnamespace\foo.
+         If the code is global, non-namespaced code, this resolves to subnamespace\foo.
+         Fully qualified name, or a prefixed name with global prefix operator like $a = new \currentnamespace\foo();
+         or \currentnamespace\foo::staticmethod();. This always resolves to the literal name specified in the code,
+         currentnamespace\foo.
+         Example:
+          <?php
+            namespace Foo\Bar;
+            include 'file1.php';
+
+            const FOO = 2;
+            function foo() {}
+            class foo
+            {
+             static function staticmethod() {}
+            }
+
+            /* Unqualified name */
+            foo(); // resolves to function Foo\Bar\foo
+            foo::staticmethod(); // resolves to class Foo\Bar\foo, method staticmethod
+            echo FOO; // resolves to constant Foo\Bar\FOO
+
+            /* Qualified name */
+            subnamespace\foo(); // resolves to function Foo\Bar\subnamespace\foo
+            subnamespace\foo::staticmethod(); // resolves to class Foo\Bar\subnamespace\foo,
+                                           // method staticmethod
+            echo subnamespace\FOO; // resolves to constant Foo\Bar\subnamespace\FOO
+
+            /* Fully qualified name */
+            \Foo\Bar\foo(); // resolves to function Foo\Bar\foo
+            \Foo\Bar\foo::staticmethod(); // resolves to class Foo\Bar\foo, method staticmethod
+            echo \Foo\Bar\FOO; // resolves to constant Foo\Bar\FOO
+          ?>
+
+          Note that to access any global class, function or constant, a fully qualified name can be used,
+          such as \strlen() or \Exception or \INI_ALL.
+
+      3) Fully qualified name, or a prefixed name with global prefix operator like $a = new \currentnamespace\foo();
+         or \currentnamespace\foo::staticmethod();.
+         This always resolves to the literal name specified in the code, currentnamespace\foo.
+         Example - Accessing global classes, functions and constants from within a namespace
+          <?php
+            namespace Foo;
+
+            function strlen() {}
+            const INI_ALL = 3;
+            class Exception {}
+
+            $a = \strlen('hi'); // calls global function strlen
+            $b = \INI_ALL; // accesses global constant INI_ALL
+            $c = new \Exception('error'); // instantiates global class Exception
+          ?>
+
+Using namespaces: Aliasing/Importing (PHP 5 >= 5.3.0, PHP 7)
+  - This is similar to the ability of unix-based filesystems to create symbolic links to a file or to a directory.
+
+  1) Importing/aliasing with the use operator
+     Example:
+      <?php
+        namespace foo;
+        use My\Full\Classname as Another;
+
+        // this is the same as use My\Full\NSname as NSname
+        use My\Full\NSname;
+
+        // importing a global class
+        use ArrayObject;
+
+        // importing a function (PHP 5.6+)
+        use function My\Full\functionName;
+
+        // aliasing a function (PHP 5.6+)
+        use function My\Full\functionName as func;
+
+        // importing a constant (PHP 5.6+)
+        use const My\Full\CONSTANT;
+
+        $obj = new namespace\Another; // instantiates object of class foo\Another
+        $obj = new Another; // instantiates object of class My\Full\Classname
+        NSname\subns\func(); // calls function My\Full\NSname\subns\func
+        $a = new ArrayObject(array(1)); // instantiates object of class ArrayObject
+        // without the "use ArrayObject" we would instantiate an object of class foo\ArrayObject
+        func(); // calls function My\Full\functionName
+        echo CONSTANT; // echoes the value of My\Full\CONSTANT
+      ?>
+
+   2) importing/aliasing with the use operator, multiple use statements combined
+      Example:
+        <?php
+          use My\Full\Classname as Another, My\Full\NSname;
+
+          $obj = new Another; // instantiates object of class My\Full\Classname
+          NSname\subns\func(); // calls function My\Full\NSname\subns\func
+        ?>
+
+   3) Importing and dynamic names
+      Example:
+      <?php
+        use My\Full\Classname as Another, My\Full\NSname;
+
+        $obj = new Another; // instantiates object of class My\Full\Classname
+        $a = 'Another';
+        $obj = new $a;      // instantiates object of class Another
+      ?>
+
+   4) Importing and fully qualified names
+      Example:
+      <?php
+        use My\Full\Classname as Another, My\Full\NSname;
+
+        $obj = new Another; // instantiates object of class My\Full\Classname
+        $obj = new \Another; // instantiates object of class Another
+        $obj = new Another\thing; // instantiates object of class My\Full\Classname\thing
+        $obj = new \Another\thing; // instantiates object of class Another\thing
+      ?>
+
+Scoping rules for importing
+  - The use keyword must be declared in the outermost scope of a file (the global scope) or inside namespace declarations.
+    This is because the importing is done at compile time and not runtime, so it cannot be block scoped
+    Example - illegal use of use keyword;
+    <?php
+      namespace Languages;
+
+      function toGreenlandic()
+      {
+        use Languages\Danish;
+
+        // ...
+      }
+    ?>
+  - Importing rules are per file basis, meaning included files will NOT inherit the parent file's importing rules
+
+Grouping namespaces(PHP >= 7)
+	Example:
+		//namespace.php
+		namespace myNS;
+
+		class A{}
+		class B{}
+		class C{}
+
+		//group_use.php
+		require_once 'namespace.php'
+
+		//old way
+		use myNS\A;
+		use myNS\B;
+		use myNS\C;
+
+		//new way
+		use myNS\{A, B, C};
+
+		// we can use an alias
+		use myNS\{A as A, B, C};
+
+  Example:
+    <?php
+      // Pre PHP 7 code
+      use some\namespace\ClassA;
+      use some\namespace\ClassB;
+      use some\namespace\ClassC as C;
+
+      use function some\namespace\fn_a;
+      use function some\namespace\fn_b;
+      use function some\namespace\fn_c;
+
+      use const some\namespace\ConstA;
+      use const some\namespace\ConstB;
+      use const some\namespace\ConstC;
+
+      // PHP 7+ code
+      use some\namespace\{ClassA, ClassB, ClassC as C};
+      use function some\namespace\{fn_a, fn_b, fn_c};
+      use const some\namespace\{ConstA, ConstB, ConstC};
+    ?>
+
+Global space
+  - Without any namespace definition, all class and function definitions are placed into the global space -
+    as it was in PHP before namespaces were supported. Prefixing a name with \ will specify that the name is
+    required from the global space even in the context of the namespace.
+    Example:
+    <?php
+      namespace A\B\C;
+
+      /* This function is A\B\C\fopen */
+      function fopen() {
+         /* ... */
+         $f = \fopen(...); // call global fopen
+         return $f;
+      }
+    ?>

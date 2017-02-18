@@ -1,0 +1,50 @@
+Node
+	- single threaded
+
+Modules
+	* File System
+			const fs = require('fs');
+			
+	* OS - operating system-related utility methods
+			const os = require('os');
+			
+	* proccess - The process object is a global that provides information about, and control over, the current Node.js process. 
+								As a global, it is always available to Node.js applications without using require().
+								process object is instance of EventEmitter
+								
+		- process.args - The process.argv property returns an ARRAY containing the command line arguments passed when the Node.js 
+											process was launched.
+											Arguments start at index = 2.
+											Example:
+												node app.js one two three
+												console.log(process.argv[2]); // one
+			
+* module object
+		- in every file we can access object "module"			
+			Example:
+				console.log(module);
+		- "module" object has a property "exports". Since it is object we can set multiple properties on it.
+			Example:
+				module.exports.age = 25;
+				module.exports = { name: "Pera" };
+				module.exports.addNote = function(){
+					...
+				}
+
+http
+	- for creating "pure" Node server
+	- Example:
+			# app.js
+			var http = require('http');
+
+			var myServer = http.createServer(function(request, response){
+				response.writeHead(200, {"Content-Type": "text/html"});
+
+				response.write("<h1>Hello World</h1>");
+				response.end();
+			});
+
+			myServer.listen(3000);
+			console.log("Server is running on port 3000");
+			
+			node app.js

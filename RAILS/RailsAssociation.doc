@@ -1,0 +1,98 @@
+Rails Association
+
+* Polymorphic Associations
+	- when we face a situation when one model need to belongs to different models, we can use a 
+		polymorphic association
+		Example:
+			Models: Article, Event, Photos all have Comment
+
+		Generate polymorphic model:
+			rails g model Comment content:text commentable_id:integer commentable_type	
+
+		Migration:
+			1) way
+					class CreateComments < ActiveRecord::Migration[5.0]
+					  def change
+					    create_table :comments do |t|
+					      t.text :content
+					      t.integer :commentable_id
+					      t.string :commentable_type
+
+					      t.timestamps
+					    end
+
+					    add_index :comments, [:commentable_id, :commentable_type]
+					  end
+					end
+  
+			2) way
+					class CreateComments < ActiveRecord::Migration[5.0]
+					  def change
+					    create_table :comments do |t|
+					      t.text :content
+					      t.references :commentable, polymorphic: true, index: true
+
+					      t.timestamps
+					    end
+					  end
+					end
+
+		- commentable_id - id of record of commentable_type model
+
+		Insert comments:
+			article = Article.first
+			#=> #<Article id: 1, name: "Batman", content: "Lorem ipsum dolor sit amet, consectetur adipisicin...", created_at: "2017-02-11 16:34:15", updated_at: "2017-02-11 16:34:15">
+
+			c = article.comments.create!(content: "Hello")
+			#=> SQL 
+				INSERT INTO "comments" ("content", "commentable_type", "commentable_id", "created_at", "updated_at") VALUES (?, ?, ?, ?, ?)  [["content", "Hello World"], ["commentable_type", "Article"], ["commentable_id", 1], ["created_at", 2017-02-11 21:47:08 UTC], ["updated_at", 2017-02-11 21:47:08 UTC]]
+			#=>  #<Comment id: 1, content: "Hello World", commentable_type: "Article", commentable_id: 1, created_at: "2017-02-11 21:47:08", updated_at: "2017-02-11 21:47:08">
+
+			c.commentable
+			#=> #<Article id: 1, name: "Batman", content: "Lorem ipsum dolor sit amet, consectetur adipisicin...", created_at: "2017-02-11 16:34:15", updated_at: "2017-02-11 16:34:15">
+
+		Generate link dynamically:
+			1) in views 
+					- <%= link_to "New Comment", [:new, @commentable, :comment] %>
+					Example:
+						#comments controller
+							before_action :load_commentable_first
+
+							def index
+			  				@comments = @commentable.comments
+							end
+
+							def load_commentable_first
+						  	resource, id = request.path.split('/')[1,2]
+						  	@commentable = resource.singularize.classify.constantize.find(id)
+						  end
+
+						#views/comments/index
+							# this won't work
+							<%= link_to "New Comment", new_article_comment_path(@commentable) %>  
+
+							# dynamic link
+							<%= link_to "New Comment", [:new, @commentable, :comment] %>
+
+							// Rails will generate
+									@commentable = Article || Photo || Event
+									[:new, @commentable, :comment] -> new_article_comment_path
+
+			2) in controller
+					- redirect_to [@commentable, :comment]
+					Example:
+						def create
+					  	@comment = @commentable.comments.new(params[:comment])
+
+					  	if @comment.save
+					  		redirect_to [@commentable, :comments], notice: "Comment created."
+					  	else
+					  		render :new
+					  	end
+					  end
+
+			3) forms in view
+					# /articles/1/comments
+					<%= form_for [@commentable, @comment] do |f| %>
+						...
+					<% end %>

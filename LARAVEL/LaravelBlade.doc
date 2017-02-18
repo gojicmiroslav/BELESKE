@@ -1,0 +1,33 @@
+- @unless(something) <=> if(!something)
+  Example:
+    @if(!empty($people))
+      <h2>There is people</h2>
+    @endif
+
+    <h3>Same with unless</h3>
+
+    @unless(empty($people))
+      <h2>There is a people</h2>
+    @endunless
+ 
+
+ * Template inheritance
+ 		@section...@stop - defines a section of content
+ 		@yield - display the content of a given section
+ 		@extend - specify which layout the child view should "inherit"
+ 		@parent - displays parents content of section
+
+ 		Example:
+ 			@extends('layouts.app')
+
+			@section('title', 'Page Title')
+
+			@section('sidebar')
+    		@parent
+
+    		<p>This is appended to the master sidebar.</p>
+			@endsection
+
+			@section('content')
+    		<p>This is my body content.</p>
+			@endsection

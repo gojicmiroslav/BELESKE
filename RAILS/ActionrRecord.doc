@@ -1,0 +1,13 @@
+Active Record
+
+has_many associations:
+	- if we want a different name for association
+			has_many :fields, class_name: "ProductField"
+	
+Generators:
+	Question |--> Answer
+
+	rails g model Question content
+	rails g model Answer content question:references
+	//or 
+	rails g model Answer content question:belongs_to

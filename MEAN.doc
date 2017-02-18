@@ -1,0 +1,6 @@
+MEAN STACK
+
+NODEJS
+	- express.static - middleware function
+	- for using middleware function we have to use:
+		app.use(middleware_function)

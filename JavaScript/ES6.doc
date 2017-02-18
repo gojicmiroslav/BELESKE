@@ -1,0 +1,129 @@
+ Creating Classes and Objects:
+	class Drone {
+		//
+	}
+
+	let drone = new Drone();
+
+Instance variables(properties) and class properties(properties at class level - static)
+	Example:		
+			class Drone {
+				constructor(id, name){
+					this.id = id;
+					this.name = name;
+				}
+
+				// static method
+				static getCompany(){
+					console.log("From static method!");
+				}
+			}
+
+			// static properties - there is no specific syntax for this
+			Drone.maxHeight = 2000;
+
+			let drone = new Drone('A123', "Misa Gojic");
+			let drone2 = new Drone('B223', "Pera Peric");
+
+			console.log(typeof Drone); //function
+			console.log(typeof drone); // object
+			console.log(Drone.maxHeight); // 2000
+			console.log(drone.name);
+			console.log(drone2.name);
+			console.log(drone.maxHeight); // undefined
+
+Getters and Setters
+	- when variable starts with "_" by conventions it means that its private
+		class Drone {
+			constructor(id, name){
+				this._id = id;
+				this._name = name;
+			}
+
+			get id(){
+				return this._id;
+			}
+
+			set id(value){
+				if(value !== undefined){
+				  this._id = value;
+				}
+			}
+		}
+
+		let drone = new Drone('A123', "Misa Gojic");
+		console.log('Drone id: ' + drone.id);
+		drone.id = undefined;
+		console.log('Drone id: ' + drone.id);
+		drone.id = 'G444'
+		console.log('Drone id: ' + drone.id);
+
+Inheritance
+	class Vehicle {
+		//
+	}
+
+	class Car extends Vehicle {
+		//
+	}
+
+	- when we instantiate a class, that object is instance of that class and any other parent class	
+		Example:
+			let c = new Car();
+			console.log(c instanceof Car); //true 
+			console.log(c instanceof Vehicle); //true
+			console.log(c instanceof Object); //true
+
+	- if child class has constructor, in child constructor we must call parent constructor using super(), even if parent 			class doesn't have a explicit constructor(it have an implicit constructor).	
+		Example:
+			class Vehicle {
+				constructor(){
+					console.log("Vehicle Constructor");
+				}
+			}
+
+			class Car extends Vehicle {
+				constructor(){
+					super();
+					console.log("Car Constructor");
+				}
+			}
+
+	- we can add a attributes to the parent class that will be available in the child class using "this" keyword	
+		Example:
+			class Vehicle {
+				constructor(licenseNumber){
+					this.licenseNumber = licenseNumber;
+				}
+			}
+
+		class Car extends Vehicle {
+	  		constructor(licenseNumber){
+    			super(licenseNumber);
+  			}
+		}
+
+		let c = new Car("A123");
+		console.log("License Number: " + c.licenseNumber); 
+
+ES6 Promises
+
+Spread Operator
+	- The spread syntax allows an expression to be expanded in places where multiple arguments (for function calls) or multiple elements 
+	  (for array literals) or multiple variables  (for destructuring assignment) are expected.
+	- Syntax:
+			for function calls:
+					myFunction(...iterableObj)
+			for array literals
+					[...iterableObj, 4,5,6]
+		
+		Examples:
+			function myFunction(x,y,z){...}
+			var args = [1,2,3];	
+			myFunction(...args);
+			
+			var parts = ['shoulders', 'knees'];
+			var lyrics = ['head', ...parts, 'and', 'toes']; // ["head", "shoulders", "knees", "and", "toes"]	
+			
+	
+	 

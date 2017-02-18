@@ -1,0 +1,27 @@
+Design Patterns:
+	Creational - Factory
+	Structural
+	Behavioral
+
+OBSERVER PATTERN
+	PHP
+		- built interfaces: SplObserver and SplSubject
+			SplSubject {
+				/* Methods */
+				abstract public void attach ( SplObserver $observer ) // attach an SplObserver
+				abstract public void detach ( SplObserver $observer ) // detach an SplObserver
+				abstract public void notify ( void ) // notify an observer
+			}
+
+			SplObserver {
+				/* Methods */
+				abstract public void update ( SplSubject $subject ) // receive update from subject
+			}
+			
+Creational Pattern
+	Factory Pattern
+		Ruby
+		
+Behavioral Patterns
+	1) Template Method Pattern
+			

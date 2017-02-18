@@ -1,0 +1,89 @@
+FLUX
+
+		Action -> Dispatcher -> Store -> React View
+
+Action
+	- describe user interactions that occured in React components(click button: Delete User, Add user,...)
+
+Dispatcher
+	- singleton registry, notify everyone who cares. It's just centralized list of callbacks
+
+Store
+	- holds application state(data). When data in store is updated, React view reflects new data
+
+Actions
+	- encapsulate events that occur with the application - save, user, delete user,...
+	- triggered by: server or user interaction
+	- action payload has type and data
+			{
+				type: USER_SAVED,
+				data: {
+					firstName: 'John',
+					lastName: 'Smith'
+				}
+			}
+
+Dispatcher
+		- central hub - there can be only one per app
+		- holds list of callbacks
+		- he dispatch a actions
+		- dispatcher invokes the callbacks that have been registered with it and broadcast the payload that he receives from the action. This dispathes the actions to stores. Multiple stores can request updates from this one dispatcher	when givin action happens. Each actions updates specific stores based on the callbacks that is registered with the dispatcher.
+		- basically, it sends actions to stores
+
+Store(skladiste)
+		- holds app state, logic and data retrieval methods
+		- not a model, contains models(one or many)
+		- registers callbacks with dispatcher
+		- uses Node's EventEmitter
+		- only store knows how to update data. Event that is dispatch doesn't know how to add or remove item, only store 				knows how.
+		- the structure of a store:
+			1. Extend EventEmitter
+			2. addChangeListener and removeChangeListener
+			3. emitChange
+
+Example Flux flow:
+	- Action - User clicked "Save User" button
+	- this generates an action. Action sends Payload object to dispatcher.
+		Payload:
+			{
+				type: USER_SAVED,
+				data: {
+					fistName: "John",
+					lastName: "Smith"
+				}
+			}
+	- dispatcher checks for registered callbacks to determines which stores should received a payload. Then it sends payload to all stores that are registered callbacks.		
+	- store update internal storage based on payload that he has received. Once it's done, he emit change event.
+	- now React knows that he needs to re-render UI.
+	- React View receives change and re-renders
+
+Flux API
+	- register(function callback) - Store -> "Hey Dispatcher, run me when actions happen."
+	- unregister(string id) - Store -> "Hey Dispatcher, stop worrying about this action."
+	- waitFor(array<string> ids) - Store -> "Update this store first"
+	- dispatch(object payload) - Action -> "Hey Dispatcher tell the stores about this action"
+	- isDispatching() - "I'm busy dispatching callbacks right now."
+
+Basic boilerplate for any store:
+	var AuthorStore = objectAssign({}, EventEmitter.prototype, {
+		addChangeListener: function(callback){
+			// what ever callback gets passed in, he is going to get called any time the things change in store
+			this.on(CHANGE_EVENT, callback);
+		},
+
+		removeChangeListener: function(callback){
+			this.removeListener(CHANGE_EVENT, callback);
+		},
+
+		emitChange: function(){
+			this.emit(CHANGE_EVENT);	
+		}
+	});
+
+	// register this store to the dispatcher
+	// this function is going to get called every time ANY action is dispatch
+	Dispatcher.register(function(action){	
+		switch(action.actionType){
+
+		}
+	});
