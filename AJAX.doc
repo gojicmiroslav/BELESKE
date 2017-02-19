@@ -96,7 +96,51 @@ AJAX
 			};
 			
 			xhr.send();
-						
+			
+* Server side AJAX
+	- two ways:
+			1) page assumes all request are AJAX
+			2) page detects if request was AJAX
+			
+	- problem: how to detect AJAX request.
+		Solution: add request header: X-Requested-With
+		
+		// in JS - client side
+		xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest'); 
+		
+		- 'XMLHttpRequest' - can be anything, by convention it is 'XMLHttpRequest'
+												jQuery do this automatically
+												
+		//on server side - PHP
+		function is_ajax-request(){
+			return isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest';
+		}
+	
+	- this header values are not secure, they can be spoof
+	
+* PHP and JSON
+		- convert to JSON - json_encode();
+			Example:
+				$arr = ['a' => 1, 'b' => 2, 'c' => 3];
+				json_encode($arr); // '{"a":1, "b":2, "c":3}'
+				
+				$arr = ['a', 'b', 'c'];
+				json_encode($arr); '["a", "b", "c"]'
+				
+				$arr = ['a', 'b', 'c'];
+				json_encode($arr, JSON_FORCE_OBJECT); '["0":"a", "1":"b", "2":"c"]'
+				
+				//class - returns all pulbic attributes of class as JSON
+				class User {
+					public $firstname = "Foo";
+					public $lastname = "Bar";
+					private $secret = "Secret";
+				}
+				
+				$user = new User();
+				json_encode($user); // '{"firstname":"Foo","lastname":"Bar"}' - no private
+				
+		- json_decode() - convert JSON into PHP entity, such as an array
 			
 					
 					

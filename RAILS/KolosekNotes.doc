@@ -37,3 +37,221 @@ KOLOSEK NOTES
 		# creates only article.rb
 		bundle exec rails g model Article --no-migration --no-test-framework --no-fixtures
 		
+* Generate controller
+		rails generate controller NAME [action action] [options]
+		
+		Options:
+			--skip-routes # Dno't add routes to routes.rb
+			--no-test-framework
+			
+		rails g controller Articles
+		
+* Set accessible parameters - Mass Assignment
+		def article_params
+			accessible = [:title, :text]
+			# add new fields
+			# article_parameters << [:test]
+			params.require(:article).permit(accessible)
+		end
+		
+* Method for belongs_to
+		comment.article		#=> Article
+		comment.article = Article.new #=> in-memory, not in DB
+		article = comment.build_article(title: "Title", body: "Body") #=> in-memory
+		article = comment.create_article(title: "Title", body: "Body") #=> in DB
+			// SQL: INSERT INTO `articles` (`title`, `body`, `created_at`, `updated_at`) 
+							VALUES ('Pasa article', 'Trararara', '2017-02-18 22:01:39', '2017-02-18 22:01:39')
+			//now
+			article.id == comment.article.id #=> true
+		article = comment.create_article!(title: "Title", body: "Body") #=> in DB
+		
+* Options for has_many:
+		:as							#=> indicates that this is a polymorphic association
+		:class_name			#=> to supply the model name
+		:dependent			#=> controls what happens to the associated objects when their owner is destroyed(:destroy, :destroy_all)
+		:foreign_key		#=> set foreign key
+			Example:
+				class Article < ApplicationRecord
+					has_many :comments, dependent: :destroy, foreign_key: "blog_id"
+					# adds 'blog_id' in comments table as foreign key for article
+
+		:inverse_of			#=> specifies the name of the belongs_to association that is the inverse of this association.Does not work in combination with the :through or :as options
+		:primary_key
+		:source
+		:source_type
+		:through
+		:validate
+		
+* inverse_of - Bi-directional Associations - in-memory object sync
+		class Article < ApplicationRecord
+			has_many :comments
+		end
+		 
+		class Comment < ApplicationRecord
+			belongs_to :article
+		end
+		
+		article = Article.first
+		comment = article.comments.first
+		article.title == comment.article.title # => true
+		article.title = 'New Title'
+		article.title == comment.article.title # => false
+		
+		class Article < ApplicationRecord
+			has_many :comments, :inverse_of :article
+		end
+		 
+		class Comment < ApplicationRecord
+			belongs_to :article, :inverse_of :comments
+		end
+		
+		article.title == comment.article.title # => true
+		
+		Another example:
+			# without :inverse_of
+			comment.article == article #=> true
+				#=> triggers: SELECT  `articles`.* FROM `articles` WHERE `articles`.`id` = 17 LIMIT 1
+			
+			# with :inverse_of
+			comment.article == article #=> true
+			
+	- this only saves as a database look-up when going from Comment to Article (:belongs_to direction)
+	
+* Customize scope for has_many association
+		- customize scope used by has_many 
+		
+		Examples:
+			class Author < ApplicationRecord
+				has_many :books, -> { where processed: true }
+			end
+		
+		Example - include:
+			class User < ApplicationRecord
+				has_many :articles
+			end
+			 
+			class Article < ApplicationRecord
+				belongs_to :user
+				has_many :comments
+			end
+			 
+			class Comment < ApplicationRecord
+				belongs_to :article
+			end
+		
+			class User < Application
+				has_many :articles, -> { includes :comments }
+			end
+		
+* List column names in Rails Console - column_names
+		Article.column_names
+		
+* new_record?
+	- Returns true if this object hasn't been saved yet – that is, a record for the object doesn't exist in the database yet; 
+		otherwise, returns false.
+		
+		article = Article.first
+		article.new_record?        #=> false
+		new_article = Article.new
+		new_article.new_record?    #=> true
+		
+* N+1 problem
+		Category |-> Products
+		
+		# in controller
+		@products = Product.all
+		
+		produces SQL:
+			SELECT `products`.* FROM `products`
+		and then for each product we are doing another query to fetch category for given product
+			SELECT  `categories`.* FROM `categories` WHERE `categories`.`id` = 35 LIMIT 1 // 35 - id of single product
+			SELECT  `categories`.* FROM `categories` WHERE `categories`.`id` = 32 LIMIT 1 // 32 - id of single product
+			...
+			
+		- Solutions - add eager loading with:
+				1) includes
+						@products = Product.includes(:category)
+						// This produces two SQL queries:
+							SELECT `products`.* FROM `products` ORDER BY `products`.`name` ASC
+							SELECT `categories`.* FROM `categories` WHERE `categories`.`id` IN (35, 36, 30, 37, 32)
+							
+				2) joins
+					  - this is better solution then "includes" if we are using associated data in query. 
+							Example:
+								@products = Product.order("category.name").joins(:category)	
+						- joins will not populate associated data(Category) like includes. It will also trigger SQL to get
+							category for every product(N+1)
+						- it can be used to fetch columns we need in products, instead of all columns, like "includes" does
+								@products = Product.order(:name).joins(:category).select("products.*, categories.name as category_name")
+								
+								# view/products/
+								# category_name becomes a property of product model
+								<td><%= product.category_name %></td>
+								
+								// this performs only ONE SQL query
+								SELECT products.*, categories.name as category_name 
+								FROM `products` INNER JOIN `categories` 
+								ON `categories`.`id` = `products`.`category_id` 
+								ORDER BY `products`.`name` ASC
+								
+								TIP: if we are changing attributes of model dynamically with select clause(using as in select), it is 
+										 recemended to defined a method in model with that name 
+										 Example:
+											#model/product.rb
+											def category_name
+												read_attribute("category_name") || category.name
+											end
+										 
+* read_attribute
+		- Syntax:
+				read_attribute(attr_name, &block)
+				
+		- Returns the value of the attribute identified by attr_name after it has been typecast 
+			(for example, “2004-12-12” in a date column is cast to a date object, like Date.new(2004, 12, 12),
+			 name "Test" is cast to String).
+			 
+		- Example:
+				Product.first.read_attribute("name")
+				
+* joins
+		Syntax:
+			joins(association_name)
+			
+			Example:
+				User.joins(:posts)
+				Product.joins(:category)
+					# SELECT `products`.* 
+					# FROM `products`
+					# INNER JOIN `categories`
+					# ON `categories`.`id` = `products`.`category_id`
+				
+			Multiple joins:
+				User.joins(:posts, :account)
+					# SELECT "users".*
+					# FROM "users"
+					# INNER JOIN "posts" ON "posts"."user_id" = "users"."id"
+					# INNER JOIN "accounts" ON "accounts"."id" = "users"."account_id"	
+					
+				Product.joins(:category, :comments => :user) // comment belongs to user
+					# SELECT "products".*
+					# FROM "products"
+					# INNER JOIN "categories" ON "products"."category_id" = "category"."id"
+					# INNER JOIN "comments" ON "comments"."product_id" = "products"."id"	
+					# INNER JOIN "users" ON "users"."id" = "comments"."user_id"	
+					
+			Nested joins:
+				User.joins(posts: [:comments])
+					# SELECT "users".*
+					# FROM "users"
+					# INNER JOIN "posts" ON "posts"."user_id" = "users"."id"
+					# INNER JOIN "comments" "comments_posts"
+					#   ON "comments_posts"."post_id" = "posts"."id"
+					
+		 Custom joins:
+			Product.joins("left outer join categories ON category_id = category.id")
+
+* exists?
+
+* find_?
+		
+		

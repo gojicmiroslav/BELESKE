@@ -114,4 +114,11 @@ Console command:
 			]);
 			
 	- all errors are stored in $errors, which is available in all views 
+	
+	- put entered values into form in case of validation fail - method old(field_name):
+		Example:
+			<input type="text" name="username" value="{{ old('username') }}" />
+			<textarea name="body" class="form-control">{{ old('body') }}</textarea>
+			
+
 

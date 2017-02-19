@@ -35,3 +35,37 @@ DEBUG
 			dd($value1, $value2, $value3, ...);
 	- If you do not want to halt the execution of your script, use the dump function instead:
 			dump($value);
+			
+AUTH
+	- scaffold basic login and registration views and routes
+			php artisan make:auth
+			php artisan migrate
+	- config mail for sending email in for pasword forgotten
+			# .env
+			MAIL_DRIVER=log  // email will be stored in storage/logs/laravel.log
+			
+			
+			
+			# config/mail.php
+			'from' => [
+        'address' => env('MAIL_FROM_ADDRESS', 'miroslav.gojic78@gmail.com'),
+        'name' => env('MAIL_FROM_NAME', 'Miroslav'),
+			],
+			
+	- authentication routes - vendpr/laravel/framewordk/src/illuminate/Routing/Router.php:
+			// Authentication Routes...
+			$this->get('login', 'Auth\LoginController@showLoginForm')->name('login');
+			$this->post('login', 'Auth\LoginController@login');
+			$this->post('logout', 'Auth\LoginController@logout')->name('logout');
+
+			// Registration Routes...
+			$this->get('register', 'Auth\RegisterController@showRegistrationForm')->name('register');
+			$this->post('register', 'Auth\RegisterController@register');
+
+			// Password Reset Routes...
+			$this->get('password/reset', 'Auth\ForgotPasswordController@showLinkRequestForm')->name('password.request');
+			$this->post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail')->name('password.email');
+			$this->get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm')->name('password.reset');
+			$this->post('password/reset', 'Auth\ResetPasswordController@reset');
+	
+
