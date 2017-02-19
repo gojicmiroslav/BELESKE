@@ -16,3 +16,12 @@ BSPAN
 * two types of dashboards:
 		- pages/individual_dashboard
 		- pages/company_dashboard
+		
+* ApplicationController includes:
+		include Enterprise::Info  #=> controllers/concerns/enterprise/info.rb
+		include Content						#=> controllers/concerns/content.rb
+
+* Enterprise::Info defines:
+		company
+		company_profile
+		company_decorator
