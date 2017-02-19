@@ -10,6 +10,9 @@ BSPAN
 * After login goes to:		
 		- pages/individual_dashboard
 		
+* After login with selected companies profile goes to:		
+		- companies_controller/show
+		
 * two types of dashboards:
 		- pages/individual_dashboard
 		- pages/company_dashboard
