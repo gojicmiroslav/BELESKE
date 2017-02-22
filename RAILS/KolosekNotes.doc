@@ -253,5 +253,71 @@ KOLOSEK NOTES
 * exists?
 
 * find_?
+
+* Declaring statuses in model:
+		STATUSES = { 'In Consideration' => 0, 'Not Interested' => 1, 'Hold for now' => 2}
+		
+* Resolve layout:
+		- never do this in controller:
+				if ...
+					render ...
+				else
+					render ...
+				end
+				
+		- instaed do this
+				layout :resolve_layout_method
+				
+				private
+				
+				def resolve_layout_method
+					...
+				end
+				
+* test debug: save_and_open_page
+
+* Add new column migration
+		rails g migration AddNameToUser
+		
+		class AddNameToUsers < ActiveRecord::Migration
+			def change
+				add_column :users, :name, :string, null: false
+			end
+		end
+		
+		
+* Rename column migration
+		- rename_column(table_name, column_name, new_column_name)
+		Example;
+			rename_column :users, :email, :email_address
+		
+			// rename_column :library_articles, :url, :source_url
+			class RenameUrlToSourceUrl < ActiveRecord::Migration
+				def change
+					rename_column :library_articles, :url, :source_url
+				end
+			end
+			
+* Reset db
+		rake db:reset = db:drop + db:setup
+		
+* Pushovanje projekta na Kolosek Codeship
+		1) prvo samo komitujemo
+		2) onda pushujempo na Kolosek Codeship
+		3) zatim Undo Last Commit
+		4) pa Unstage
+
+		//dodavanje kolosek remote:
+		git add remote git@bitbucket.org-kolosek:kolosek/bspan.git
+
+		git push kolosek development
+		//or if don't work 
+		git push --force kolosek development
+		
+		- na Codeshipu Select Poject i mora biti prikazan "kolosek" kod izvrsavanja testova
+		
+		
+
+		
 		
 		

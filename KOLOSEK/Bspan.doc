@@ -25,3 +25,10 @@ BSPAN
 		company
 		company_profile
 		company_decorator
+		
+* Active ENT - Recruitment - companies/search_controller#index
+
+* Company from Gap Assessment
+		Assessment::Enterprise::GapAnalysis.first.company_board_member.company.name
+		
+CURRENT: https://www.pivotaltracker.com/n/projects/1140540/stories/137827307
