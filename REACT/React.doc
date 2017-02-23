@@ -368,7 +368,7 @@ Prop Validation
 		...
 	}
 
-	- every prop typethat isn't required should have a corresponding field in getDefaultProps
+	- every prop type that isn't required should have a corresponding field in getDefaultProps
 
 Mixins
 	- for sharing code between multiple components
@@ -411,7 +411,7 @@ SyntheticEvent
 
 React State
 	- state is plain JS object that is used to record in React to use in events.Each class-based React component has his one state object.
-		Whenever a compo nent state is changed the component immediately re-renders(function render() is re-run) and also forces his children to 
+		Whenever a component state is changed the component immediately re-renders(function render() is re-run) and also forces his children to 
 		re-renders as well.
 	- before we use a state inside of a component we need to initiliaze a state object. To initialize a state we set a property state to a plain JS object
 		inside of a classes constructor method.

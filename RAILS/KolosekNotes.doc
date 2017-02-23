@@ -298,6 +298,11 @@ KOLOSEK NOTES
 				end
 			end
 			
+* Remove column migration
+		- remove_column(table_name, column_name)
+		
+		Example:
+			
 * Reset db
 		rake db:reset = db:drop + db:setup
 		
@@ -315,6 +320,19 @@ KOLOSEK NOTES
 		git push --force kolosek development
 		
 		- na Codeshipu Select Poject i mora biti prikazan "kolosek" kod izvrsavanja testova
+		
+* Steps:
+		 - Start (task)
+		 - Push
+		 - Finish
+		 - check tests
+		 - check in staging
+		 - Deliver
+		 
+* Raw SQL
+		results = ActiveRecord::Base.connection.execute("select * from schema_migrations")
+		results[0]
+		 
 		
 		
 

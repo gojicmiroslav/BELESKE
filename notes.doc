@@ -1,0 +1,475 @@
+NOTES
+ - push to the Heroku branch that is not master
+    git push heroku add-new-features:master
+- heroku console:
+    heroku run rails console
+- bundle exec rake db:migrate:reset
+- http://bspan.weebly.com/
+
+Cucumber:
+  Feature: Manage Articles
+    In order to make a blog
+    As an a author 
+    I want to create and manage articles
+
+  Scenario: Article List
+    Given I have articles titled Pizza, Breadsticks
+    When I go to the list of articles
+    Then I should see "Pizza"
+    And I should see "Breadsticks"
+
+  Scenario: Create Valid Article
+    Given I have no articles
+    And I am on the list of articles
+    When I follow "New Article"
+    And I fill in "Title" with "Spuds"
+    And I fill in "Content" with "Delicious potato wedges!"
+    And I press "Create"
+    Then I should see "New article created."
+    And I should see "Spuds"
+    And I should see "Delicious potato wedges!"
+    And I should have 1 article
+
+- Given - Given
+- Then, And - When 
+
+===========================================================================================================================================
+/home/ubuntu/projects/bspan/features/step_definitions/user/home_page_steps.rb:
+
+When(/^I sign in with "(.*?)", "(.*?)"$/) do |login, password|
+  sign_in_with(login, password)
+end
+
+===========================================================================================================================================
+Updating steps:
+  - update in Gemfile
+  - bundle update GEM (i.e bundle update rails)
+
+===========================================================================================================================================
+Views without actions:
+  WelcaomeController < ...
+    before_filter :set_format_to_html
+  
+    private
+
+    def set_format_to_html
+      request.format = 'html'
+    end
+  end
+
+- <script\b[^>]*>([\s\S]*?)<\/script>
+
+ =================================================================================
+
+jQuery:
+  - $(this) - selected element inside of a function
+      $("p").on("click", function(){
+        $(this).toggleClass("off");
+      })
+  - empty()
+  - remove()
+  - toggleClass("active")
+  - detach() 
+      //=> var p = $( "p" ).detach()
+  - val()
+      var singleValues = $( "#single" ).val();  //=> returns single value
+      var multipleValues = $( "#multiple" ).val() || []; //=> returns array
+
+ =================================================================================
+  Cucumber	
+    Steps:
+     - starts with: Given, When, Then
+     - for multiple Given and When use And or But
+     - When - describe action, one When step per scenario
+     - Then - describe EXPECTED outcome or result.
+
+
+ =================================================================================
+
+Rails
+  - html_safe
+
+User Story style
+  Feature: <feature title>
+    As a <persona|role>
+    I want to <action>
+    So that <outcome>
+
+Cucumber
+  Feature: Product pages
+
+    Background:
+      Given I am not signed in
+
+    Scenario: Viewing product boards page
+      Given I am on page product boards
+      Then I should see product boards page
+
+    Scenario: Viewing product candidates page
+      Given I am on page product candidates
+      Then I should see product candidates page
+
+    Scenario: Logging in on product candidates page
+      Given I am on page product candidates
+      When I login using form on the page
+      Then I should see "welcome"
+
+CSS Text
+  - text-align: left|right|center|justify|initial|inherit
+      justify - Stretches the lines so that each line has equal width (like in newspapers and magazines)
+  - text-decoration: none|underline|overline|line-through|initial|inherit
+  - text-transform: none|capitalize|uppercase|lowercase|initial|inherit;
+  - letter-spacing: normal|length|initial|inherit
+      length - Defines an extra space between characters (negative values are allowed). Ex: 2px, -4px
+  - line-height
+    - "spaces" between the lines of the text
+    - line-height: normal|number|length|initial|inherit
+        - number - A number that will be multiplied with the current font size to set the line height. Ex: line-height: 3
+        - length - fixed length in px, pt, %, ...Ex: line-height: 20px, line0height: 150%
+        - % - The default line height in most browsers is about 110% to 120%
+  - vertical-align - The vertical-align property sets the vertical alignment of an element.
+      vertical-align: baseline|length|sub|super|top|text-top|middle|bottom|text-bottom|initial|inherit;
+      Ex: vertical-align:10px, vertical-align:-10px; vertical-align:50%;
+
+CSS Links
+  - links can be styled differently depending on what state they are in.
+  - states are:
+      a:link - a normal, unvisited link
+      a:visited - a link the user has visited
+      a:hover - a link when the user mouses over it
+      a:active - a link the moment it is clicked
+  - Note: a:hover MUST come after a:link and a:visited in the CSS definition in order to be effective.
+  - Note: a:active MUST come after a:hover in the CSS definition in order to be effective.
+  - Ex - combination of properties:
+      a:hover, a:active {
+       background-color: red;
+      }
+
+CSS display
+  - The display property specifies if/how an element is displayed.
+  - block-level element - block-level element always starts on a new line and takes up the full width available (stretches out to the left and right as far as it can).
+    Block elements: <div>, <h1> - <h6>, <p>, <form>, <header>, <footer>, <section>
+  - inline element - does not start on a new line and only takes up as much width as necessary.
+    Inline elements: <span>, <img>, <a>
+  - Note: Setting the display property of an element only changes how the element is displayed, NOT what kind of element it is. So, an inline element with display: block; is not allowed to have other block elements inside it.
+
+display:none vs visibility:hidden
+  - display: none - The element will be hidden, and the page will be displayed as if the element is not there(he is NOT in the DOM)
+  - visibility:hidden - hides a element, but the element will still take up the same space as before. The element will be hidden, but still affect the layout(he is still in the DOM).
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Profile:
+  - user
+  - company
+
+Assessment Types:
+  - individual
+  - enterprise
+
+User:
+  - can fill:
+      - experience
+      - education
+      - accomplishments
+      - boad service
+
+Assessments:
+  - individual
+
+Board Pitch:
+  - ubedjivanje odbora
+
+
+===========================================================================================================================
+
+#MailWorker.perform_at(24.hours.from_now, "RequestMailer", :request_rejected, self.id) if (skip_email == "false")
+
+    <div class="notification">
+      <span class="notification-value"> 
+        <%= position.recent_comments(current_user) %>
+      </span>
+      <a href="#" class="joblink"></a>
+      <i class="fa fa-envelope icon" aria-hidden="true"></i>
+    </div>
+
+    <div class="notification -second">
+      <span class="notification-value"> 
+        <%= position.recent_applicants_count(current_user) %>
+      </span>
+      <a href="#" class="joblink"></a>
+      <i class="fa fa-user icon" aria-hidden="true"></i>
+    </div>
+
+    BOX:
+
+
+@import "mixin";
+
+.job{
+  position:relative;
+  height:150px;
+  background-color:white;
+  margin-top:30px;
+  border:1px solid transparent;
+  @include box-shadow1;
+  @include border-radius(4px);
+
+  &.-new{
+    height:50px !important;
+  }
+  &:hover{
+    background-color:#b0d6d6;
+    background-color:rgba(80,200,222,0.1);
+  }
+  .addjob{
+    text-align:center;
+    font-size:13px;
+    margin:18px;
+    font-family:"AileronSemiBold";
+    color:$c-gray2;
+    text-decoration: none !important;
+
+    &:hover {
+      text-decoration: none !important;
+    }
+  }
+  .jobheadline  a{
+    @extend .addjob;
+    text-align:left;
+    margin-top:45px !important;
+  }
+  .options{
+    font-size:16px;
+    position:absolute;
+    margin-right:10px;
+    bottom:0;
+    right:0;
+    z-index:100;
+  }
+  .options .option{
+    color: $c-gray3 !important;
+    text-decoration: none !important;
+    padding-left: 5px;
+  }
+  .options.option:hover{
+    color:$c-gray1;
+  }
+  .notification{
+    position:absolute;
+    background-color:white;
+    height:28px;
+    width:45px;
+    z-index:101;
+    right:10px;
+    top:-10px;
+    border:1px solid transparent;
+    @include box-shadow1;
+    @include border-radius(4px);
+  }
+
+  .notification.-second{
+    right: 65px;
+  }
+
+  .notification .icon{
+    top:0;
+    margin:3px -10px 5px 0;
+    font-size:18px;
+    color: $c-blue1;    
+  }
+
+  .notification-value {
+    font-weight: bold;
+    text-align: center;
+    padding: 5px;
+  }
+
+}
+
+//whole job link
+.job .joblink, 
+.notification .joblink{
+  position:absolute; 
+  width:100%;
+  height:100%;
+  top:0;
+  left: 0;
+  z-index: 1;
+  background-color:#ffffff;
+    -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";  
+    filter: alpha(opacity=0);  
+    opacity:0;  
+}
+
+//effect
+// .notification::before{
+//  position:absolute;
+//  height:100%;
+//  width:100%;
+//  content:"122";
+//  text-align:center;
+//  font-family:'AileronBlack';
+//  font-size:18px;
+//  opacity:0;
+//  transform:translate(0,-50%);
+// }
+
+// .notification:hover::before {
+//  transform:translate(0,0);
+//  transition:0.5s;
+//  opacity:1;
+//  top:3px;
+// }
+
+// .notification:hover .icon{
+//  transform:translate(0,50%);
+//  transition:0.5s;
+//  opacity:0
+// }
+
+.group-input{
+  margin-top:45px;
+  
+  &.biggerwidth{
+    width:102%;
+  }
+  .inputtext{
+    background-color: transparent;
+    font-size: 12px;
+    width:100%;
+    font-family: "AileronSemiBold";
+    color: $c-gray3;
+    border:none;
+    border-radius:0;
+    border-bottom:0.5px solid $c-gray3;
+    box-shadow:none;
+    padding:0px;
+    margin: 0 10px 0 0;
+  }
+  .inputtext:focus{
+    box-shadow:none;
+    border-bottom:0.5 solid #ffcccc;
+  }
+}
+
+.searchbtn{
+  &:focus{
+    background-color:transparent;
+    border:none;
+    outline: none;
+  }
+  .button{
+    background-color:transparent !important;
+    border:none;
+    color:$c-gray3;
+    font-size: 18px;
+    padding: 5px;
+    @include border-radius(4px);
+    &:hover{
+      background-color:transparent;
+    }
+
+    &:focus{
+      background-color:transparent;
+      outline: none;
+    }
+    
+    &:active{
+      background-color:$c-gray5;
+    }
+  }
+
+}
+
+================================================================================================================================================
+  Post params:
+	{
+	  "utf8" => "✓",
+	  "authenticity_token" => "U28+bO10+Pr24rMk+gkYbQMu+EHzWsSUGZ1FFtejQHk=",
+	  "restaurant" => {
+	    "email" => "ghosthost@hauntedatx.com",
+		"password" => "Jackson13"
+	    },
+          "action" => "create",
+		    "controller" => "restaurant/once_there_offerings"
+	}
+
+  Response:
+	response["user"]["access_token"]["token"] - success
+
+  "credentials": {
+    "login": "ghosthost@hauntedatx.com",
+    "password": "Jackson13"
+  }
+
+  POST https://api.oncethere.com/auth
+
+  localhost:3000/restaurant/once_there_offerings/new
+			
+  - tip: stash, pa na development, pa commit na development, pa zoves mene i onda cemo da push-ujemo 
+
+restaurant.external_relations.find_by_service_name(service_name)
+    ExternalRelation.where("restaurant_id = ? and service_name = ?", restaurant.id, service_name).exists?
+
+================================================================================================================================================
+
+ReservationStatusService#mark_noshow -> ReservationNotificationService#notify -> ReservationNotificationMailer.notification_to_patron_of_no_show(@reservation).deliver
+
+Send email:
+ r = Reservation.last
+ rss = ReservationStatusService.new(r)
+ rss.mark_noshow
+
+
+http://localhost:3000/restaurant/reservations/on_date?date=2016-12-09
+
+ReservationStatusService#mark_confirmed
+
+
+Task - Remove step 1 icon from CC auth crises step
+ - URL: https://www.pivotaltracker.com/n/projects/87334/stories/121309041
+ - fajl: app/views/layouts/lander/_steps_logged_in.html.erb
+ 
+ 
+================================================================================================================================================
+
+BSPAN
+
+Task 1:
+	- after creating a ENT profile, it redirects to: http://test.lvh.me:3000/account
+  
+	- Problem:
+		- http://bambi.lvh.me:3000/
+		- problem: app/views/layouts/enterprise/private/_menu_pending.html.erb
+		
+Task 2
+	- u ArticleMailer#share_article_email - error camelcase
+	- LibraryController#email_article -> SendArticleEmailWorker#perform -> ArticleMailer#share_article_email
+	
+	- concern :readable have:
+		  resource :company, only: [:index, :new, :show, :create] do
+			concerns :upgradeable
+			concerns :readable, readable_type: 'Company'
+		  end
+		  
+		  resources :users do
+			concerns :upgradeable
+			concerns :readable, readable_type: 'User'
+
+			get 'sessions/new'
+
+			collection do
+			  get 'check_sign_up_email'
+			  get 'check_sign_up_username'
+			  post 'validate_credentials'
+			  post 'reset_devise_session'
+			end
+		  end
+
+
+ 
+
+
+
+
