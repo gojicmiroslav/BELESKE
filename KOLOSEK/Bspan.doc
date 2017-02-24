@@ -31,4 +31,9 @@ BSPAN
 * Company from Gap Assessment
 		Assessment::Enterprise::GapAnalysis.first.company_board_member.company.name
 		
-CURRENT: https://www.pivotaltracker.com/n/projects/1140540/stories/137827307
+CURRENT: 
+	- features/enterprise/search/search_creation.feature
+			- step_definitions/common_steps:36
+			- step_definitions/common_steps:13
+	
+	- features/individual/board_pitch/new_pitch.feature

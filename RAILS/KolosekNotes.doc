@@ -323,7 +323,8 @@ KOLOSEK NOTES
 		
 * Steps:
 		 - Start (task)
-		 - Push
+		 - zavrsiti task 	
+		 - Pull pa Push
 		 - Finish
 		 - check tests
 		 - check in staging
@@ -333,7 +334,18 @@ KOLOSEK NOTES
 		results = ActiveRecord::Base.connection.execute("select * from schema_migrations")
 		results[0]
 		 
+* Create random number of users in DB:
+		100.times do
+			User.create!(email: "test-#{ SecureRandom.hex(100)}@user.com", password: 'boardspan', username: "user-#{ SecureRandom.hex(100)}", user_profile_attributes: {first_name: "Test_#{ SecureRandom.hex(100)}", last_name: 'User'})
+		end
 		
+* Ruby - present?
+		- checks: 
+				- it's not nil
+				- it's not empty
+				
+* Capybara - find link by id
+		find('#contact-submit', :visible => :all).click
 		
 
 		
