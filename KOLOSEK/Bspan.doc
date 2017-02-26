@@ -25,3 +25,15 @@ BSPAN
 		company
 		company_profile
 		company_decorator
+		
+* Active ENT - Recruitment - companies/search_controller#index
+
+* Company from Gap Assessment
+		Assessment::Enterprise::GapAnalysis.first.company_board_member.company.name
+		
+CURRENT: 
+	- features/enterprise/search/search_creation.feature
+			- step_definitions/common_steps:36
+			- step_definitions/common_steps:13
+	
+	- features/individual/board_pitch/new_pitch.feature

@@ -1,0 +1,107 @@
+Suggestions:
+
+  - pristup problemu prvo
+  - obratiti paznju na detalje
+  - obratiti paznju na davanje imena metodama i variablama(nesto smisleno)
+  - imena metoda - do 3 reci
+  - kreiranje nove tabele u migraciji sa reference key:
+      create_table :position_request_contacts do |t|
+        t.string :phone, default: ""
+        t.string :skype, default: ""
+        t.integer :position_request_id
+
+        t.timestamps
+      end
+
+  - pokusati preuzeti uzorke u jednom query, pa onda manipulisati sa njima
+  - konfliktni fajlovi u SmartGitu:
+      nase(working) - conflicts - theirs
+  - pre commitovanja proveriti kljuceve i pokrenuti ceo test-suite
+  - posle pullovanja uraditi: rakem
+  - obratiti paznju na vreme za task
+  - ne stavljati biznis logiku u view
+  - u view fajlove ne stavljati: <script></script>
+  - kod pretrage kontrolera i viewa gledati u konzolu - server response
+    (po potrebi povecati console diplay line)
+  - pre izmene bilo kojeg feature, prvo pokrenuti test da vidimo da li prolazi
+  - ako nam zatreba neka provera za model, mailer ili sl. uvek prvo proveriti da li vec postoji takva metoda
+  - metode koje se interno koriste (npr. u modelu) prebaciti u private deo klase
+    Example:
+      def reject_actions(email, replace_text, new_text)
+        if !email_present?(email)
+          ...
+        end
+      end
+
+      private
+
+      def email_present?(email)
+        email.eql?("true")
+      end
+      
+   - heroku dashboard:
+			 https://dashboard.heroku.com/apps/bspan-prods/resources
+      
+   - after push test are run automatically at
+			 https://app.codeship.com/projects   
+	 
+	 - email service for bspan:
+			 https://mailtrap.io/inboxes/30468/messages/370967485
+	 
+	 - Airbrake email service(bspan)
+			 https://herokuapp45233928herokucom.airbrake.io/projects/118720/groups/1882086694337643600?tab=notice-detail
+      
+   - task workflow:
+			push
+			finish(pivotaltracker)
+			kada prodje na codeshipu - Deliver (pivotaltracker)
+				
+			
+   - RG url:
+			http://localhost:3000/restaurant/reservations
+				http://localhost:3000/admin/cities
+					http://localhost:3000/admin/cities/austin
+						http://localhost:3000/admin/cities/austin/restaurants/62-austin-duck-adventures-austin ( click on Become)
+							http://localhost:3000/restaurant/reservations
+								http://localhost:3000/restaurant/reporting/reservations
+									http://localhost:3000/restaurant/reporting/invoices
+				
+				
+========================================
+article = Library::
+mail = ::ArticleMailer.share_article_email('miroslav@kolosek.com', 'user@test.com', "Miroslav", "Gojic", 'Message', article, false).deliver
+reload!
+
+===========================================================================================================================================
+Task: https://www.pivotaltracker.com/n/projects/1140540/stories/139488431
+  - app/mailers/article_mailer.rb
+  - app/helpers/mailer_helper.rb
+  
+  
+==========================================================================================================
+user = User.first
+company = Company.fist
+sr = SearchResult.first
+	
+::CompanyAccount::AccountMailer.outreach_result_candidate(sender, company, search_result_id).deliver
+
+============================================================================================================
+
+											 :year => 2017,
+											:month => 2,
+							:num_completed => 102,
+			 :num_completed_people => 363,
+					 :direct_completed => 35,
+		:direct_completed_people => 135,
+				 :websites_completed => 67,
+	:websites_completed_people => 228,
+			 :concierges_completed => 0,
+:concierges_completed_people => 0,
+			 :affiliates_completed => 0,
+:affiliates_completed_people => 0,
+								 :amount_due => "120.0"
+
+				
+				
+      
+    

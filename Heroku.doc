@@ -34,14 +34,20 @@ Production and development mode
 	For example, in a Ruby environment you could set a RACK_ENV config var to development to enable such a mode.
 
 Commands:
-	- heroku run:detached rake db:migrate
+	- run migrations
+			heroku run rake db:migrate
+			heroku run:detached rake db:migrate
 	- restart DB:
-		heroku pg:reset DATABASE
+			heroku pg:reset DATABASE
 	- To run the migrations and seed for your database, run:
- 		heroku run rake db:setup
+			heroku run rake db:setup
  	- Or if you feel like want to do it individually:
- 		heroku run rake db:migrate
+			heroku run rake db:migrate
 	- And then
- 		heroku run rake db:seed
+			heroku run rake db:seed
  	- to establish a psql session with your remote database use heroku pg:psql.
+ 	- logs:
+			heroku logs
+	- heroku console:
+			heroku run rails console
 
