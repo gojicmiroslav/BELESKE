@@ -253,5 +253,18 @@ KOLOSEK NOTES
 * exists?
 
 * find_?
+
+* to_params
+
+* routes - option "path"
+		resources :pages, only: [:index, :new, :create]
+			// for urls:
+					localhost:3000/pages/new
+					localhost:3000/pages/
+					
+		resources :pages, path: "", except: [:index, :new, :create]
+			// for urls:
+					localhost:3000/home #-> home - slug
+					locahost:3000/1     #=> or: 1 - id
 		
 		

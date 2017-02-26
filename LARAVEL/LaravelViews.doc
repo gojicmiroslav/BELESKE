@@ -28,6 +28,22 @@ Laravel Views
 * Forms
 	- TIP: name of the form elements show correspond to the name of the column in the DB
     
+* Partial
+		- @include('partial_name')
+		
+			Example:
+			//partial - resource/views/flash.blade.php
+			@if (Session::has('flash_message'))
+					<div class="alert alert-{{ Session::get('flash_type') }}">{{ Session::get('flash_message') }}</div>
+			@endif
+			
+			//or
+			@if (session()->has('flash_message'))
+					<div class="alert alert-{{ Session::get('flash_type') }}">{{ Session::get('flash_message') }}</div>
+			@endif
+			
+			// in view
+			@include('partial_name')
     
 
 
