@@ -309,7 +309,7 @@ Store
 			
 	- subscribe - register a callback that redux store will call any time an action has been dispatch
 	
-// nastaviti: https://egghead.io/lessons/javascript-redux-implementing-store-from-scratch
+// nastaviti: https://egghead.io/lessons/javascript-redux-avoiding-array-mutations-with-concat-slice-and-spread
 	
 
 	

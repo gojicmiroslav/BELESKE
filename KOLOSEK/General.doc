@@ -1,0 +1,25 @@
+GENERAL
+
+* Pushovanje projekta na Kolosek Codeship
+		1) prvo samo komitujemo
+		2) onda pushujempo na Kolosek Codeship
+		3) zatim Undo Last Commit
+		4) pa Unstage
+
+		//dodavanje kolosek remote:
+		git add remote git@bitbucket.org-kolosek:kolosek/bspan.git
+
+		git push kolosek development
+		//or if don't work 
+		git push --force kolosek development
+		
+		- na Codeshipu Select Poject i mora biti prikazan "kolosek" kod izvrsavanja testova
+		
+* Steps:
+		 - Start (task)
+		 - zavrsiti task 	
+		 - Pull pa Push
+		 - Finish
+		 - check tests
+		 - check in staging
+		 - Deliver
