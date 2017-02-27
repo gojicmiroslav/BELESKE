@@ -321,6 +321,12 @@ KOLOSEK NOTES
 		
 		- na Codeshipu Select Poject i mora biti prikazan "kolosek" kod izvrsavanja testova
 		
+* Pullovanje iz konzole
+		git pull origin development
+		
+* Pushovanje iz konzole
+		git push origin development
+		
 * Steps:
 		 - Start (task)
 		 - zavrsiti task 	
@@ -330,13 +336,19 @@ KOLOSEK NOTES
 		 - check in staging
 		 - Deliver
 		 
+* Push to Codeship without testing
+		- create branch
+		- commit to that branch with --skip-ci
+				Base setup for knowledge center --skip-ci
+		- git push origin new-branch-name
+		 
 * Raw SQL
 		results = ActiveRecord::Base.connection.execute("select * from schema_migrations")
 		results[0]
 		 
 * Create random number of users in DB:
 		100.times do
-			User.create!(email: "test-#{ SecureRandom.hex(100)}@user.com", password: 'boardspan', username: "user-#{ SecureRandom.hex(100)}", user_profile_attributes: {first_name: "Test_#{ SecureRandom.hex(100)}", last_name: 'User'})
+			User.create!(email: "test-#{ SecureRandom.hex(3)}@user.com", password: 'boardspan', username: "user-#{ SecureRandom.hex(3)}", user_profile_attributes: {first_name: "Test_#{ SecureRandom.hex(3)}", last_name: 'User'})
 		end
 		
 * Ruby - present?

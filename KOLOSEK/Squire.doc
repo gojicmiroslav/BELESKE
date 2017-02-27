@@ -1,0 +1,10 @@
+Squire
+	- npm run apiDoc - kreiranje dokumentacije(localhost:3000)
+	
+API
+	- git pull origin master
+	- npm start
+	
+APP
+	- git pull origin development
+	- npm run start:webpack
