@@ -1,0 +1,6 @@
+Rails Testing
+
+* test debug: save_and_open_page
+
+* Capybara - find link by id
+		find('#contact-submit', :visible => :all).click

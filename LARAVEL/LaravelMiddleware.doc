@@ -9,3 +9,59 @@ Laravel Middleware
 					{{ csrf_field() }}
 					...
 				</form>
+				
+* Each middleware class has a handle method, that is responsible for processing the request in some way and
+	passing it on to the next middleware in the layer(group)
+	
+* We can use middleware at:
+		1) routes level
+				Route::get('/dashboard', 'HomeController@index')->middleware('auth');
+		2) controllers level(recomend way)
+			 Example:
+				// web.php
+				Route::get('/dashboard', 'HomeController@index')
+				Route::get('/about', 'HomeController@about')
+			 
+				class HomeController extends Controller
+				{
+						public function __construct()
+						{
+								$this->middleware('auth'); //every method(route) in HomeController is now forbidden for un-authenticated users 
+						}
+						...
+				}	
+				
+				// apply middleware for given method
+				$this->middleware('auth', ['only' => 'home'])
+				$this->middleware('auth', ['except' => ['about', 'contact']]);
+				
+* Http/Kernel.php
+		protected $middleware - The application's global HTTP middleware stack.These middleware are run 
+														during EVERY request to your application.
+														
+* Create cutom middleware
+		- Create a new middleware class
+				php artisan make:middleware  
+				
+			Example:
+				php artisan make:middleware MustBeAdministrator
+				
+		- add to Kernel
+				protected $routeMiddleware = [
+					'auth' => \Illuminate\Auth\Middleware\Authenticate::class,
+					...
+					'admin' => \App\Http\Middleware\MustBeAdministrator::class,
+			];
+			
+			// if we want to apply this middleware to every request we added to group $middleware
+			protected $middleware = [
+        \Illuminate\Foundation\Http\Middleware\CheckForMaintenanceMode::class,
+				...
+				'admin' => \App\Http\Middleware\MustBeAdministrator::class
+			];
+			
+		- in controller:
+				$this->middleware('admin', ['only' => 'index']);		
+		
+* Get authenticated user for the request
+		$request->user(); // user - user authenticated, null - use is not authenticated

@@ -254,7 +254,63 @@ Store
 
 	- Tip: "write independent small reducer functions that are each responsible for updates to a specific slice of state. We call this
 					pattern 'reducer composition'. A given action could be handled by all, some, or none of them."
-					
+
+Dan Abramov
+
+Redux principle:
+	1) state of application is represent with a single JS object. This object is called state or state tree.
+		 This state contains all changes in application. 
+	2) state is redundant, read-only, we can't modify it or edit. Any time we want to change state, we have to dispatch an action.
+	3) action is plain JS object. Only requirement for action is to have a type property, structure of action is random.
+	4) redux are pure functions
+	
+Pure functions:
+	- returned value depends only on the values of the passed arguments. It always returns same value for same argument
+	- they do not modify arguments passed to them
+	- the do not have side affects (DB calls,...)
+
+Reducer 
+	- pure function
+	- takes arguments: previous state and action
+	- returns: new state of whole app (it doesn't actually modify state, it returns a object). New state is calculated
+		based on previous state and action
+	
+	Example:
+		const counter = (state = 0, action) => {
+			switch(action.type){
+				case 'INCREMENT':
+					return state + 1;
+				case 'INCREMENT':
+					return state - 1;
+				default:
+					return state;
+			}
+		}
+		
+Store
+	- create store
+			const { createStore } = Redux;
+			// or Node
+			import { createStore } from 'Redux';
+	- create store
+			const store = createStore(counter);  // counter - reducer
+	- state methods
+			dispatch()
+			getState()
+			replaceReducer()
+			subscribe()
+	
+			Example:
+				console.log(store);		
+				console.log(store.getState());		
+				
+	- dispatch action
+			store.dispatch({ type: 'INCREMENT' });
+			
+	- subscribe - register a callback that redux store will call any time an action has been dispatch
+	
+// nastaviti: https://egghead.io/lessons/javascript-redux-avoiding-array-mutations-with-concat-slice-and-spread
+	
 
 	
 	

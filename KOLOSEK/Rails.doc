@@ -1,0 +1,64 @@
+KOLOSEK NOTES
+		
+* Generate controller
+		rails generate controller NAME [action action] [options]
+		
+		Options:
+			--skip-routes # Dno't add routes to routes.rb
+			--no-test-framework
+			
+		rails g controller Articles
+		
+* Set accessible parameters - Mass Assignment
+		def article_params
+			accessible = [:title, :text]
+			# add new fields
+			# article_parameters << [:test]
+			params.require(:article).permit(accessible)
+		end
+
+* Declaring statuses in model:
+		STATUSES = { 'In Consideration' => 0, 'Not Interested' => 1, 'Hold for now' => 2}
+		
+* Resolve layout:
+		- never do this in controller:
+				if ...
+					render ...
+				else
+					render ...
+				end
+				
+		- instaed do this
+				layout :resolve_layout_method
+				
+				private
+				
+				def resolve_layout_method
+					...
+				end
+		 
+* Create random number of users in DB:
+		100.times do
+			User.create!(email: "test-#{ SecureRandom.hex(100)}@user.com", password: 'boardspan', username: "user-#{ SecureRandom.hex(100)}", user_profile_attributes: {first_name: "Test_#{ SecureRandom.hex(100)}", last_name: 'User'})
+		end
+		
+* Ruby - present?
+		- checks: 
+				- it's not nil
+				- it's not empty
+		
+* to_params
+
+* routes - option "path"
+		resources :pages, only: [:index, :new, :create]
+			// for urls:
+					localhost:3000/pages/new
+					localhost:3000/pages/
+					
+		resources :pages, path: "", except: [:index, :new, :create]
+			// for urls:
+					localhost:3000/home #-> home - slug
+					locahost:3000/1     #=> or: 1 - id
+		
+		
+

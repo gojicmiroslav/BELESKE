@@ -67,5 +67,144 @@ AUTH
 			$this->post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail')->name('password.email');
 			$this->get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm')->name('password.reset');
 			$this->post('password/reset', 'Auth\ResetPasswordController@reset');
+			
+MAINTENANCE MODE
+	- php artisan down
+		(an then: php artisan serve)
+	- user will only see warning page 
+	- php artisan up
+	
+Flas Messages
+	- using Facades
+		//in controller
+			Session::flash('status', 'Hello there')
+			
+		//view
+			@if (Session::has('status'))
+				<h3>{{ Session::get('status') }}</h3>
+			@endif
+			
+	- custom helper method for flash
+			// create app/helpers.php
+			function flash($message, $type = 'notice')
+			{
+				session()->flash('flash_message', $message);
+				session()->flash('flash_type', $type);
+			}
+			
+			//add helper file - composer.json
+			"autoload": {
+					"classmap": [
+							"database"
+					],
+					"psr-4": {
+							"App\\": "app/"
+					},
+					"files": [
+							"app/helpers.php"
+					]
+			},
+			
+			// in console - to make shure changes are updated
+			composer dump-autoload
+			
+			// in route
+			flash('You are signed in', 'sucess');
+			
+Session
+	- using global methods to put something in the session
+			session(['status' => 'Welcome'])
+			//or
+			Session::put('status', 'Welcome')
+			
+	- we can get with
+			session('status') // returns null if status
+			//or
+			Session::get('status')
+			
+	- get session
+			session('flash_message') // return null if no flash message
+			// we can call methods on the session
+			session()->has('flash_message') // returns flase if no flash message
+			session()->flash('status', 'Welcome')
+			
+Dependency injection
+	class RegisterUser 
+	{
+			protected $mailer;
+			
+			//constructor injection
+			public function __construct(Mailer $mailer)
+			{
+				$this->mailer = $mailer;
+			}
+			
+			//method injection
+			public function setMailer(Mailer $mailer)
+			{
+				$this->mailer = $mailer;
+			}
+	}
+			
+Service container (laravel_project2)
+	- add to twe container
+		// we can think of it as: ['foo' => 'bar'] - bar can be anything
+		App::bind('foo', function(){
+			return 'bar';
+		});
+
+	- resolve from container
+			1) way
+					App::make('foo'); // 'bar'
+			2) way
+					app('foo')
+					
+	- it retuns a different object
+			$one = app('foo')
+			$two = app(foo)
+			// $one !== $two  - there are different objects
+			
+	- if we want same objects
+			App::singleton('foo', function(){
+				return 'bar';
+			});
+			
+			// $one === $two  - there are same objects
+			
+	- automatic resolution - get this "bind" to routes or controllers
+			class RegisteUser
+			{
+				...
+			}	
+	
+		
+			App::bind('RegisterUser', function(){
+				return new RegisterUser(new Mailer);
+			});
+	
+			// this will work even if we do not do App::bind()
+			// Laravel will found this class and resolve it
+			Route::get('/', function(RegisterUser $registerUser){
+				...
+			});
+			
+Service Provider (laravel_project2)
+	- service provider is point of entry for resource (package, component, specific portion of project,...)
+	- function register of every service provider of Laravel source
+			public function register()
+			{
+				$this->app->singleton('hash', function(){
+					return new BcryptHasher;
+				});
+			}
+			
+			// now we can do
+			$this->app->make('hash'); // BcryptHasher
+			// or...
+			app('hash'); // BcryptHasher
+		
+			
+
+				
 	
 

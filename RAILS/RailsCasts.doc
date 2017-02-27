@@ -43,3 +43,9 @@ UPGRADING RAILS VERSION
 	- change version of Rails in Gemfile
 	- change branch of a gem from github:
 			gem 'paper_trail', github: 'airblade/papir_trail', branch: 'rails4'
+			
+* to_param
+	- triggered when Rails needs to represent model in URL
+	- it must include id of model, because Rails is doing:
+			"1-home".to_i #=> 1
+		and use that id of model to find model
