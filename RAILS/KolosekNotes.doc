@@ -319,3 +319,45 @@ KOLOSEK NOTES
 					locahost:3000/1     #=> or: 1 - id
 		
 		
+* Estimate poins:
+		  1 -point je jako lak fix
+			2 - pointa su otprilike izmedju pola dana i jednog dana rada
+			3 pointa - 1 - 2 dana
+			5 pointa 3 - 7 dana
+			
+* Position page(scroll) with JS
+		var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+		document.documentElement.scrollTop = document.body.scrollTop = 300;
+		
+* git merge za Bspan:
+		1) prvo smo na development grani, zatim dobavljamo izmene za development granu
+				(development)$  git pull
+		2) prelazimo na feature granu(npr. friendly_id) i dobavljamo izmene sa te grane
+		    (development)$ git checkout friendly_id
+		    (friendly_id)$ git pull
+		3) spajamo features granu sa development granom i resavamo konflikte ukoliko ih ima
+				(friendly_id)$ git merge development
+	  4) prelazimo na development granu i resavamo konflikte ukoliko ih ima
+				(friendly_id)$ git checkout development
+		5) (development)$ git merge friendly_id
+		
+* Array#reject
+		- Returns a new array containing the items in self for which the block is not true
+			Example:
+				['one', 'two'].reject { |w| w.eql 'one'  } #=> ["two"]
+			
+			Example - removes emtpy strings
+				['one', 'two', '', ''].reject { |w| w.blank?  } #=> ['one', 'two']
+				
+* Rails - blank?
+		- returns -> true or false
+		- An object is blank if it's false, empty, or a whitespace string. For example, false, '', ' ', nil, [], and {} are all blank.
+			This simplifies
+				!address || address.empty?
+			to
+				address.blank?
+				
+				
+			
+
+

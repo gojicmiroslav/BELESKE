@@ -1,8 +1,4 @@
-  - Isomorphic friendly - can be run both on the server side and the client side
-
-Stateless Components
-	- since React .14
-	- use plain JS functions
+- Isomorphic friendly - can be run both on the server side and the client side
 
 React Context
 	- if we want an entire subtree to have access to some piece of information (a color). Using context, we can pass this through the tree automatically
@@ -670,3 +666,5 @@ Higher Order Component
 		}
 		
 Stateless Functional Components
+	- since React .14
+	- use plain JS functions

@@ -31,9 +31,14 @@ BSPAN
 * Company from Gap Assessment
 		Assessment::Enterprise::GapAnalysis.first.company_board_member.company.name
 		
-CURRENT: 
-	- features/enterprise/search/search_creation.feature
-			- step_definitions/common_steps:36
-			- step_definitions/common_steps:13
+		
+URADJENI TASKOVI:
+	 - https://www.pivotaltracker.com/n/projects/1140540/stories/140712933
 	
-	- features/individual/board_pitch/new_pitch.feature
+CURRENT: 
+	- https://www.pivotaltracker.com/n/projects/1140540/stories/140458865
+
+Nastaviti:
+	- proveriti friendly_id na Stagingu - zbog rake taska	
+			Library::Article.all.each(&:save!)
+	- nastaviti file: _ideal_role_info.html.erb 
