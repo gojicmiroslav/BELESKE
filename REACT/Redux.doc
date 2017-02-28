@@ -256,13 +256,6 @@ Store
 					pattern 'reducer composition'. A given action could be handled by all, some, or none of them."
 
 Dan Abramov
-
-Redux principle:
-	1) state of application is represent with a single JS object. This object is called state or state tree.
-		 This state contains all changes in application. 
-	2) state is redundant, read-only, we can't modify it or edit. Any time we want to change state, we have to dispatch an action.
-	3) action is plain JS object. Only requirement for action is to have a type property, structure of action is random.
-	4) redux are pure functions
 	
 Pure functions:
 	- returned value depends only on the values of the passed arguments. It always returns same value for same argument
@@ -291,7 +284,7 @@ Store
 	- create store
 			const { createStore } = Redux;
 			// or Node
-			import { createStore } from 'Redux';
+			import { createStore } from 'redux';
 	- create store
 			const store = createStore(counter);  // counter - reducer
 	- state methods

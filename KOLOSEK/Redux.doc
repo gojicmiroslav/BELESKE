@@ -1,0 +1,29 @@
+REDUX
+
+Redux principle:
+	1) state of application is represent with a single JS object. This object is called state or state tree.
+		 This state contains all changes in application. 
+	2) state is redundant, read-only, we can't modify it or edit. Any time we want to change state, we have to dispatch an action.
+	3) action is plain JS object. Only requirement for action is to have a type property, structure of action is random.
+	4) redux are pure functions
+
+Store
+	- creating store
+			import { createStore } from 'redux'
+			
+			store = createStore(reducer);
+			
+Reducer
+	- a pure function takes a current state and action, and returns a new state
+	- a function that returns a piece of a application state. Because application can have many different pieces of state, we can have many 
+		reducers.Example: list of all books, currently selected book,...
+	- Reducer can have two arguments: 
+				state - state argument is not application state, only the state this reducer is responsible for(it's the same state that is passed)
+				action - Reducers is called when action occures.
+
+	- If we don't care about the action, just back the state back through
+	
+Two Types of Components on Redux:
+	Container - a React component that has a direct connection to the state managed by Redux
+	Normal Component - a React component that shows stuff 
+
