@@ -28,6 +28,14 @@ Console command:
 				return request()->all();
 			}
 			
+* Get specific request parameter:
+		public function store(Request $request)
+    {
+        //return $request->get('title');
+        //or ...
+        return $request->title;
+    }
+			
 * Saving associated(one-to-many) model
 		1) way
 				public function store(Article $article)

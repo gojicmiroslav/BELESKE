@@ -7,8 +7,12 @@ REDUX
 	- Redux provides state, and React produces view to that state
 	- Redux helps maintain the state
 	- Redux is a state container
-	- Redux centralizes all of the data in to one object, which we refere to as STATE. This APPLICATION LEVEL STATE, not the compoent state in React.
+	- Redux centralizes all of the data in to one object, which we refere to as STATE. 
+		This APPLICATION LEVEL STATE, not the compoent state in React.
 		Redux state is big object that contains all data.
+		
+State
+ - an object that represent state of all application
 		
 Redux Object
 	- import redux from 'redux'

@@ -1,0 +1,14 @@
+PHP Best Practices
+
+* Date and Time
+	- url: https://secure.php.net/manual/en/book.datetime.php
+
+* DateTime class
+	- url: https://secure.php.net/manual/en/class.datetime.php
+	- comparison can be directly on dates (>, <)
+	
+* Date and Time formats
+	- url: https://secure.php.net/manual/en/datetime.formats.php
+	
+* Timezones
+	- class DateTimeZones

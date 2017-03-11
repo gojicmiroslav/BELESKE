@@ -705,9 +705,20 @@ Whitelisting Unserialization
 		$unserialized_data = unserialize($serialized_data,
 									["allowed_classes" => ["UserInfo", "ShoppingCart"]]);
 
-session_start() initialization options
-	- session_start() - starts session in PHP
-	- when calling session_start() we can provide an array of session settings we like to use, so we can overide some of
-		the php.ini session settings.
-		Example:
-			session_start(['cookie_lifetime' => 3600, 'read_and_close' => true]);
+* Session 
+		- session_start() initialization options
+				- session_start() - starts session in PHP
+				- when calling session_start() we can provide an array of session settings we like to use, so we can overide some of
+					the php.ini session settings.
+					Example:
+					session_start(['cookie_lifetime' => 3600, 'read_and_close' => true]);
+		- add and destroy session data
+				$_SESSION['favorites'][] = $id;
+				$_SESSION['favorites'] = [];
+	
+				
+			
+* Check if request is ajax in PHP
+		function is_ajax_request(){
+			return isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XmlHttpRequest';
+		}

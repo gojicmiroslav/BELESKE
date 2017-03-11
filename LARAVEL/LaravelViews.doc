@@ -23,10 +23,10 @@ Laravel Views
 				return '/cards/' . $this->id;
 			}
 			
-			<a href="{{ $card->path() }}">{{ $card->title }}</a>
+			<a href="{{ $card->path() }}">{{ $card->title }}</a>			
 			
-* Forms
-	- TIP: name of the form elements show correspond to the name of the column in the DB
+		- using route() helper method
+				<a href="{{ route('posts.show', $post->id) }}">{{ $post->title }}</a>
     
 * Partial
 		- @include('partial_name')
@@ -44,6 +44,9 @@ Laravel Views
 			
 			// in view
 			@include('partial_name')
+			
+* Add csrf token in forms:
+		{{ csrf_field() }}
     
 
 

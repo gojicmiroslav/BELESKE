@@ -1,0 +1,8 @@
+LARAVEL FORMS
+
+* TIP: name of the form elements show correspond to the name of the column in the DB
+
+* Add csrf token in forms:
+		{{ csrf_field() }}
+    
+

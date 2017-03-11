@@ -221,3 +221,17 @@ RELATION CRUDs
 				//delete
 				$user = User::findOrFail($user_id);
 				$user->address->delete();
+
+Trick to listen SQL performed in app - for development and testing;
+	- # routes/web.php
+		DB::listen(function($query){
+			var_dump($query->sql, $query->bindings);
+		});
+		
+		// or...
+		DB::listen(function($query){
+			Log::info(var_dump($query->sql, $query->bindings));
+		});
+		
+	- or better - in ServiceProvider
+		# app/Providers/AppServiceProvider.php - boot

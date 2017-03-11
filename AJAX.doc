@@ -141,8 +141,52 @@ AJAX
 				json_encode($user); // '{"firstname":"Foo","lastname":"Bar"}' - no private
 				
 		- json_decode() - convert JSON into PHP entity, such as an array
+		
+* Check if request is ajax in PHP
+		function is_ajax_request(){
+			return isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XmlHttpRequest';
+		}
+
+* Sending data vis POST
+	- we have to set header 'Content-Type'
+	- Example:
+			xhr.open('POST', 'favorite.php', true);
+			xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+			xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 			
-					
+* Ajax Form
+		- for submiting Ajax Form use button instead of input submit
+			Example:
+				<input type="submit" value="Submit" id="html-submit">
+				<input type="button" value="Ajax Submit" id="ajax-submit">
+				
+				
+				
+======================= AJAX IN jQuey ===================================================================
+
+* Parameters of $.ajax()
+		- URL : It indicates the URL where request should be sent
+		- data : data to be sent to the server
+		- dataType : type of data to be expected in response from server
+		- type : method type. GET or POST
+		- beforeSend( http ) : function to run before sending of data begins
+		- success( response_data , status , http ) : function to run on success
+		- error( http , status , error ) : function to run when request fails
+		- complete( http , status ) : function to run when ajax completes
+		
+* get,post
+		Syntax:
+			$.get(url, request_data, function(response_data, status, XMLHttpRequest), dataType)
+			$.post(url, request_data, function(response_data, status, XMLHttpRequest), dataType)
+		- function will be executed only when status is a success, else not
+		- datatype is data type of response(json, xml, html, text,...)
+		- Example:
+				
+	
+
+				
+			
+				
 					
 					
 					

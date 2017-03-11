@@ -1,1 +1,51 @@
 jQuery
+
+* event.target
+		- element that registered for the event or a descedant of it.It is often useful to compare event.target to this 
+			in order to determine if the event is being handled due to event bubbling. 
+		- it returns Element - DOM(Document Object Model)
+		
+* data(key, value), data(Object), data(key), data()
+		- Store data associated with the matched elements or 
+			return the value at the named data store for the first element in the set of matched elements.
+		
+		Syntax:	
+			- data(key, value) - store data
+				Example:
+					$( "body" ).data( "foo", 52 );
+					$( "body" ).data( "bar", { myType: "test", count: 40 } );	
+			
+			- data(Object) - store data
+				Example:
+					$( "body" ).data( { baz: [ 1, 2, 3 ] } );
+					
+			- data(key) - Return the value at the named data store for the first element in the jQuery collection, 
+										as set by data(name, value) or by an HTML5 data-* attribute.
+										Example:
+												$( "body" ).data( "foo" ); // 52
+		
+			- data() - returns all data
+									Example:
+										$( "body" ).data(); // { foo: 52, bar: { myType: "test", count: 40 }, baz: [ 1, 2, 3 ] }
+
+* return false in on-click handler prevents <a> element to navigate to the href.
+
+* html(), html(htmlString)
+		-	html() - Get the HTML contents of the first element in the set of matched elements. Uses the browser's innerHTML property. 
+							Example:
+								<div class="demo-container">
+									<div class="demo-box">Demonstration Box</div>
+								</div>
+		
+								$( "div.demo-container" ).html(); // <div class="demo-box">Demonstration Box</div>
+								
+		- html(htmlString) - Set the HTML contents of each element in the set of matched elements.
+													Example:
+														$( "div.demo-container" ).html( "<p>All new content. <em>You bet!</em></p>" );
+		
+		- html(function(index, oldString) - function returning the HTML content to set
+																				Example:
+																					$( "div.demo-container" ).html(function() {
+																						var emphasis = "<em>" + $( "p" ).length + " paragraphs!</em>";
+																						return "<p>All new content for " + emphasis + "</p>";
+																					});

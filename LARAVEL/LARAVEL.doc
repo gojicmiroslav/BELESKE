@@ -158,6 +158,10 @@ Service container (laravel_project2)
 					App::make('foo'); // 'bar'
 			2) way
 					app('foo')
+			3) way
+					$this->app->make('foo);
+			4) way
+					$this->app['foo'];
 					
 	- it retuns a different object
 			$one = app('foo')
@@ -202,6 +206,25 @@ Service Provider (laravel_project2)
 			$this->app->make('hash'); // BcryptHasher
 			// or...
 			app('hash'); // BcryptHasher
+			
+	- create provider
+			php artisan make:provider FooServiceProvider
+			
+			// convention for name: ExampleServiceProvider
+			
+	- service provider methods:
+			register() - registering at Laravel Service Container. As part of page load Laravel will cycle through any Service Provider
+										we created and DECLARED, and call the register() method. That way it will register itself with framework.
+			boot() - called after every Service Provider is called
+								Example:
+									function boot(){
+										Event::listen('event');
+									}
+									
+	- declare service provider:
+			# in config/app.php, to Application Service Providers group add:
+			App\Providers\FooProvider::class
+			
 		
 			
 

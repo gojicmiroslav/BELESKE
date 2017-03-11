@@ -39,7 +39,7 @@ Laravel Middleware
 		protected $middleware - The application's global HTTP middleware stack.These middleware are run 
 														during EVERY request to your application.
 														
-* Create cutom middleware
+* Create custom middleware
 		- Create a new middleware class
 				php artisan make:middleware  
 				
